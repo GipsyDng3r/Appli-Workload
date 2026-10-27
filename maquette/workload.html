@@ -1,0 +1,295 @@
+<title>Workload</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: écran Power App tablette. Rail de vues à gauche, liste filtrable au centre, volet de détail à droite. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --surface-2:#eef1f4; --line:#dde2e8;
+  --fg:#17212b; --muted:#5d6b7a; --accent:#0b6e6e; --accent-fg:#ffffff; --accent-soft:#d9efee;
+  --good:#1e7a46; --good-soft:#dff2e6; --warn:#a15c00; --warn-soft:#fbecd0; --bad:#b3261e; --bad-soft:#fbe1de;
+  --t-support:#2b5fb4; --t-amel:#7a4bb0; --t-monthly:#a15c00; --t-projet:#0b6e6e;
+  --font:"IBM Plex Sans","Segoe UI",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f161d; --surface:#17212b; --surface-2:#1e2a36; --line:#2b3947;
+  --fg:#e7edf3; --muted:#9aa9b8; --accent:#4cc3be; --accent-fg:#06201f; --accent-soft:#143735;
+  --good:#5fd18c; --good-soft:#15331f; --warn:#f0b55a; --warn-soft:#3a2b10; --bad:#ff8f86; --bad-soft:#3d1a17;
+  --t-support:#7fa8f0; --t-amel:#c19cf0; --t-monthly:#f0b55a; --t-projet:#4cc3be; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f161d; --surface:#17212b; --surface-2:#1e2a36; --line:#2b3947;
+  --fg:#e7edf3; --muted:#9aa9b8; --accent:#4cc3be; --accent-fg:#06201f; --accent-soft:#143735;
+  --good:#5fd18c; --good-soft:#15331f; --warn:#f0b55a; --warn-soft:#3a2b10; --bad:#ff8f86; --bad-soft:#3d1a17;
+  --t-support:#7fa8f0; --t-amel:#c19cf0; --t-monthly:#f0b55a; --t-projet:#4cc3be; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:14px/1.45 var(--font);padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.note{max-width:1180px;margin:0 auto 10px;color:var(--muted);font-size:12px}
+.app{max-width:1180px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.bar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--accent);color:var(--accent-fg)}
+.bar b{font-weight:600;letter-spacing:.02em}
+.bar span{opacity:.85;font-size:12px}
+.bar .sp{flex:1}
+.bar .sync{font:12px var(--mono);display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+.shell{display:grid;grid-template-columns:200px minmax(0,1fr) 320px;min-height:560px}
+.rail{background:var(--surface-2);border-right:1px solid var(--line);padding:12px 8px;display:flex;flex-direction:column;gap:2px}
+.rail h4{margin:12px 8px 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.rail button{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;border:0;background:none;padding:8px;border-radius:6px}
+.rail button:hover{background:var(--line)}
+.rail button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.rail .n{font:12px var(--mono);color:var(--muted)}
+.main{padding:16px;min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.kpi{border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.kpi small{display:block;color:var(--muted);font-size:12px}
+.kpi strong{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
+.kpi.bad strong{color:var(--bad)}
+.kpi.good strong{color:var(--good)}
+.prog{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--surface-2);margin:6px 0 14px}
+.prog i{display:block;height:100%}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.tools input,.tools select{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 10px;min-width:0}
+.tools input{flex:1 1 180px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px}
+.chip[aria-pressed=true]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.list{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.row{display:grid;grid-template-columns:4px minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 12px 10px 0;border-bottom:1px solid var(--line);background:var(--surface);cursor:pointer}
+.row:last-child{border-bottom:0}
+.row:hover{background:var(--surface-2)}
+.row[aria-selected=true]{background:var(--accent-soft)}
+.row .stripe{align-self:stretch}
+.row .t{min-width:0}
+.row .t b{display:block;font-weight:500;overflow-wrap:anywhere}
+.row .t small{color:var(--muted);font-size:12px}
+.row.done .t b{text-decoration:line-through;color:var(--muted)}
+.row.done .stripe{background:var(--good)!important}
+.pill{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.due{font:12px var(--mono);white-space:nowrap}
+.due.late{color:var(--bad);font-weight:500}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-fg);border-radius:6px;padding:6px 12px;font-weight:600;font-size:13px}
+.btn.ghost{background:none;color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+.side{border-left:1px solid var(--line);padding:16px;background:var(--surface);min-width:0}
+.side h3{margin:0 0 4px;font-size:16px;line-height:1.3;text-wrap:balance}
+.side dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:12px 0;font-size:13px}
+.side dt{color:var(--muted)}
+.side dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.side .lnk{font:12px var(--mono);color:var(--accent)}
+.sync-box{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:14px 0}
+.sync-box h5{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:500}
+.sync-box li{list-style:none;display:flex;justify-content:space-between;gap:8px;padding:3px 0;font-size:13px}
+.sync-box ul{margin:0;padding:0}
+.st{font:12px var(--mono)}
+.st.ok{color:var(--good)}
+.st.wait{color:var(--warn)}
+.mini{display:flex;align-items:center;gap:8px;margin-top:4px}
+.bar2{flex:1;height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden;max-width:220px}
+.bar2 i{display:block;height:100%;background:var(--accent)}
+.mini span{font:11px var(--mono);color:var(--muted);min-width:34px}
+.projs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.pc{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px 12px;display:block;width:100%}
+.pc:hover{background:var(--surface-2)}
+.pc b{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.pc small{color:var(--muted);font-size:12px}
+.pc .bar2{display:block;max-width:none;height:8px;margin:8px 0 4px}
+.steps{margin:10px 0;display:flex;flex-direction:column;gap:2px}
+.step{display:flex;gap:8px;align-items:flex-start;text-align:left;border:0;background:none;padding:5px 4px;border-radius:6px;width:100%}
+.step:hover{background:var(--surface-2)}
+.step i{flex:none;width:16px;height:16px;border:1.5px solid var(--muted);border-radius:4px;margin-top:2px;display:grid;place-items:center;font-style:normal;font-size:11px;line-height:1}
+.step.on i{background:var(--good);border-color:var(--good);color:var(--bg)}
+.step.on span{color:var(--muted);text-decoration:line-through}
+.big{display:flex;align-items:baseline;gap:8px;margin-top:12px}
+.big strong{font-size:22px;font-variant-numeric:tabular-nums}
+.big small{color:var(--muted)}
+.addstep{display:flex;gap:6px;margin:6px 0 0}
+.addstep input{flex:1;min-width:0;font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.models{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;background:var(--surface)}
+.models .mc{border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.models h4{margin:0 0 6px;font-size:13px;display:flex;justify-content:space-between;gap:8px}
+.models ol{margin:0;padding-left:20px;font-size:13px}
+.models p{margin:0 0 4px;grid-column:1/-1;color:var(--muted);font-size:12px}
+@media (max-width:700px){.models{grid-template-columns:minmax(0,1fr)}}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:13px;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+@media (max-width:940px){.shell{grid-template-columns:minmax(0,1fr)}.rail{flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--line)}.rail h4{display:none}.rail button{width:auto;gap:8px}.side{border-left:0;border-top:1px solid var(--line)}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:700px){.projs{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:520px){.row{grid-template-columns:4px minmax(0,1fr) auto}.row .pill{display:none}}
+</style>
+
+<p class="note">Maquette interactive. Clique sur une tâche pour voir son détail, puis sur « Terminer » pour voir la clôture se propager. Les données sont des exemples.</p>
+
+<div class="app" id="app">
+  <div class="bar">
+    <b>Workload</b><span>Power App · liste SharePoint « Workload »</span><span class="sp"></span>
+    <span class="sync"><i class="dot"></i>Flux actifs · dernière synchro 08:42</span>
+  </div>
+  <div class="shell">
+    <nav class="rail" aria-label="Vues">
+      <h4>Vues</h4>
+      <button data-view="today" aria-pressed="true">Aujourd'hui <span class="n" id="n-today"></span></button>
+      <button data-view="open" aria-pressed="false">Toutes ouvertes <span class="n" id="n-open"></span></button>
+      <button data-view="late" aria-pressed="false">En retard <span class="n" id="n-late"></span></button>
+      <button data-view="done" aria-pressed="false">Terminées <span class="n" id="n-done"></span></button>
+      <h4>Projets</h4>
+      <button data-proj="Migration Win 11" aria-pressed="false">Migration Win 11 <span class="n" id="p0"></span></button>
+      <button data-proj="Supervision" aria-pressed="false">Supervision <span class="n" id="p1"></span></button>
+      <button data-proj="Hors projet" aria-pressed="false">Hors projet <span class="n" id="p2"></span></button>
+      <h4>Réglages</h4>
+      <button data-view="models" aria-pressed="false">Modèles d'étapes</button>
+    </nav>
+
+    <section class="main">
+      <div class="kpis">
+        <div class="kpi"><small>Ouvertes</small><strong id="k-open"></strong></div>
+        <div class="kpi bad"><small>En retard</small><strong id="k-late"></strong></div>
+        <div class="kpi good"><small>Terminées cette semaine</small><strong id="k-week"></strong></div>
+        <div class="kpi"><small>Avancement global</small><strong id="k-pct"></strong></div>
+      </div>
+      <div class="prog" id="prog" role="img" aria-label="Répartition des tâches ouvertes par type"></div>
+      <div class="projs" id="projs"></div>
+
+      <div class="tools">
+        <input id="q" type="search" placeholder="Rechercher une tâche" aria-label="Rechercher">
+        <button class="chip" data-type="Support" aria-pressed="false">Support</button>
+        <button class="chip" data-type="Amélioration" aria-pressed="false">Amélioration</button>
+        <button class="chip" data-type="Monthly eng" aria-pressed="false">Monthly eng</button>
+        <button class="chip" data-type="Projet" aria-pressed="false">Projet</button>
+        <select id="sort" aria-label="Tri"><option value="due">Tri : échéance</option><option value="type">Tri : type</option></select>
+        <button class="btn ghost" id="sim" type="button">Simuler un mail flaggé</button>
+      </div>
+      <div class="list" id="list"></div>
+    </section>
+
+    <aside class="side" id="side" aria-live="polite"></aside>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+var TODAY = new Date("2026-10-27");
+var COL = {"Support":"--t-support","Amélioration":"--t-amel","Monthly eng":"--t-monthly","Projet":"--t-projet"};
+var tasks = [
+ {id:1,t:"Accès VPN prestataire : demande de Martin",type:"Support",src:"Mail",proj:"Hors projet",due:"2026-10-26",st:"À faire",link:"outlook · mail flaggé 25/10",sync:["Liste","Flag Outlook","To Do"]},
+ {id:2,t:"Imprimante étage 3 hors service",type:"Support",src:"Teams",proj:"Hors projet",due:"2026-10-27",st:"En cours",link:"teams · canal Support IT",sync:["Liste","To Do"]},
+ {id:3,t:"FA-2417 Archivage automatique des tickets",type:"Amélioration",src:"Mail",proj:"Hors projet",due:"2026-10-30",st:"En cours",link:"outlook · fiche FA-2417",sync:["Liste","Flag Outlook","To Do"]},
+ {id:4,t:"FA-2431 Modèle de réponse pour les demandes d'accès",type:"Amélioration",src:"Mail",proj:"Hors projet",due:"2026-11-06",st:"À faire",link:"outlook · fiche FA-2431",sync:["Liste","Flag Outlook","To Do"]},
+ {id:5,t:"Revoir les seuils d'alerte de supervision",type:"Monthly eng",src:"Loop",proj:"Supervision",due:"2026-10-29",st:"À faire",link:"loop · Monthly eng octobre",sync:["Liste","Loop","To Do"]},
+ {id:6,t:"Documenter la procédure de restauration",type:"Monthly eng",src:"Loop",proj:"Supervision",due:"2026-11-12",st:"À faire",link:"loop · Monthly eng octobre",sync:["Liste","Loop","To Do"]},
+ {id:7,t:"Migration Win 11, lot 2 : liste des postes",type:"Projet",src:"Manuel",proj:"Migration Win 11",due:"2026-10-28",st:"En cours",link:"liste Workload",sync:["Liste","To Do"]},
+ {id:8,t:"Migration Win 11, lot 2 : planning avec les métiers",type:"Projet",src:"Manuel",proj:"Migration Win 11",due:"2026-11-04",st:"Bloqué",link:"liste Workload",sync:["Liste","To Do"]},
+ {id:9,t:"Mot de passe expiré : compte comptabilité",type:"Support",src:"Mail",proj:"Hors projet",due:"2026-10-23",st:"Terminé",done:"2026-10-24",link:"outlook · mail flaggé 22/10",sync:["Liste","Flag Outlook","To Do"]},
+ {id:10,t:"FA-2398 Alerte de quota boîtes partagées",type:"Amélioration",src:"Mail",proj:"Supervision",due:"2026-10-22",st:"Terminé",done:"2026-10-26",link:"outlook · fiche FA-2398",sync:["Liste","Flag Outlook","To Do"]}
+];
+var STEPS={
+ 1:["Valider la demande avec le responsable","Créer le compte prestataire","Envoyer les accès"],
+ 2:["Diagnostic sur place","Remplacer le toner","Confirmer avec l'utilisateur"],
+ 3:["Cadrer le besoin","Écrire la règle d'archivage","Tester sur 50 tickets","Déployer"],
+ 4:["Rédiger le modèle","Faire relire"],
+ 5:["Lister les alertes bruyantes","Proposer de nouveaux seuils","Valider en monthly"],
+ 6:["Rédiger la procédure","Tester la restauration","Publier"],
+ 7:["Export de l'inventaire","Filtrer les postes éligibles","Valider avec la sécurité","Publier la liste"],
+ 8:["Recueillir les contraintes","Proposer 2 scénarios","Faire valider"]
+};
+tasks.forEach(function(x){var s=STEPS[x.id];x.steps=s?s.map(function(l){return {l:l,d:false}}):[]});
+[[1,1],[2,2],[3,2],[5,1],[7,3],[8,1]].forEach(function(a){var t=tasks.filter(function(x){return x.id===a[0]})[0];for(var i=0;i<a[1];i++)t.steps[i].d=true});
+function pct(x){if(isDone(x))return 100;if(!x.steps.length)return 0;return Math.round(100*x.steps.filter(function(s){return s.d}).length/x.steps.length)}
+var view="today", proj=null, types={}, sel=1;
+var $=function(s){return document.querySelector(s)};
+function isDone(x){return x.st==="Terminé"}
+function late(x){return !isDone(x)&&new Date(x.due)<TODAY}
+function dueToday(x){return !isDone(x)&&new Date(x.due)<=TODAY}
+function fmt(d){var a=d.split("-");return a[2]+"/"+a[1]}
+function pill(x){var c="var("+COL[x.type]+")";return '<span class="pill" style="color:'+c+';background:color-mix(in srgb,'+c+' 14%,transparent)">'+x.type+'</span>'}
+function visible(){
+  var q=$("#q").value.toLowerCase();
+  var a=tasks.filter(function(x){
+    if(view==="models")return false;
+    if(view==="today"&&!dueToday(x))return false;
+    if(view==="open"&&isDone(x))return false;
+    if(view==="late"&&!late(x))return false;
+    if(view==="done"&&!isDone(x))return false;
+    if(proj&&x.proj!==proj)return false;
+    var any=Object.keys(types).some(function(k){return types[k]});
+    if(any&&!types[x.type])return false;
+    return !q||x.t.toLowerCase().indexOf(q)>-1;
+  });
+  var s=$("#sort").value;
+  a.sort(function(m,n){return s==="type"?m.type.localeCompare(n.type):new Date(m.due)-new Date(n.due)});
+  return a;
+}
+function render(){
+  var open=tasks.filter(function(x){return !isDone(x)}), done=tasks.filter(isDone);
+  $("#n-today").textContent=tasks.filter(dueToday).length;
+  $("#n-open").textContent=open.length; $("#n-late").textContent=tasks.filter(late).length; $("#n-done").textContent=done.length;
+  ["Migration Win 11","Supervision","Hors projet"].forEach(function(p,i){$("#p"+i).textContent=tasks.filter(function(x){return x.proj===p&&!isDone(x)}).length});
+  $("#k-open").textContent=open.length; $("#k-late").textContent=tasks.filter(late).length;
+  $("#k-week").textContent=done.length; $("#k-pct").textContent=Math.round(100*done.length/tasks.length)+" %";
+  $("#prog").innerHTML=Object.keys(COL).map(function(k){var n=open.filter(function(x){return x.type===k}).length;return n?'<i title="'+k+' : '+n+'" style="flex:'+n+';background:var('+COL[k]+')"></i>':""}).join("");
+  $("#projs").innerHTML=["Migration Win 11","Supervision","Hors projet"].map(function(p){
+    var ts=tasks.filter(function(x){return x.proj===p}), nd=ts.filter(isDone).length;
+    var avg=ts.length?Math.round(ts.reduce(function(s,x){return s+pct(x)},0)/ts.length):0;
+    return '<button class="pc" data-proj="'+p+'"><b><span>'+p+'</span><span>'+avg+' %</span></b><div class="bar2"><i style="width:'+avg+'%"></i></div><small>'+nd+' terminée'+(nd>1?'s':'')+' sur '+ts.length+'</small></button>';
+  }).join("");
+  var a=visible();
+  $("#list").innerHTML=a.length?a.map(function(x){
+    return '<div class="row'+(isDone(x)?" done":"")+'" role="button" tabindex="0" data-id="'+x.id+'" aria-selected="'+(x.id===sel)+'">'
+     +'<span class="stripe" style="background:var('+COL[x.type]+')"></span>'
+     +'<span class="t"><b>'+x.t+'</b><small>'+x.src+' · '+x.proj+' · '+x.st+'</small><div class="mini"><div class="bar2"><i style="width:'+pct(x)+'%"></i></div><span>'+pct(x)+' %</span></div></span>'
+     +pill(x)+'<span class="due'+(late(x)?" late":"")+'">'+(isDone(x)?"fait "+fmt(x.done):(late(x)?"retard ":"")+fmt(x.due))+'</span></div>';
+  }).join(""):(view==="models"?modelsHtml():'<div class="empty">Aucune tâche dans cette vue.</div>');
+  side();
+}
+function side(){
+  var x=tasks.filter(function(y){return y.id===sel})[0];
+  if(!x){$("#side").innerHTML='<div class="empty">Sélectionne une tâche.</div>';return}
+  var d=isDone(x);
+  $("#side").innerHTML='<div>'+pill(x)+'</div><h3 style="margin-top:8px">'+x.t+'</h3>'
+   +'<dl><dt>Statut</dt><dd>'+x.st+'</dd><dt>Échéance</dt><dd>'+fmt(x.due)+(late(x)?' (en retard)':'')+'</dd><dt>Projet</dt><dd>'+x.proj+'</dd><dt>Source</dt><dd>'+x.src+'</dd><dt>Lien</dt><dd><span class="lnk">'+x.link+'</span></dd></dl>'
+   +'<div class="big"><strong>'+pct(x)+' %</strong><small>'+(x.steps.length?x.steps.filter(function(s){return s.d||d}).length+' étape'+(x.steps.length>1?'s':'')+' sur '+x.steps.length:'aucune étape')+'</small></div>'
+   +'<div class="bar2" style="max-width:none;height:8px;margin-top:6px"><i style="width:'+pct(x)+'%"></i></div>'
+   +'<div class="steps">'+x.steps.map(function(s,i){var on=s.d||d;return '<button class="step'+(on?' on':'')+'" data-step="'+i+'"><i>'+(on?'✓':'')+'</i><span>'+s.l+'</span></button>'}).join("")+'</div>'
+   +(d?'':'<form class="addstep" id="addstep"><input id="newstep" placeholder="Ajouter une étape" aria-label="Nouvelle étape"><button class="btn ghost" type="submit">Ajouter</button></form>')
+   +'<div class="sync-box"><h5>'+(d?"Clôture propagée":"Sera clôturée dans")+'</h5><ul>'
+   +x.sync.map(function(s){return '<li><span>'+({"Liste":"Liste SharePoint","Flag Outlook":"Flag du mail Outlook","To Do":"Microsoft To Do","Loop":"Tâche Loop"})[s]+'</span><span class="st '+(d?"ok":"wait")+'">'+(d?"✓ fait":"en attente")+'</span></li>'}).join("")+'</ul></div>'
+   +(d?'<button class="btn ghost" id="reopen">Rouvrir</button>':'<button class="btn" id="finish">Terminer partout</button>');
+  var f=$("#finish"); if(f)f.onclick=function(){finish(x)};
+  var af=$("#addstep"); if(af)af.onsubmit=function(ev){ev.preventDefault();var v=$("#newstep").value.trim();if(!v)return;x.steps.push({l:v,d:false});render();$("#newstep").focus()};
+  var r=$("#reopen"); if(r)r.onclick=function(){x.st="En cours";delete x.done;if(x.steps.length)x.steps[x.steps.length-1].d=false;toast("Tâche rouverte dans "+x.sync.length+" endroits");render()};
+}
+function finish(x){x.steps.forEach(function(s){s.d=true});x.st="Terminé";x.done="2026-10-27";toast("Terminée. Clôture envoyée à "+x.sync.length+" endroits (flux Power Automate)");render()}
+var tt;function toast(m){var e=$("#toast");e.textContent=m;e.classList.add("on");clearTimeout(tt);tt=setTimeout(function(){e.classList.remove("on")},2600)}
+document.addEventListener("click",function(e){
+  var r=e.target.closest(".row"); if(r){sel=+r.dataset.id;render();return}
+  var sp=e.target.closest("[data-step]"); if(sp){var x=tasks.filter(function(y){return y.id===sel})[0];if(x&&!isDone(x)){var s=x.steps[+sp.dataset.step];s.d=!s.d;if(x.st==="À faire"&&pct(x)>0)x.st="En cours";render()}return}
+  var v=e.target.closest("[data-view]"); if(v){view=v.dataset.view;proj=null;document.querySelectorAll(".rail button").forEach(function(b){b.setAttribute("aria-pressed",b===v)});render();return}
+  var p=e.target.closest("[data-proj]"); if(p){proj=p.dataset.proj;view="open";document.querySelectorAll(".rail button").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.proj===p.dataset.proj)});render();return}
+  var c=e.target.closest("[data-type]"); if(c){types[c.dataset.type]=!types[c.dataset.type];c.setAttribute("aria-pressed",!!types[c.dataset.type]);render()}
+});
+document.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("row")){e.preventDefault();e.target.click()}});
+var TEMPLATES={
+ "Support":["Qualifier la demande","Traiter","Répondre au demandeur"],
+ "Amélioration":["Cadrer","Réaliser","Tester","Déployer"],
+ "Monthly eng":["Préparer","Présenter","Suivre l'action"],
+ "Projet":[]
+};
+function modelsHtml(){
+  return '<div class="models"><p>Liste SharePoint « Modèles d'étapes ». Un flux copie ces étapes dans chaque nouvelle tâche selon son type. Tu peux ensuite les modifier tâche par tâche.</p>'
+   +Object.keys(TEMPLATES).map(function(k){var s=TEMPLATES[k];return '<div class="mc"><h4><span>'+k+'</span><span class="pill" style="color:var('+COL[k]+');background:color-mix(in srgb,var('+COL[k]+') 14%,transparent)">'+s.length+' étape'+(s.length>1?'s':'')+'</span></h4>'+(s.length?'<ol>'+s.map(function(l){return '<li>'+l+'</li>'}).join('')+'</ol>':'<small style="color:var(--muted)">Aucune : tu ajoutes les étapes toi-même.</small>')+'</div>'}).join('')+'</div>';
+}
+var SIM=[
+ {t:"Demande de licence Visio : service RH",type:"Support",src:"Mail",link:"outlook · mail flaggé 27/10",sync:["Liste","Flag Outlook","To Do"]},
+ {t:"FA-2440 Export automatique du rapport mensuel",type:"Amélioration",src:"Mail",link:"outlook · fiche FA-2440",sync:["Liste","Flag Outlook","To Do"]}
+], simN=0;
+$("#sim").onclick=function(){
+  var s=SIM[simN++%SIM.length], id=Math.max.apply(null,tasks.map(function(x){return x.id}))+1;
+  tasks.push({id:id,t:s.t,type:s.type,src:s.src,proj:"Hors projet",due:"2026-11-03",st:"À faire",link:s.link,sync:s.sync,steps:TEMPLATES[s.type].map(function(l){return {l:l,d:false}})});
+  sel=id;view="open";proj=null;
+  document.querySelectorAll(".rail button").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.view==="open")});
+  toast("Mail catégorisé « "+s.type+" » : tâche créée avec "+TEMPLATES[s.type].length+" étapes du modèle");render();
+};
+$("#q").oninput=render; $("#sort").onchange=render;
+render();
+</script>
