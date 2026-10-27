@@ -276,7 +276,7 @@ var TEMPLATES={
  "Projet":[]
 };
 function modelsHtml(){
-  return '<div class="models"><p>Liste SharePoint « Modèles d'étapes ». Un flux copie ces étapes dans chaque nouvelle tâche selon son type. Tu peux ensuite les modifier tâche par tâche.</p>'
+  return '<div class="models"><p>Liste SharePoint « Modèles d\'étapes ». Un flux copie ces étapes dans chaque nouvelle tâche selon son type. Tu peux ensuite les modifier tâche par tâche.</p>'
    +Object.keys(TEMPLATES).map(function(k){var s=TEMPLATES[k];return '<div class="mc"><h4><span>'+k+'</span><span class="pill" style="color:var('+COL[k]+');background:color-mix(in srgb,var('+COL[k]+') 14%,transparent)">'+s.length+' étape'+(s.length>1?'s':'')+'</span></h4>'+(s.length?'<ol>'+s.map(function(l){return '<li>'+l+'</li>'}).join('')+'</ol>':'<small style="color:var(--muted)">Aucune : tu ajoutes les étapes toi-même.</small>')+'</div>'}).join('')+'</div>';
 }
 var SIM=[
