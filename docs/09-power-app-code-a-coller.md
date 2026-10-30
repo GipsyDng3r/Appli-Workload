@@ -72,6 +72,10 @@ Screens:
           Notify("Refresh(Projets) : " & FirstError.Message, NotificationType.Error)
         );
         IfError(
+          ClearCollect(colWL, '[LME] Workload'),
+          Notify("ClearCollect(colWL) : " & FirstError.Message, NotificationType.Error)
+        );
+        IfError(
           ClearCollect(colEtapes, '[LME] Etapes'),
           Notify("ClearCollect(colEtapes) : " & FirstError.Message, NotificationType.Error)
         );
@@ -91,7 +95,7 @@ Screens:
           Notify("ClearCollect(colPct) : " & FirstError.Message, NotificationType.Error)
         );
         IfError(
-          Set(varGlobal, Round(Coalesce(Average(colPct, pct), 0), 0)),
+          Set(varGlobal, Round(IfError(Average(colPct, pct), 0), 0)),
           Notify("Set(varGlobal) : " & FirstError.Message, NotificationType.Error)
         );
         IfError(
@@ -104,7 +108,7 @@ Screens:
               {
                 T: t.Value,
                 n: CountRows(Filter('[LME] Workload', TypeTache.Value = t.Value)),
-                pct: Round(Coalesce(Average(Filter(colPct, TypeT = t.Value), pct), 0), 0)
+                pct: Round(IfError(Average(Filter(colPct, TypeT = t.Value), pct), 0), 0)
               }
             )
           ),
@@ -323,6 +327,10 @@ Screens:
                       Notify("Refresh(Projets) : " & FirstError.Message, NotificationType.Error)
                     );
                     IfError(
+                      ClearCollect(colWL, '[LME] Workload'),
+                      Notify("ClearCollect(colWL) : " & FirstError.Message, NotificationType.Error)
+                    );
+                    IfError(
                       ClearCollect(colEtapes, '[LME] Etapes'),
                       Notify("ClearCollect(colEtapes) : " & FirstError.Message, NotificationType.Error)
                     );
@@ -342,7 +350,7 @@ Screens:
                       Notify("ClearCollect(colPct) : " & FirstError.Message, NotificationType.Error)
                     );
                     IfError(
-                      Set(varGlobal, Round(Coalesce(Average(colPct, pct), 0), 0)),
+                      Set(varGlobal, Round(IfError(Average(colPct, pct), 0), 0)),
                       Notify("Set(varGlobal) : " & FirstError.Message, NotificationType.Error)
                     );
                     IfError(
@@ -355,7 +363,7 @@ Screens:
                           {
                             T: t.Value,
                             n: CountRows(Filter('[LME] Workload', TypeTache.Value = t.Value)),
-                            pct: Round(Coalesce(Average(Filter(colPct, TypeT = t.Value), pct), 0), 0)
+                            pct: Round(IfError(Average(Filter(colPct, TypeT = t.Value), pct), 0), 0)
                           }
                         )
                       ),
@@ -534,7 +542,7 @@ Screens:
                         - lblPctProj:
                             Control: Label@2.5.1
                             Properties:
-                              Text: =Round(Coalesce(Average(Filter(colPct, ProjetId = ThisItem.ID), pct), 0), 0) & " %"
+                              Text: =Round(IfError(Average(Filter(colPct, ProjetId = ThisItem.ID), pct), 0), 0) & " %"
                               Align: =Align.Center
                               FontWeight: =FontWeight.Semibold
                               Color: =RGBA(16, 26, 46, 1)
@@ -557,7 +565,7 @@ Screens:
                               X: =Parent.TemplateWidth / 2 - 22
                               Y: =26 + 116 - Self.Height
                               Width: =44
-                              Height: =Max(8, 116 * Coalesce(Average(Filter(colPct, ProjetId = ThisItem.ID), pct), 0) / 100)
+                              Height: =Max(8, 116 * IfError(Average(Filter(colPct, ProjetId = ThisItem.ID), pct), 0) / 100)
                         - lblNomProj:
                             Control: Label@2.5.1
                             Properties:
@@ -1211,7 +1219,7 @@ Screens:
                         - lblEv1:
                             Control: Label@2.5.1
                             Properties:
-                              Text: =Coalesce(Last(FirstN(Filter('[LME] Workload', Echeance = ThisItem.d), 1)).Title, "")
+                              Text: =Coalesce(Last(FirstN(Filter(colWL, Echeance = ThisItem.d), 1)).Title, "")
                               Size: =9
                               Fill: =If(IsBlank(Self.Text), RGBA(0, 0, 0, 0), RGBA(227, 235, 255, 1))
                               Color: =RGBA(31, 79, 216, 1)
@@ -1222,7 +1230,7 @@ Screens:
                         - lblEv2:
                             Control: Label@2.5.1
                             Properties:
-                              Text: =If(CountRows(Filter('[LME] Workload', Echeance = ThisItem.d)) >= 2, Last(FirstN(Filter('[LME] Workload', Echeance = ThisItem.d), 2)).Title, "")
+                              Text: =If(CountRows(Filter(colWL, Echeance = ThisItem.d)) >= 2, Last(FirstN(Filter(colWL, Echeance = ThisItem.d), 2)).Title, "")
                               Size: =9
                               Fill: =If(IsBlank(Self.Text), RGBA(0, 0, 0, 0), RGBA(227, 235, 255, 1))
                               Color: =RGBA(31, 79, 216, 1)
@@ -1233,7 +1241,7 @@ Screens:
                         - lblEvPlus:
                             Control: Label@2.5.1
                             Properties:
-                              Text: =If(CountRows(Filter('[LME] Workload', Echeance = ThisItem.d)) > 2, "+" & (CountRows(Filter('[LME] Workload', Echeance = ThisItem.d)) - 2), "")
+                              Text: =If(CountRows(Filter(colWL, Echeance = ThisItem.d)) > 2, "+" & (CountRows(Filter(colWL, Echeance = ThisItem.d)) - 2), "")
                               Size: =9
                               Color: =RGBA(100, 114, 138, 1)
                               X: =4
@@ -1872,6 +1880,10 @@ Screens:
 Coller le code ne relance pas l'`OnVisible` de l'écran : les variables (`varVue`, `varAn`, `varMois`) et les collections restent vides dans la session de Studio en cours. Dans l'arborescence, clic droit sur `scrMain` → **Exécuter OnVisible**, ou relance l'application avec F5 depuis l'écran. Sans cela, le calendrier affichait l'erreur « The year argument to the Date function must be between 0 and 9999 ». Il est maintenant protégé par des `Coalesce`, mais les chiffres ne se chargent qu'après l'`OnVisible` ou un clic sur « Actualiser ».
 
 Pour vérifier que les données sont chargées : menu **Affichage → Collections**, puis ouvre `colPct` (une ligne par tâche).
+
+## Si les écrans sont vides
+
+L'application affiche uniquement ce qui est dans tes listes. Si `[LME] Workload` contient peu de lignes, ou si `[LME] Etapes` est vide, les cartes sont vides ou à 0 %, ce qui est normal. Ajoute quelques lignes de test (voir [02](02-listes-sharepoint.md), section « Jeu d'essai »).
 
 ## Si les chiffres restent à zéro
 

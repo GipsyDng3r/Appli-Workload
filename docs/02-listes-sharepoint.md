@@ -86,3 +86,29 @@ Astuce : une liste SharePoint permet de coller plusieurs lignes depuis Excel ave
 
 - Ajoute une ligne de test dans Workload à la main, puis supprime-la.
 - Vérifie que tu peux créer deux lignes avec le même SourceId : la seconde doit être refusée.
+
+## Jeu d'essai (pour voir l'application avant les flux)
+
+Dans SharePoint, ouvre la liste, passe en **Modifier en mode Grille** et colle ces lignes. Les noms de projet doivent correspondre exactement à ceux de la liste `Projets`.
+
+`Projets` (colonnes `Title`, `StatutProjet`) :
+
+| Title | StatutProjet |
+|---|---|
+| Hors projet | Actif |
+| Migration Win 11 | Actif |
+| Supervision | Actif |
+
+`Workload` (colonnes `Title`, `TypeTache`, `Source`, `Statut`, `Echeance`, `Projet`) : adapte les dates à la semaine en cours.
+
+| Title | TypeTache | Source | Statut | Echeance | Projet |
+|---|---|---|---|---|---|
+| Accès VPN prestataire | Support | Mail | À faire | hier | Hors projet |
+| Imprimante étage 3 | Support | Teams | En cours | aujourd'hui | Hors projet |
+| FA-2417 Archivage des tickets | Amélioration | Mail | En cours | dans 3 jours | Hors projet |
+| Revoir les seuils d'alerte | Monthly eng | Loop | En cours | dans 2 jours | Supervision |
+| Migration Win 11, lot 2 : liste des postes | Projet | Manuel | En cours | demain | Migration Win 11 |
+| Accès dossier partagé RH | À trier | Mail | À faire | dans 7 jours | (vide) |
+
+Pour les étapes, ouvre une tâche dans l'application et utilise « Ajouter une étape », ou laisse le flux d'étapes ([04](04-flux-etapes.md)) les créer depuis les modèles.
+
