@@ -1,6 +1,8 @@
 # 9. Power App : code complet à coller
 
-Application canvas au format **Tablette** (1366 x 768), dans le style de la maquette [maquette/workload.html](../maquette/workload.html) : tableau de bord, Kanban, calendrier, analyse, vue « À trier » et volet de détail. Un seul écran `scrMain` : les vues sont des **containers** (`cntDash`, `cntTasks`, `cntCal`, `cntStats`, `cntTrier`) dont la propriété `Visible` dépend de la variable `varVue`. Chaque zone (cartes, compteurs, filtres, volet de détail) est un sous-container.
+Application canvas dont la mise en page **s'adapte à la taille de l'écran** : les containers se dimensionnent à partir de `Parent.Width` et `Parent.Height`, sans coordonnées fixes. Elle a été contrôlée numériquement à 1366 x 768, 1280 x 720 et 1920 x 907 : aucun contrôle ne déborde de son container. Style de la maquette [maquette/workload.html](../maquette/workload.html) : tableau de bord, Kanban, calendrier, analyse, vue « À trier » et volet de détail. Un seul écran `scrMain` : les vues sont des **containers** (`cntDash`, `cntTasks`, `cntCal`, `cntStats`, `cntTrier`) dont la propriété `Visible` dépend de la variable `varVue`. Chaque zone (cartes, compteurs, filtres, volet de détail) est un sous-container.
+
+Typographie : police Segoe UI partout, échelle de tailles fixe (26 titre de page, 15 titre de carte, 13 texte, 11 à 12 légendes, 32 chiffres des compteurs).
 
 Le même code est dans [power-app/scrMain.pa.yaml](../power-app/scrMain.pa.yaml), plus pratique à copier depuis GitHub (bouton « Copy raw file »).
 
@@ -10,7 +12,7 @@ Je n'ai pas pu tester ce code dans Power Apps Studio. Deux niveaux de risque :
 - **Le format de collage** (YAML) : il reprend la syntaxe réelle d'un export de Studio (`Control: Label@2.5.1`, `Properties:`, `Children:`), mais les numéros de version des contrôles peuvent différer chez toi. Si Studio en refuse un, voir « Si le collage échoue ». Le contrôle `Image` (`Image@2.2.3`) est celui dont la version est la moins sûre.
 - **Les formules Power Fx** : elles ne dépendent pas du format et se corrigent contrôle par contrôle. Les points les plus délicats sont signalés dans « Points à surveiller ».
 
-La structure du YAML a été vérifiée avec un analyseur YAML : indentation correcte, aucun nom de contrôle en double, aucune référence à un contrôle inexistant. Les contrôles sont rangés dans 21 containers en mise en page manuelle (`ManualLayout`) : les coordonnées X et Y d'un contrôle sont relatives à son container, et un container masqué masque tout son contenu.
+La structure du YAML a été vérifiée avec un analyseur YAML : indentation correcte, aucun nom de contrôle en double, aucune référence à un contrôle inexistant. Les contrôles sont rangés dans des containers en mise en page manuelle (`ManualLayout`) : les coordonnées X et Y d'un contrôle sont relatives à son container, et un container masqué masque tout son contenu. Les cartes sont des containers à fond blanc (plus de rectangles de fond).
 
 ## Différences avec la maquette
 
@@ -36,8 +38,8 @@ La structure du YAML a été vérifiée avec un analyseur YAML : indentation cor
 ## Coller
 
 1. Copie tout le bloc YAML ci-dessous.
-2. Dans l'arborescence, clic droit sur la liste des écrans → **Coller le code**. L'écran `scrMain` se crée avec ses 125 contrôles et ses 21 containers. Si tu avais déjà collé une version précédente, supprime l'ancien `scrMain` d'abord.
-3. Définis `scrMain` comme écran de démarrage, puis lance l'application (F5). L'`OnVisible` charge les données.
+2. Dans l'arborescence, clic droit sur la liste des écrans → **Coller le code**. L'écran `scrMain` se crée avec ses contrôles et ses containers. Si tu avais déjà collé une version précédente, supprime l'ancien `scrMain` d'abord.
+3. Dans Paramètres → Affichage, laisse « Adapter à l'écran » activé. Définis `scrMain` comme écran de démarrage, puis lance l'application (F5). L'`OnVisible` charge les données.
 
 ## Le code
 
@@ -168,1579 +170,1844 @@ Screens:
           Control: GroupContainer@1.5.0
           Variant: ManualLayout
           Properties:
-            Height: =Parent.Height
-            Width: =230
             X: =0
             Y: =0
+            Width: =232
+            Height: =Parent.Height
+            Fill: =RGBA(255, 255, 255, 1)
           Children:
-            - recSide:
-                Control: Rectangle@2.3.0
-                Properties:
-                  Fill: =RGBA(255, 255, 255, 1)
-                  X: =0
-                  Y: =0
-                  Width: =230
-                  Height: =Parent.Height
             - lblLogo:
                 Control: Label@2.5.1
                 Properties:
+                  X: =20
+                  Y: =20
+                  Width: =190
+                  Height: =36
                   Text: ="Workload"
-                  Size: =18
+                  Size: =20
                   FontWeight: =FontWeight.Bold
                   Color: =RGBA(16, 26, 46, 1)
-                  X: =20
-                  Y: =16
-                  Width: =190
-                  Height: =40
+                  Font: =Font.'Segoe UI'
             - navDash:
                 Control: Classic/Button@2.2.0
                 Properties:
+                  X: =12
+                  Y: =84
+                  Width: =208
+                  Height: =40
                   Text: ="Tableau de bord"
                   Fill: =If(Coalesce(varVue, "dash") = "dash", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(Coalesce(varVue, "dash") = "dash", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
-                  X: =12
-                  Y: =84
-                  Width: =206
-                  Height: =38
                   OnSelect: =Set(varVue, "dash"); Set(varSel, Blank())
+                  Size: =14
+                  Align: =Align.Left
+                  Font: =Font.'Segoe UI'
             - navTasks:
                 Control: Classic/Button@2.2.0
                 Properties:
+                  X: =12
+                  Y: =130
+                  Width: =208
+                  Height: =40
                   Text: ="Tâches"
                   Fill: =If(varVue = "tasks", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varVue = "tasks", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
-                  X: =12
-                  Y: =128
-                  Width: =206
-                  Height: =38
                   OnSelect: =Set(varVue, "tasks"); Set(varSel, Blank())
+                  Size: =14
+                  Align: =Align.Left
+                  Font: =Font.'Segoe UI'
             - navCal:
                 Control: Classic/Button@2.2.0
                 Properties:
+                  X: =12
+                  Y: =176
+                  Width: =208
+                  Height: =40
                   Text: ="Calendrier"
                   Fill: =If(varVue = "cal", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varVue = "cal", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
-                  X: =12
-                  Y: =172
-                  Width: =206
-                  Height: =38
                   OnSelect: =Set(varVue, "cal"); Set(varSel, Blank())
+                  Size: =14
+                  Align: =Align.Left
+                  Font: =Font.'Segoe UI'
             - navStats:
                 Control: Classic/Button@2.2.0
                 Properties:
+                  X: =12
+                  Y: =222
+                  Width: =208
+                  Height: =40
                   Text: ="Analyse"
                   Fill: =If(varVue = "stats", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varVue = "stats", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
-                  X: =12
-                  Y: =216
-                  Width: =206
-                  Height: =38
                   OnSelect: =Set(varVue, "stats"); Set(varSel, Blank())
+                  Size: =14
+                  Align: =Align.Left
+                  Font: =Font.'Segoe UI'
             - navTrier:
                 Control: Classic/Button@2.2.0
                 Properties:
+                  X: =12
+                  Y: =268
+                  Width: =208
+                  Height: =40
                   Text: ="À trier (" & CountRows(Filter('[LME] Workload', TypeTache.Value = "À trier", Statut.Value <> "Terminé")) & ")"
                   Fill: =If(varVue = "trier", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varVue = "trier", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
-                  X: =12
-                  Y: =260
-                  Width: =206
-                  Height: =38
                   OnSelect: =Set(varVue, "trier"); Set(varSel, Blank())
-      - cntTopbar:
+                  Size: =14
+                  Align: =Align.Left
+                  Font: =Font.'Segoe UI'
+      - cntMain:
           Control: GroupContainer@1.5.0
           Variant: ManualLayout
           Properties:
-            Height: =64
-            Width: =Parent.Width - 230
-            X: =230
+            X: =232
             Y: =0
+            Width: =Parent.Width - 232
+            Height: =Parent.Height
           Children:
-            - txtRecherche:
-                Control: Classic/TextInput@2.3.2
+            - cntTopbar:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
                 Properties:
-                  HintText: ="Rechercher une tâche"
-                  X: =24
-                  Y: =12
-                  Width: =300
-                  Height: =40
-            - txtNouvelle:
-                Control: Classic/TextInput@2.3.2
-                Properties:
-                  HintText: ="Nouvelle tâche manuelle"
-                  X: =340
-                  Y: =12
-                  Width: =260
-                  Height: =40
-            - btnAjouter:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  Text: ="Ajouter"
-                  Fill: =RGBA(31, 79, 216, 1)
-                  Color: =RGBA(255, 255, 255, 1)
-                  X: =608
-                  Y: =12
-                  Width: =100
-                  Height: =40
-                  DisplayMode: =If(IsBlank(txtNouvelle.Text), DisplayMode.Disabled, DisplayMode.Edit)
-                  OnSelect: |-
-                    =Patch('[LME] Workload', Defaults('[LME] Workload'),
-                      {
-                        Title: txtNouvelle.Text,
-                        TypeTache: {Value: "À trier"},
-                        Source: {Value: "Manuel"},
-                        Statut: {Value: "À faire"},
-                        Echeance: DateAdd(Today(), 7, TimeUnit.Days),
-                        Propage: false,
-                        EtapesCreees: false
-                      });
-                    Reset(txtNouvelle);
-                    Select(btnRefresh);
-                    Set(varVue, "trier");
-                    Notify("Tâche créée dans À trier : choisis son type et son projet.", NotificationType.Success)
-            - btnRefresh:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  Text: ="Actualiser"
-                  Fill: =RGBA(255, 255, 255, 1)
-                  Color: =RGBA(16, 26, 46, 1)
-                  X: =Parent.Width - 130
-                  Y: =12
-                  Width: =112
-                  Height: =40
-                  OnSelect: |-
-                    =IfError(
-                      Refresh('[LME] Workload'),
-                      Notify("Refresh(Workload) : " & FirstError.Message, NotificationType.Error)
-                    );
-                    IfError(
-                      Refresh('[LME] Etapes'),
-                      Notify("Refresh(Etapes) : " & FirstError.Message, NotificationType.Error)
-                    );
-                    IfError(
-                      Refresh('[LME] Projets'),
-                      Notify("Refresh(Projets) : " & FirstError.Message, NotificationType.Error)
-                    );
-                    IfError(
-                      ClearCollect(colWL, '[LME] Workload'),
-                      Notify("ClearCollect(colWL) : " & FirstError.Message, NotificationType.Error)
-                    );
-                    IfError(
-                      ClearCollect(colEtapes, '[LME] Etapes'),
-                      Notify("ClearCollect(colEtapes) : " & FirstError.Message, NotificationType.Error)
-                    );
-                    IfError(
-                      ClearCollect(colPct,
-                        ForAll('[LME] Workload' As w,
-                          {
-                            ID: w.ID,
-                            ProjetId: w.Projet.Id,
-                            TypeT: w.TypeTache.Value,
-                            pct: If(w.Statut.Value = "Terminé", 100,
-                              With({e: Filter(colEtapes, Tache.Id = w.ID)},
-                                If(CountRows(e) = 0, 0, Round(100 * CountRows(Filter(e, Fait)) / CountRows(e), 0))))
-                          }
-                        )
-                      ),
-                      Notify("ClearCollect(colPct) : " & FirstError.Message, NotificationType.Error)
-                    );
-                    IfError(
-                      Set(varGlobal, Round(IfError(Average(colPct, pct), 0), 0)),
-                      Notify("Set(varGlobal) : " & FirstError.Message, NotificationType.Error)
-                    );
-                    IfError(
-                      Set(varNext, First(SortByColumns(Filter('[LME] Workload', Statut.Value <> "Terminé", TypeTache.Value <> "À trier"), "Echeance", SortOrder.Ascending))),
-                      Notify("Set(varNext) : " & FirstError.Message, NotificationType.Error)
-                    );
-                    IfError(
-                      ClearCollect(colTypes,
-                        ForAll(["Support", "Amélioration", "Monthly eng", "Projet"] As t,
-                          {
-                            T: t.Value,
-                            n: CountRows(Filter('[LME] Workload', TypeTache.Value = t.Value)),
-                            pct: Round(IfError(Average(Filter(colPct, TypeT = t.Value), pct), 0), 0)
-                          }
-                        )
-                      ),
-                      Notify("ClearCollect(colTypes) : " & FirstError.Message, NotificationType.Error)
-                    );
-                    IfError(
-                      ClearCollect(colProjCount,
-                        ForAll(Sequence(CountRows('[LME] Projets')),
-                          With({p: Index('[LME] Projets', Value)},
-                            {
-                              k: Value,
-                              name: p.Title,
-                              n: CountRows(Filter('[LME] Workload', Projet.Id = p.ID, Statut.Value <> "Terminé"))
-                            }
-                          )
-                        )
-                      ),
-                      Notify("ClearCollect(colProjCount) : " & FirstError.Message, NotificationType.Error)
-                    );
-                    IfError(
-                      Set(varTotalOuv, Sum(colProjCount, n)),
-                      Notify("Set(varTotalOuv) : " & FirstError.Message, NotificationType.Error)
-                    );
-                    IfError(
-                      ClearCollect(colDonut,
-                        ForAll(colProjCount As c,
-                          {
-                            k: c.k,
-                            name: c.name,
-                            n: c.n,
-                            share: Round(100 * c.n / Max(varTotalOuv, 1), 0),
-                            start: Round(100 * Sum(Filter(colProjCount, k < c.k), n) / Max(varTotalOuv, 1), 0)
-                          }
-                        )
-                      ),
-                      Notify("ClearCollect(colDonut) : " & FirstError.Message, NotificationType.Error)
-                    );
-                    IfError(
-                      ClearCollect(colSem,
-                        ForAll(Sequence(8, 0),
-                          {
-                            i: Value,
-                            n: CountRows(Filter('[LME] Workload', Statut.Value = "Terminé",
-                                 TermineLe >= DateAdd(Today(), 1 - 7 * (8 - Value), TimeUnit.Days),
-                                 TermineLe < DateAdd(Today(), 1 - 7 * (7 - Value), TimeUnit.Days)))
-                          }
-                        )
-                      ),
-                      Notify("ClearCollect(colSem) : " & FirstError.Message, NotificationType.Error)
-                    );
-                    IfError(
-                      If(!IsBlank(varSel), Set(varSel, LookUp('[LME] Workload', ID = varSel.ID))),
-                      Notify("mise à jour de varSel : " & FirstError.Message, NotificationType.Error)
-                    )
-      - cntDash:
-          Control: GroupContainer@1.5.0
-          Variant: ManualLayout
-          Properties:
-            Height: =Parent.Height - 64
-            Visible: =Coalesce(varVue, "dash") = "dash"
-            Width: =1088
-            X: =254
-            Y: =64
-          Children:
-            - lblTitreDash:
-                Control: Label@2.5.1
-                Properties:
-                  Text: ="Tableau de bord"
-                  Size: =24
-                  FontWeight: =FontWeight.Bold
-                  Color: =RGBA(16, 26, 46, 1)
-                  X: =0
-                  Y: =8
-                  Width: =500
+                  X: =20
+                  Y: =16
+                  Width: =Parent.Width - 40
                   Height: =44
-            - cntDashKpi:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  Height: =96
-                  Width: =1072
-                  X: =0
-                  Y: =60
                 Children:
-                  - lblKpiOuvertes:
-                      Control: Label@2.5.1
+                  - txtRecherche:
+                      Control: Classic/TextInput@2.3.2
                       Properties:
-                        Text: =CountRows(Filter('[LME] Workload', Statut.Value <> "Terminé")) & Char(10) & "Tâches ouvertes"
-                        Size: =18
-                        FontWeight: =FontWeight.Bold
-                        Fill: =RGBA(21, 62, 170, 1)
+                        X: =0
+                        Y: =2
+                        Width: =Parent.Width * 0.30
+                        Height: =40
+                        HintText: ="Rechercher une tâche"
+                        Size: =13
+                        Font: =Font.'Segoe UI'
+                        Default: =""
+                  - txtNouvelle:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        X: =Parent.Width * 0.30 + 12
+                        Y: =2
+                        Width: =Parent.Width * 0.26
+                        Height: =40
+                        HintText: ="Nouvelle tâche manuelle"
+                        Size: =13
+                        Font: =Font.'Segoe UI'
+                        Default: =""
+                  - btnAjouter:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        X: =Parent.Width * 0.56 + 24
+                        Y: =2
+                        Width: =110
+                        Height: =40
+                        Text: ="Ajouter"
+                        Fill: =RGBA(31, 79, 216, 1)
                         Color: =RGBA(255, 255, 255, 1)
-                        PaddingLeft: =14
-                        X: =0
-                        Y: =0
-                        Width: =256
-                        Height: =96
-                  - lblKpiRetard:
-                      Control: Label@2.5.1
+                        DisplayMode: =If(IsBlank(txtNouvelle.Text), DisplayMode.Disabled, DisplayMode.Edit)
+                        OnSelect: |-
+                          =Patch('[LME] Workload', Defaults('[LME] Workload'),
+                            {
+                              Title: txtNouvelle.Text,
+                              TypeTache: {Value: "À trier"},
+                              Source: {Value: "Manuel"},
+                              Statut: {Value: "À faire"},
+                              Echeance: DateAdd(Today(), 7, TimeUnit.Days),
+                              Propage: false,
+                              EtapesCreees: false
+                            });
+                          Reset(txtNouvelle);
+                          Select(btnRefresh);
+                          Set(varVue, "trier");
+                          Notify("Tâche créée dans À trier : choisis son type et son projet.", NotificationType.Success)
+                        Size: =13
+                        Font: =Font.'Segoe UI'
+                  - btnRefresh:
+                      Control: Classic/Button@2.2.0
                       Properties:
-                        Text: =CountRows(Filter('[LME] Workload', Statut.Value <> "Terminé", Echeance < Today())) & Char(10) & "En retard"
-                        Size: =18
-                        FontWeight: =FontWeight.Bold
-                        Fill: =RGBA(255, 255, 255, 1)
-                        Color: =RGBA(192, 51, 43, 1)
-                        PaddingLeft: =14
-                        X: =272
-                        Y: =0
-                        Width: =256
-                        Height: =96
-                  - lblKpiSemaine:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: =CountRows(Filter('[LME] Workload', Statut.Value = "Terminé", TermineLe >= DateAdd(Today(), -6, TimeUnit.Days))) & Char(10) & "Terminées sur 7 jours"
-                        Size: =18
-                        FontWeight: =FontWeight.Bold
-                        Fill: =RGBA(255, 255, 255, 1)
-                        Color: =RGBA(19, 122, 74, 1)
-                        PaddingLeft: =14
-                        X: =544
-                        Y: =0
-                        Width: =256
-                        Height: =96
-                  - lblKpiTrier:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: =CountRows(Filter('[LME] Workload', TypeTache.Value = "À trier", Statut.Value <> "Terminé")) & Char(10) & "À trier"
-                        Size: =18
-                        FontWeight: =FontWeight.Bold
+                        X: =Parent.Width - 124
+                        Y: =2
+                        Width: =124
+                        Height: =40
+                        Text: ="Actualiser"
                         Fill: =RGBA(255, 255, 255, 1)
                         Color: =RGBA(16, 26, 46, 1)
-                        PaddingLeft: =14
-                        X: =816
-                        Y: =0
-                        Width: =256
-                        Height: =96
-            - cntDashProjets:
+                        OnSelect: |-
+                          =IfError(
+                            Refresh('[LME] Workload'),
+                            Notify("Refresh(Workload) : " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                            Refresh('[LME] Etapes'),
+                            Notify("Refresh(Etapes) : " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                            Refresh('[LME] Projets'),
+                            Notify("Refresh(Projets) : " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                            ClearCollect(colWL, '[LME] Workload'),
+                            Notify("ClearCollect(colWL) : " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                            ClearCollect(colEtapes, '[LME] Etapes'),
+                            Notify("ClearCollect(colEtapes) : " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                            ClearCollect(colPct,
+                              ForAll('[LME] Workload' As w,
+                                {
+                                  ID: w.ID,
+                                  ProjetId: w.Projet.Id,
+                                  TypeT: w.TypeTache.Value,
+                                  pct: If(w.Statut.Value = "Terminé", 100,
+                                    With({e: Filter(colEtapes, Tache.Id = w.ID)},
+                                      If(CountRows(e) = 0, 0, Round(100 * CountRows(Filter(e, Fait)) / CountRows(e), 0))))
+                                }
+                              )
+                            ),
+                            Notify("ClearCollect(colPct) : " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                            Set(varGlobal, Round(IfError(Average(colPct, pct), 0), 0)),
+                            Notify("Set(varGlobal) : " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                            Set(varNext, First(SortByColumns(Filter('[LME] Workload', Statut.Value <> "Terminé", TypeTache.Value <> "À trier"), "Echeance", SortOrder.Ascending))),
+                            Notify("Set(varNext) : " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                            ClearCollect(colTypes,
+                              ForAll(["Support", "Amélioration", "Monthly eng", "Projet"] As t,
+                                {
+                                  T: t.Value,
+                                  n: CountRows(Filter('[LME] Workload', TypeTache.Value = t.Value)),
+                                  pct: Round(IfError(Average(Filter(colPct, TypeT = t.Value), pct), 0), 0)
+                                }
+                              )
+                            ),
+                            Notify("ClearCollect(colTypes) : " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                            ClearCollect(colProjCount,
+                              ForAll(Sequence(CountRows('[LME] Projets')),
+                                With({p: Index('[LME] Projets', Value)},
+                                  {
+                                    k: Value,
+                                    name: p.Title,
+                                    n: CountRows(Filter('[LME] Workload', Projet.Id = p.ID, Statut.Value <> "Terminé"))
+                                  }
+                                )
+                              )
+                            ),
+                            Notify("ClearCollect(colProjCount) : " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                            Set(varTotalOuv, Sum(colProjCount, n)),
+                            Notify("Set(varTotalOuv) : " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                            ClearCollect(colDonut,
+                              ForAll(colProjCount As c,
+                                {
+                                  k: c.k,
+                                  name: c.name,
+                                  n: c.n,
+                                  share: Round(100 * c.n / Max(varTotalOuv, 1), 0),
+                                  start: Round(100 * Sum(Filter(colProjCount, k < c.k), n) / Max(varTotalOuv, 1), 0)
+                                }
+                              )
+                            ),
+                            Notify("ClearCollect(colDonut) : " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                            ClearCollect(colSem,
+                              ForAll(Sequence(8, 0),
+                                {
+                                  i: Value,
+                                  n: CountRows(Filter('[LME] Workload', Statut.Value = "Terminé",
+                                       TermineLe >= DateAdd(Today(), 1 - 7 * (8 - Value), TimeUnit.Days),
+                                       TermineLe < DateAdd(Today(), 1 - 7 * (7 - Value), TimeUnit.Days)))
+                                }
+                              )
+                            ),
+                            Notify("ClearCollect(colSem) : " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                            If(!IsBlank(varSel), Set(varSel, LookUp('[LME] Workload', ID = varSel.ID))),
+                            Notify("mise à jour de varSel : " & FirstError.Message, NotificationType.Error)
+                          )
+                        Size: =13
+                        Font: =Font.'Segoe UI'
+            - cntDash:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
                 Properties:
-                  Height: =236
-                  Width: =460
-                  X: =0
-                  Y: =172
+                  X: =20
+                  Y: =72
+                  Width: =Parent.Width - 40
+                  Height: =Parent.Height - 88
+                  Visible: =Coalesce(varVue, "dash") = "dash"
                 Children:
-                  - recCardProj:
-                      Control: Rectangle@2.3.0
-                      Properties:
-                        Fill: =RGBA(255, 255, 255, 1)
-                        X: =0
-                        Y: =0
-                        Width: =460
-                        Height: =236
-                  - lblHProj:
+                  - lblTitreDash:
                       Control: Label@2.5.1
                       Properties:
-                        Text: ="Avancement par projet"
-                        FontWeight: =FontWeight.Semibold
+                        X: =0
+                        Y: =0
+                        Width: =Parent.Width
+                        Height: =40
+                        Text: ="Tableau de bord"
+                        Size: =26
+                        FontWeight: =FontWeight.Bold
                         Color: =RGBA(16, 26, 46, 1)
-                        X: =16
-                        Y: =8
-                        Width: =300
-                        Height: =26
-                  - galProjets:
+                        Font: =Font.'Segoe UI'
+                  - cntDashKpi:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        X: =0
+                        Y: =48
+                        Width: =Parent.Width
+                        Height: =92
+                      Children:
+                        - cntKpiOuvertes:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =0
+                              Y: =0
+                              Width: =(Parent.Width - 36) / 4
+                              Height: =92
+                              Fill: =RGBA(21, 62, 170, 1)
+                            Children:
+                              - lblKpiOuvertesV:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: =CountRows(Filter('[LME] Workload', Statut.Value <> "Terminé"))
+                                    Size: =32
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    X: =16
+                                    Y: =10
+                                    Width: =Parent.Width - 32
+                                    Height: =46
+                                    Font: =Font.'Segoe UI'
+                                    FontWeight: =FontWeight.Bold
+                              - lblKpiOuvertesC:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: ="Tâches ouvertes"
+                                    Size: =13
+                                    Color: =RGBA(255, 255, 255, 0.85)
+                                    X: =16
+                                    Y: =58
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Font: =Font.'Segoe UI'
+                        - cntKpiRetard:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =(Parent.Width - 36) / 4 * 1 + 12
+                              Y: =0
+                              Width: =(Parent.Width - 36) / 4
+                              Height: =92
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblKpiRetardV:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: =CountRows(Filter('[LME] Workload', Statut.Value <> "Terminé", Echeance < Today()))
+                                    Size: =32
+                                    Color: =RGBA(192, 51, 43, 1)
+                                    X: =16
+                                    Y: =10
+                                    Width: =Parent.Width - 32
+                                    Height: =46
+                                    Font: =Font.'Segoe UI'
+                                    FontWeight: =FontWeight.Bold
+                              - lblKpiRetardC:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: ="En retard"
+                                    Size: =13
+                                    Color: =RGBA(100, 114, 138, 1)
+                                    X: =16
+                                    Y: =58
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Font: =Font.'Segoe UI'
+                        - cntKpiSemaine:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =(Parent.Width - 36) / 4 * 2 + 24
+                              Y: =0
+                              Width: =(Parent.Width - 36) / 4
+                              Height: =92
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblKpiSemaineV:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: =CountRows(Filter('[LME] Workload', Statut.Value = "Terminé", TermineLe >= DateAdd(Today(), -6, TimeUnit.Days)))
+                                    Size: =32
+                                    Color: =RGBA(19, 122, 74, 1)
+                                    X: =16
+                                    Y: =10
+                                    Width: =Parent.Width - 32
+                                    Height: =46
+                                    Font: =Font.'Segoe UI'
+                                    FontWeight: =FontWeight.Bold
+                              - lblKpiSemaineC:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: ="Terminées sur 7 jours"
+                                    Size: =13
+                                    Color: =RGBA(100, 114, 138, 1)
+                                    X: =16
+                                    Y: =58
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Font: =Font.'Segoe UI'
+                        - cntKpiTrier:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =(Parent.Width - 36) / 4 * 3 + 36
+                              Y: =0
+                              Width: =(Parent.Width - 36) / 4
+                              Height: =92
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblKpiTrierV:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: =CountRows(Filter('[LME] Workload', TypeTache.Value = "À trier", Statut.Value <> "Terminé"))
+                                    Size: =32
+                                    Color: =RGBA(16, 26, 46, 1)
+                                    X: =16
+                                    Y: =10
+                                    Width: =Parent.Width - 32
+                                    Height: =46
+                                    Font: =Font.'Segoe UI'
+                                    FontWeight: =FontWeight.Bold
+                              - lblKpiTrierC:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: ="À trier"
+                                    Size: =13
+                                    Color: =RGBA(100, 114, 138, 1)
+                                    X: =16
+                                    Y: =58
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Font: =Font.'Segoe UI'
+                  - cntDashRow2:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        X: =0
+                        Y: =152
+                        Width: =Parent.Width
+                        Height: =(Parent.Height - 164) * 0.5
+                      Children:
+                        - cntDashProjets:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =0
+                              Y: =0
+                              Width: =(Parent.Width - 24) * 0.38
+                              Height: =Parent.Height
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblHProj:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =16
+                                    Y: =12
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Text: ="Avancement par projet"
+                                    FontWeight: =FontWeight.Semibold
+                                    Color: =RGBA(16, 26, 46, 1)
+                                    Size: =15
+                                    Font: =Font.'Segoe UI'
+                              - galProjets:
+                                  Control: Gallery@2.15.0
+                                  Variant: Horizontal
+                                  Properties:
+                                    X: =8
+                                    Y: =44
+                                    Width: =Parent.Width - 16
+                                    Height: =Parent.Height - 52
+                                    Items: =Filter('[LME] Projets', StatutProjet.Value = "Actif")
+                                    TemplateSize: =Min(190, Self.Width / Max(CountRows(Filter('[LME] Projets', StatutProjet.Value = "Actif")), 1))
+                                    TemplatePadding: =0
+                                  Children:
+                                    - lblPctProj:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          X: =0
+                                          Y: =0
+                                          Width: =Parent.TemplateWidth
+                                          Height: =26
+                                          Text: =Round(IfError(Average(Filter(colPct, ProjetId = ThisItem.ID), pct), 0), 0) & " %"
+                                          Align: =Align.Center
+                                          FontWeight: =FontWeight.Semibold
+                                          Color: =RGBA(16, 26, 46, 1)
+                                          Size: =14
+                                          Font: =Font.'Segoe UI'
+                                    - recTube:
+                                        Control: Rectangle@2.3.0
+                                        Properties:
+                                          X: =Parent.TemplateWidth / 2 - 24
+                                          Y: =32
+                                          Width: =48
+                                          Height: =Max(20, Parent.TemplateHeight - 82)
+                                          Fill: =RGBA(238, 241, 247, 1)
+                                    - recFillProj:
+                                        Control: Rectangle@2.3.0
+                                        Properties:
+                                          X: =Parent.TemplateWidth / 2 - 24
+                                          Y: =32 + Max(20, Parent.TemplateHeight - 82) - Self.Height
+                                          Width: =48
+                                          Height: =Max(8, Max(20, Parent.TemplateHeight - 82) * IfError(Average(Filter(colPct, ProjetId = ThisItem.ID), pct), 0) / 100)
+                                          Fill: =RGBA(31, 79, 216, 1)
+                                    - lblNomProj:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          X: =0
+                                          Y: =Parent.TemplateHeight - 46
+                                          Width: =Parent.TemplateWidth
+                                          Height: =42
+                                          Text: =ThisItem.Title
+                                          Align: =Align.Center
+                                          Size: =12
+                                          Color: =RGBA(100, 114, 138, 1)
+                                          Font: =Font.'Segoe UI'
+                        - cntDashNext:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =(Parent.Width - 24) * 0.38 + 12
+                              Y: =0
+                              Width: =(Parent.Width - 24) * 0.3
+                              Height: =Parent.Height
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblHNext:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =16
+                                    Y: =12
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Text: ="Prochaine échéance"
+                                    FontWeight: =FontWeight.Semibold
+                                    Color: =RGBA(16, 26, 46, 1)
+                                    Size: =15
+                                    Font: =Font.'Segoe UI'
+                              - lblNextTitre:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =16
+                                    Y: =46
+                                    Width: =Parent.Width - 32
+                                    Height: =66
+                                    Text: =Coalesce(varNext.Title, "Rien à échéance")
+                                    Size: =16
+                                    FontWeight: =FontWeight.Semibold
+                                    Color: =RGBA(31, 79, 216, 1)
+                                    Font: =Font.'Segoe UI'
+                              - lblNextMeta:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =16
+                                    Y: =116
+                                    Width: =Parent.Width - 32
+                                    Height: =24
+                                    Text: =If(IsBlank(varNext), "", varNext.TypeTache.Value & " · " & varNext.Source.Value & " · " & Text(varNext.Echeance, "dd/mm"))
+                                    Size: =12
+                                    Color: =RGBA(100, 114, 138, 1)
+                                    Font: =Font.'Segoe UI'
+                              - btnNextTerminer:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    X: =16
+                                    Y: =Parent.Height - 100
+                                    Width: =Parent.Width - 32
+                                    Height: =42
+                                    Text: ="Terminer partout"
+                                    Fill: =RGBA(31, 79, 216, 1)
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    Visible: =!IsBlank(varNext)
+                                    OnSelect: |-
+                                      =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varNext.ID),
+                                        {Statut: {Value: "Terminé"}, TermineLe: Now()});
+                                      Select(btnRefresh);
+                                      Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success)
+                                    Size: =13
+                                    Font: =Font.'Segoe UI'
+                              - btnNextOuvrir:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    X: =16
+                                    Y: =Parent.Height - 52
+                                    Width: =Parent.Width - 32
+                                    Height: =38
+                                    Text: ="Ouvrir le détail"
+                                    Fill: =RGBA(255, 255, 255, 1)
+                                    Color: =RGBA(16, 26, 46, 1)
+                                    Visible: =!IsBlank(varNext)
+                                    OnSelect: =Set(varSel, varNext)
+                                    Size: =13
+                                    Font: =Font.'Segoe UI'
+                        - cntDashListe:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =(Parent.Width - 24) * 0.68 + 24
+                              Y: =0
+                              Width: =(Parent.Width - 24) * 0.32
+                              Height: =Parent.Height
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblHList:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =16
+                                    Y: =12
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Text: ="À traiter"
+                                    FontWeight: =FontWeight.Semibold
+                                    Color: =RGBA(16, 26, 46, 1)
+                                    Size: =15
+                                    Font: =Font.'Segoe UI'
+                              - galATraiter:
+                                  Control: Gallery@2.15.0
+                                  Variant: Vertical
+                                  Properties:
+                                    X: =8
+                                    Y: =44
+                                    Width: =Parent.Width - 16
+                                    Height: =Parent.Height - 52
+                                    Items: =FirstN(SortByColumns(Filter('[LME] Workload', Statut.Value <> "Terminé"), "Echeance", SortOrder.Ascending), 5)
+                                    TemplateSize: =54
+                                    TemplatePadding: =0
+                                    OnSelect: =Set(varSel, ThisItem)
+                                  Children:
+                                    - lblATTitre:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          X: =8
+                                          Y: =4
+                                          Width: =Parent.TemplateWidth - 76
+                                          Height: =24
+                                          Text: =ThisItem.Title
+                                          Size: =13
+                                          Color: =RGBA(16, 26, 46, 1)
+                                          Font: =Font.'Segoe UI'
+                                    - lblATMeta:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          X: =8
+                                          Y: =29
+                                          Width: =Parent.TemplateWidth - 76
+                                          Height: =20
+                                          Text: =ThisItem.TypeTache.Value
+                                          Size: =11
+                                          Color: =Coalesce(LookUp(colTC, T = ThisItem.TypeTache.Value, C), RGBA(107, 119, 140, 1))
+                                          Font: =Font.'Segoe UI'
+                                    - lblATDue:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          X: =Parent.TemplateWidth - 66
+                                          Y: =14
+                                          Width: =58
+                                          Height: =24
+                                          Text: =Text(ThisItem.Echeance, "dd/mm")
+                                          Align: =Align.Right
+                                          Size: =12
+                                          Color: =If(ThisItem.Echeance < Today(), RGBA(192, 51, 43, 1), RGBA(16, 26, 46, 1))
+                                          Font: =Font.'Segoe UI'
+                  - cntDashRow3:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        X: =0
+                        Y: =152 + (Parent.Height - 164) * 0.5 + 12
+                        Width: =Parent.Width
+                        Height: =(Parent.Height - 164) * 0.5
+                      Children:
+                        - cntDashType:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =0
+                              Y: =0
+                              Width: =(Parent.Width - 24) * 0.4
+                              Height: =Parent.Height
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblHType:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =16
+                                    Y: =12
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Text: ="Avancement par type"
+                                    FontWeight: =FontWeight.Semibold
+                                    Color: =RGBA(16, 26, 46, 1)
+                                    Size: =15
+                                    Font: =Font.'Segoe UI'
+                              - galParType:
+                                  Control: Gallery@2.15.0
+                                  Variant: Vertical
+                                  Properties:
+                                    X: =8
+                                    Y: =44
+                                    Width: =Parent.Width - 16
+                                    Height: =Parent.Height - 52
+                                    Items: =colTypes
+                                    TemplateSize: =Max(44, Self.Height / 4)
+                                    TemplatePadding: =0
+                                  Children:
+                                    - lblTypeNom:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          X: =8
+                                          Y: =2
+                                          Width: =Parent.TemplateWidth - 100
+                                          Height: =26
+                                          Text: =ThisItem.T & " · " & ThisItem.n
+                                          Size: =13
+                                          Color: =RGBA(16, 26, 46, 1)
+                                          Font: =Font.'Segoe UI'
+                                    - lblTypePct:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          X: =Parent.TemplateWidth - 90
+                                          Y: =2
+                                          Width: =82
+                                          Height: =26
+                                          Text: =ThisItem.pct & " %"
+                                          Align: =Align.Right
+                                          Size: =13
+                                          FontWeight: =FontWeight.Semibold
+                                          Color: =RGBA(16, 26, 46, 1)
+                                          Font: =Font.'Segoe UI'
+                                    - recTypeBack:
+                                        Control: Rectangle@2.3.0
+                                        Properties:
+                                          X: =8
+                                          Y: =32
+                                          Width: =Parent.TemplateWidth - 16
+                                          Height: =8
+                                          Fill: =RGBA(238, 241, 247, 1)
+                                    - recTypeFill:
+                                        Control: Rectangle@2.3.0
+                                        Properties:
+                                          X: =8
+                                          Y: =32
+                                          Width: =(Parent.TemplateWidth - 16) * ThisItem.pct / 100
+                                          Height: =8
+                                          Fill: =Coalesce(LookUp(colTC, T = ThisItem.T, C), RGBA(31, 79, 216, 1))
+                        - cntDashGauge:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =(Parent.Width - 24) * 0.40 + 12
+                              Y: =0
+                              Width: =(Parent.Width - 24) * 0.3
+                              Height: =Parent.Height
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblHGauge:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =16
+                                    Y: =12
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Text: ="Avancement global"
+                                    FontWeight: =FontWeight.Semibold
+                                    Color: =RGBA(16, 26, 46, 1)
+                                    Size: =15
+                                    Font: =Font.'Segoe UI'
+                              - imgGauge:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    X: =16
+                                    Y: =44
+                                    Width: =Parent.Width - 32
+                                    Height: =Parent.Height - 56
+                                    Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 74'><path d='M10 64 A50 50 0 0 1 110 64' fill='none' stroke='#eef1f7' stroke-width='12' stroke-linecap='round'/><path d='M10 64 A50 50 0 0 1 110 64' pathLength='100' fill='none' stroke='#1f4fd8' stroke-width='12' stroke-linecap='" & If(varGlobal > 0, "round", "butt") & "' stroke-dasharray='" & varGlobal & " 100'/><text x='60' y='58' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='22' font-weight='700' fill='#101a2e'>" & varGlobal & "%</text></svg>")
+                        - cntDashDark:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =(Parent.Width - 24) * 0.70 + 24
+                              Y: =0
+                              Width: =(Parent.Width - 24) * 0.3
+                              Height: =Parent.Height
+                              Fill: =RGBA(12, 29, 74, 1)
+                            Children:
+                              - lblDark:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =20
+                                    Y: =20
+                                    Width: =Parent.Width - 40
+                                    Height: =Parent.Height - 40
+                                    Text: =CountRows(Filter('[LME] Workload', Statut.Value = "Terminé")) & " / " & CountRows('[LME] Workload') & Char(10) & "tâches clôturées partout"
+                                    Size: =24
+                                    FontWeight: =FontWeight.Bold
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    Font: =Font.'Segoe UI'
+            - cntTasks:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  X: =20
+                  Y: =72
+                  Width: =Parent.Width - 40
+                  Height: =Parent.Height - 88
+                  Visible: =varVue = "tasks"
+                Children:
+                  - lblTitreTasks:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =0
+                        Y: =0
+                        Width: =Parent.Width
+                        Height: =40
+                        Text: ="Tâches"
+                        Size: =26
+                        FontWeight: =FontWeight.Bold
+                        Color: =RGBA(16, 26, 46, 1)
+                        Font: =Font.'Segoe UI'
+                  - cntTasksFiltres:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        X: =0
+                        Y: =48
+                        Width: =Parent.Width
+                        Height: =36
+                      Children:
+                        - btnChipAll:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              X: =0
+                              Y: =0
+                              Width: =120
+                              Height: =36
+                              Text: ="Toutes"
+                              Fill: =If(IsBlank(varType), RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+                              Color: =If(IsBlank(varType), RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+                              OnSelect: =Set(varType, Blank())
+                              Size: =13
+                              Font: =Font.'Segoe UI'
+                        - btnChipSupport:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              X: =128
+                              Y: =0
+                              Width: =120
+                              Height: =36
+                              Text: ="Support"
+                              Fill: =If(varType = "Support", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+                              Color: =If(varType = "Support", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+                              OnSelect: =Set(varType, If(varType = "Support", Blank(), "Support"))
+                              Size: =13
+                              Font: =Font.'Segoe UI'
+                        - btnChipAmel:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              X: =256
+                              Y: =0
+                              Width: =120
+                              Height: =36
+                              Text: ="Amélioration"
+                              Fill: =If(varType = "Amélioration", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+                              Color: =If(varType = "Amélioration", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+                              OnSelect: =Set(varType, If(varType = "Amélioration", Blank(), "Amélioration"))
+                              Size: =13
+                              Font: =Font.'Segoe UI'
+                        - btnChipMonthly:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              X: =384
+                              Y: =0
+                              Width: =120
+                              Height: =36
+                              Text: ="Monthly eng"
+                              Fill: =If(varType = "Monthly eng", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+                              Color: =If(varType = "Monthly eng", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+                              OnSelect: =Set(varType, If(varType = "Monthly eng", Blank(), "Monthly eng"))
+                              Size: =13
+                              Font: =Font.'Segoe UI'
+                        - btnChipProjet:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              X: =512
+                              Y: =0
+                              Width: =120
+                              Height: =36
+                              Text: ="Projet"
+                              Fill: =If(varType = "Projet", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+                              Color: =If(varType = "Projet", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+                              OnSelect: =Set(varType, If(varType = "Projet", Blank(), "Projet"))
+                              Size: =13
+                              Font: =Font.'Segoe UI'
+                  - galCols:
                       Control: Gallery@2.15.0
                       Variant: Horizontal
                       Properties:
-                        Items: =Filter('[LME] Projets', StatutProjet.Value = "Actif")
-                        X: =8
-                        Y: =36
-                        Width: =444
-                        Height: =196
-                        TemplateSize: =148
-                        TemplatePadding: =0
-                      Children:
-                        - lblPctProj:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =Round(IfError(Average(Filter(colPct, ProjetId = ThisItem.ID), pct), 0), 0) & " %"
-                              Align: =Align.Center
-                              FontWeight: =FontWeight.Semibold
-                              Color: =RGBA(16, 26, 46, 1)
-                              X: =0
-                              Y: =0
-                              Width: =Parent.TemplateWidth
-                              Height: =22
-                        - recTube:
-                            Control: Rectangle@2.3.0
-                            Properties:
-                              Fill: =RGBA(238, 241, 247, 1)
-                              X: =Parent.TemplateWidth / 2 - 22
-                              Y: =26
-                              Width: =44
-                              Height: =116
-                        - recFillProj:
-                            Control: Rectangle@2.3.0
-                            Properties:
-                              Fill: =RGBA(31, 79, 216, 1)
-                              X: =Parent.TemplateWidth / 2 - 22
-                              Y: =26 + 116 - Self.Height
-                              Width: =44
-                              Height: =Max(8, 116 * IfError(Average(Filter(colPct, ProjetId = ThisItem.ID), pct), 0) / 100)
-                        - lblNomProj:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =ThisItem.Title
-                              Align: =Align.Center
-                              Size: =11
-                              Color: =RGBA(100, 114, 138, 1)
-                              X: =0
-                              Y: =146
-                              Width: =Parent.TemplateWidth
-                              Height: =40
-            - cntDashNext:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  Height: =236
-                  Width: =300
-                  X: =476
-                  Y: =172
-                Children:
-                  - recCardNext:
-                      Control: Rectangle@2.3.0
-                      Properties:
-                        Fill: =RGBA(255, 255, 255, 1)
                         X: =0
-                        Y: =0
-                        Width: =300
-                        Height: =236
-                  - lblHNext:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: ="Prochaine échéance"
-                        FontWeight: =FontWeight.Semibold
-                        Color: =RGBA(16, 26, 46, 1)
-                        X: =16
-                        Y: =8
-                        Width: =270
-                        Height: =26
-                  - lblNextTitre:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: =Coalesce(varNext.Title, "Rien à échéance")
-                        Size: =15
-                        FontWeight: =FontWeight.Semibold
-                        Color: =RGBA(31, 79, 216, 1)
-                        X: =16
-                        Y: =38
-                        Width: =268
-                        Height: =62
-                  - lblNextMeta:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: =If(IsBlank(varNext), "", varNext.TypeTache.Value & " · " & varNext.Source.Value & " · " & Text(varNext.Echeance, "dd/mm"))
-                        Size: =11
-                        Color: =RGBA(100, 114, 138, 1)
-                        X: =16
-                        Y: =102
-                        Width: =268
-                        Height: =22
-                  - btnNextTerminer:
-                      Control: Classic/Button@2.2.0
-                      Properties:
-                        Text: ="Terminer partout"
-                        Fill: =RGBA(31, 79, 216, 1)
-                        Color: =RGBA(255, 255, 255, 1)
-                        Visible: =!IsBlank(varNext)
-                        X: =16
-                        Y: =138
-                        Width: =268
-                        Height: =40
-                        OnSelect: |-
-                          =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varNext.ID),
-                            {Statut: {Value: "Terminé"}, TermineLe: Now()});
-                          Select(btnRefresh);
-                          Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success)
-                  - btnNextOuvrir:
-                      Control: Classic/Button@2.2.0
-                      Properties:
-                        Text: ="Ouvrir le détail"
-                        Fill: =RGBA(255, 255, 255, 1)
-                        Color: =RGBA(16, 26, 46, 1)
-                        Visible: =!IsBlank(varNext)
-                        X: =16
-                        Y: =186
-                        Width: =268
-                        Height: =36
-                        OnSelect: =Set(varSel, varNext)
-            - cntDashListe:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  Height: =236
-                  Width: =296
-                  X: =792
-                  Y: =172
-                Children:
-                  - recCardList:
-                      Control: Rectangle@2.3.0
-                      Properties:
-                        Fill: =RGBA(255, 255, 255, 1)
-                        X: =0
-                        Y: =0
-                        Width: =296
-                        Height: =236
-                  - lblHList:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: ="À traiter"
-                        FontWeight: =FontWeight.Semibold
-                        Color: =RGBA(16, 26, 46, 1)
-                        X: =16
-                        Y: =8
-                        Width: =260
-                        Height: =26
-                  - galATraiter:
-                      Control: Gallery@2.15.0
-                      Variant: Vertical
-                      Properties:
-                        Items: =FirstN(SortByColumns(Filter('[LME] Workload', Statut.Value <> "Terminé"), "Echeance", SortOrder.Ascending), 5)
-                        X: =8
-                        Y: =36
-                        Width: =280
-                        Height: =196
-                        TemplateSize: =39
-                        TemplatePadding: =0
-                        OnSelect: =Set(varSel, ThisItem)
-                      Children:
-                        - lblATTitre:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =ThisItem.Title
-                              Size: =12
-                              Color: =RGBA(16, 26, 46, 1)
-                              X: =8
-                              Y: =0
-                              Width: =Parent.TemplateWidth - 64
-                              Height: =22
-                        - lblATMeta:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =ThisItem.TypeTache.Value
-                              Size: =10
-                              Color: =Coalesce(LookUp(colTC, T = ThisItem.TypeTache.Value, C), RGBA(107, 119, 140, 1))
-                              X: =8
-                              Y: =20
-                              Width: =Parent.TemplateWidth - 64
-                              Height: =18
-                        - lblATDue:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =Text(ThisItem.Echeance, "dd/mm")
-                              Align: =Align.Right
-                              Size: =11
-                              Color: =If(ThisItem.Echeance < Today(), RGBA(192, 51, 43, 1), RGBA(16, 26, 46, 1))
-                              X: =Parent.TemplateWidth - 56
-                              Y: =8
-                              Width: =50
-                              Height: =22
-            - cntDashType:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  Height: =260
-                  Width: =440
-                  X: =0
-                  Y: =424
-                Children:
-                  - recCardType:
-                      Control: Rectangle@2.3.0
-                      Properties:
-                        Fill: =RGBA(255, 255, 255, 1)
-                        X: =0
-                        Y: =0
-                        Width: =440
-                        Height: =260
-                  - lblHType:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: ="Avancement par type"
-                        FontWeight: =FontWeight.Semibold
-                        Color: =RGBA(16, 26, 46, 1)
-                        X: =16
-                        Y: =8
-                        Width: =300
-                        Height: =26
-                  - galParType:
-                      Control: Gallery@2.15.0
-                      Variant: Vertical
-                      Properties:
-                        Items: =colTypes
-                        X: =8
-                        Y: =38
-                        Width: =424
-                        Height: =216
-                        TemplateSize: =52
-                        TemplatePadding: =0
-                      Children:
-                        - lblTypeNom:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =ThisItem.T & " · " & ThisItem.n
-                              Size: =12
-                              Color: =RGBA(16, 26, 46, 1)
-                              X: =8
-                              Y: =2
-                              Width: =Parent.TemplateWidth - 80
-                              Height: =24
-                        - lblTypePct:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =ThisItem.pct & " %"
-                              Align: =Align.Right
-                              Size: =12
-                              FontWeight: =FontWeight.Semibold
-                              Color: =RGBA(16, 26, 46, 1)
-                              X: =Parent.TemplateWidth - 70
-                              Y: =2
-                              Width: =62
-                              Height: =24
-                        - recTypeBack:
-                            Control: Rectangle@2.3.0
-                            Properties:
-                              Fill: =RGBA(238, 241, 247, 1)
-                              X: =8
-                              Y: =30
-                              Width: =Parent.TemplateWidth - 16
-                              Height: =8
-                        - recTypeFill:
-                            Control: Rectangle@2.3.0
-                            Properties:
-                              Fill: =Coalesce(LookUp(colTC, T = ThisItem.T, C), RGBA(31, 79, 216, 1))
-                              X: =8
-                              Y: =30
-                              Width: =(Parent.TemplateWidth - 16) * ThisItem.pct / 100
-                              Height: =8
-            - cntDashGauge:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  Height: =260
-                  Width: =300
-                  X: =456
-                  Y: =424
-                Children:
-                  - recCardGauge:
-                      Control: Rectangle@2.3.0
-                      Properties:
-                        Fill: =RGBA(255, 255, 255, 1)
-                        X: =0
-                        Y: =0
-                        Width: =300
-                        Height: =260
-                  - lblHGauge:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: ="Avancement global"
-                        FontWeight: =FontWeight.Semibold
-                        Color: =RGBA(16, 26, 46, 1)
-                        X: =16
-                        Y: =8
-                        Width: =260
-                        Height: =26
-                  - imgGauge:
-                      Control: Image@2.2.3
-                      Properties:
-                        Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 74'><path d='M10 64 A50 50 0 0 1 110 64' fill='none' stroke='#eef1f7' stroke-width='12' stroke-linecap='round'/><path d='M10 64 A50 50 0 0 1 110 64' pathLength='100' fill='none' stroke='#1f4fd8' stroke-width='12' stroke-linecap='round' stroke-dasharray='" & varGlobal & " 100'/><text x='60' y='58' text-anchor='middle' font-size='22' font-weight='700' fill='#101a2e'>" & varGlobal & "%</text></svg>")
-                        X: =16
-                        Y: =52
-                        Width: =268
-                        Height: =180
-            - cntDashDark:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  Height: =260
-                  Width: =316
-                  X: =772
-                  Y: =424
-                Children:
-                  - recCardDark:
-                      Control: Rectangle@2.3.0
-                      Properties:
-                        Fill: =RGBA(12, 29, 74, 1)
-                        X: =0
-                        Y: =0
-                        Width: =316
-                        Height: =260
-                  - lblDark:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: =CountRows(Filter('[LME] Workload', Statut.Value = "Terminé")) & " / " & CountRows('[LME] Workload') & Char(10) & "tâches clôturées partout"
-                        Size: =20
-                        FontWeight: =FontWeight.Bold
-                        Color: =RGBA(255, 255, 255, 1)
-                        X: =16
-                        Y: =16
-                        Width: =284
-                        Height: =120
-      - cntTasks:
-          Control: GroupContainer@1.5.0
-          Variant: ManualLayout
-          Properties:
-            Height: =Parent.Height - 64
-            Visible: =varVue = "tasks"
-            Width: =1088
-            X: =254
-            Y: =64
-          Children:
-            - lblTitreTasks:
-                Control: Label@2.5.1
-                Properties:
-                  Text: ="Tâches"
-                  Size: =24
-                  FontWeight: =FontWeight.Bold
-                  Color: =RGBA(16, 26, 46, 1)
-                  X: =0
-                  Y: =8
-                  Width: =300
-                  Height: =44
-            - cntTasksFiltres:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  Height: =34
-                  Width: =572
-                  X: =0
-                  Y: =56
-                Children:
-                  - btnChipAll:
-                      Control: Classic/Button@2.2.0
-                      Properties:
-                        Text: ="Toutes"
-                        Fill: =If(IsBlank(varType), RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
-                        Color: =If(IsBlank(varType), RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
-                        X: =0
-                        Y: =0
-                        Width: =100
-                        Height: =34
-                        OnSelect: =Set(varType, Blank())
-                  - btnChipSupport:
-                      Control: Classic/Button@2.2.0
-                      Properties:
-                        Text: ="Support"
-                        Fill: =If(varType = "Support", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
-                        Color: =If(varType = "Support", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
-                        X: =108
-                        Y: =0
-                        Width: =100
-                        Height: =34
-                        OnSelect: =Set(varType, If(varType = "Support", Blank(), "Support"))
-                  - btnChipAmel:
-                      Control: Classic/Button@2.2.0
-                      Properties:
-                        Text: ="Amélioration"
-                        Fill: =If(varType = "Amélioration", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
-                        Color: =If(varType = "Amélioration", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
-                        X: =216
-                        Y: =0
-                        Width: =120
-                        Height: =34
-                        OnSelect: =Set(varType, If(varType = "Amélioration", Blank(), "Amélioration"))
-                  - btnChipMonthly:
-                      Control: Classic/Button@2.2.0
-                      Properties:
-                        Text: ="Monthly eng"
-                        Fill: =If(varType = "Monthly eng", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
-                        Color: =If(varType = "Monthly eng", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
-                        X: =344
-                        Y: =0
-                        Width: =120
-                        Height: =34
-                        OnSelect: =Set(varType, If(varType = "Monthly eng", Blank(), "Monthly eng"))
-                  - btnChipProjet:
-                      Control: Classic/Button@2.2.0
-                      Properties:
-                        Text: ="Projet"
-                        Fill: =If(varType = "Projet", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
-                        Color: =If(varType = "Projet", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
-                        X: =472
-                        Y: =0
-                        Width: =100
-                        Height: =34
-                        OnSelect: =Set(varType, If(varType = "Projet", Blank(), "Projet"))
-            - galCols:
-                Control: Gallery@2.15.0
-                Variant: Horizontal
-                Properties:
-                  Items: |-
-                    =Table({S: "À faire"}, {S: "En cours"}, {S: "Bloqué"}, {S: "Terminé"})
-                  X: =0
-                  Y: =100
-                  Width: =1088
-                  Height: =584
-                  TemplateSize: =272
-                  TemplatePadding: =4
-                Children:
-                  - recCol:
-                      Control: Rectangle@2.3.0
-                      Properties:
-                        Fill: =RGBA(255, 255, 255, 1)
-                        X: =0
-                        Y: =0
-                        Width: =Parent.TemplateWidth
-                        Height: =Parent.TemplateHeight
-                  - lblColHead:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: =ThisItem.S & " (" & CountRows(Filter('[LME] Workload', Statut.Value = ThisItem.S, TypeTache.Value <> "À trier")) & ")"
-                        FontWeight: =FontWeight.Semibold
-                        Color: =Switch(ThisItem.S, "En cours", RGBA(31, 79, 216, 1), "Bloqué", RGBA(192, 51, 43, 1), "Terminé", RGBA(19, 122, 74, 1), RGBA(100, 114, 138, 1))
-                        X: =12
-                        Y: =8
-                        Width: =Parent.TemplateWidth - 24
-                        Height: =28
-                  - galCartes:
-                      Control: Gallery@2.15.0
-                      Variant: Vertical
-                      Properties:
+                        Y: =94
+                        Width: =Parent.Width
+                        Height: =Parent.Height - 94
                         Items: |-
-                          =SortByColumns(
-                            Filter('[LME] Workload',
-                              Statut.Value = ThisItem.S,
-                              TypeTache.Value <> "À trier",
-                              IsBlank(varType) || TypeTache.Value = varType,
-                              IsBlank(txtRecherche.Text) || txtRecherche.Text in Title
-                            ),
-                            "Echeance", SortOrder.Ascending
-                          )
-                        X: =6
-                        Y: =40
-                        Width: =Parent.TemplateWidth - 12
-                        Height: =Parent.TemplateHeight - 48
-                        TemplateSize: =118
-                        TemplatePadding: =0
-                        OnSelect: =Set(varSel, ThisItem)
+                          =Table({S: "À faire"}, {S: "En cours"}, {S: "Bloqué"}, {S: "Terminé"})
+                        TemplateSize: =Self.Width / 4
+                        TemplatePadding: =6
                       Children:
-                        - recCarte:
+                        - recCol:
                             Control: Rectangle@2.3.0
                             Properties:
-                              Fill: =RGBA(244, 246, 250, 1)
                               X: =0
                               Y: =0
                               Width: =Parent.TemplateWidth
-                              Height: =Parent.TemplateHeight - 8
-                        - lblCType:
+                              Height: =Parent.TemplateHeight
+                              Fill: =RGBA(255, 255, 255, 1)
+                        - lblColHead:
                             Control: Label@2.5.1
                             Properties:
-                              Text: =ThisItem.TypeTache.Value
-                              Size: =10
+                              X: =14
+                              Y: =10
+                              Width: =Parent.TemplateWidth - 28
+                              Height: =28
+                              Text: =ThisItem.S & " (" & CountRows(Filter('[LME] Workload', Statut.Value = ThisItem.S, TypeTache.Value <> "À trier")) & ")"
                               FontWeight: =FontWeight.Semibold
-                              Color: =Coalesce(LookUp(colTC, T = ThisItem.TypeTache.Value, C), RGBA(107, 119, 140, 1))
+                              Color: =Switch(ThisItem.S, "En cours", RGBA(31, 79, 216, 1), "Bloqué", RGBA(192, 51, 43, 1), "Terminé", RGBA(19, 122, 74, 1), RGBA(100, 114, 138, 1))
+                              Size: =15
+                              Font: =Font.'Segoe UI'
+                        - galCartes:
+                            Control: Gallery@2.15.0
+                            Variant: Vertical
+                            Properties:
                               X: =8
-                              Y: =4
+                              Y: =44
                               Width: =Parent.TemplateWidth - 16
-                              Height: =18
-                        - lblCTitre:
+                              Height: =Parent.TemplateHeight - 52
+                              Items: |-
+                                =SortByColumns(
+                                  Filter('[LME] Workload',
+                                    Statut.Value = ThisItem.S,
+                                    TypeTache.Value <> "À trier",
+                                    IsBlank(varType) || TypeTache.Value = varType,
+                                    IsBlank(txtRecherche.Text) || txtRecherche.Text in Title
+                                  ),
+                                  "Echeance", SortOrder.Ascending
+                                )
+                              TemplateSize: =128
+                              TemplatePadding: =0
+                              OnSelect: =Set(varSel, ThisItem)
+                            Children:
+                              - recCarte:
+                                  Control: Rectangle@2.3.0
+                                  Properties:
+                                    X: =0
+                                    Y: =0
+                                    Width: =Parent.TemplateWidth
+                                    Height: =Parent.TemplateHeight - 8
+                                    Fill: =RGBA(244, 246, 250, 1)
+                              - lblCType:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =10
+                                    Y: =6
+                                    Width: =Parent.TemplateWidth - 20
+                                    Height: =18
+                                    Text: =ThisItem.TypeTache.Value
+                                    Size: =11
+                                    FontWeight: =FontWeight.Semibold
+                                    Color: =Coalesce(LookUp(colTC, T = ThisItem.TypeTache.Value, C), RGBA(107, 119, 140, 1))
+                                    Font: =Font.'Segoe UI'
+                              - lblCTitre:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =10
+                                    Y: =26
+                                    Width: =Parent.TemplateWidth - 20
+                                    Height: =48
+                                    Text: =ThisItem.Title
+                                    Size: =13
+                                    FontWeight: =FontWeight.Semibold
+                                    Color: =If(ThisItem.Statut.Value = "Terminé", RGBA(100, 114, 138, 1), RGBA(16, 26, 46, 1))
+                                    Font: =Font.'Segoe UI'
+                              - recCBack:
+                                  Control: Rectangle@2.3.0
+                                  Properties:
+                                    X: =10
+                                    Y: =78
+                                    Width: =Parent.TemplateWidth - 20
+                                    Height: =6
+                                    Fill: =RGBA(227, 232, 240, 1)
+                              - recCFill:
+                                  Control: Rectangle@2.3.0
+                                  Properties:
+                                    X: =10
+                                    Y: =78
+                                    Width: =(Parent.TemplateWidth - 20) * Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) / 100
+                                    Height: =6
+                                    Fill: =RGBA(31, 79, 216, 1)
+                              - lblCDue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =10
+                                    Y: =90
+                                    Width: =Parent.TemplateWidth - 100
+                                    Height: =24
+                                    Text: =Text(ThisItem.Echeance, "dd/mm") & " · " & Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) & " %"
+                                    Size: =12
+                                    Color: =If(ThisItem.Statut.Value <> "Terminé" && ThisItem.Echeance < Today(), RGBA(192, 51, 43, 1), RGBA(100, 114, 138, 1))
+                                    Font: =Font.'Segoe UI'
+                              - btnPrev:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    X: =Parent.TemplateWidth - 84
+                                    Y: =88
+                                    Width: =36
+                                    Height: =28
+                                    Text: ="◀"
+                                    Fill: =RGBA(255, 255, 255, 1)
+                                    Color: =RGBA(16, 26, 46, 1)
+                                    Visible: =ThisItem.Statut.Value <> "À faire"
+                                    OnSelect: |-
+                                      =Patch('[LME] Workload', LookUp('[LME] Workload', ID = ThisItem.ID),
+                                        {Statut: {Value: Switch(ThisItem.Statut.Value, "En cours", "À faire", "Bloqué", "En cours", "Terminé", "Bloqué", "À faire")}});
+                                      If(ThisItem.Statut.Value = "Terminé",
+                                        Patch('[LME] Workload', LookUp('[LME] Workload', ID = ThisItem.ID), {TermineLe: Blank(), Propage: false}));
+                                      Select(btnRefresh)
+                                    Size: =13
+                                    Font: =Font.'Segoe UI'
+                              - btnNext:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    X: =Parent.TemplateWidth - 44
+                                    Y: =88
+                                    Width: =36
+                                    Height: =28
+                                    Text: ="▶"
+                                    Fill: =RGBA(255, 255, 255, 1)
+                                    Color: =RGBA(16, 26, 46, 1)
+                                    Visible: =ThisItem.Statut.Value <> "Terminé"
+                                    OnSelect: |-
+                                      =With({nv: Switch(ThisItem.Statut.Value, "À faire", "En cours", "En cours", "Bloqué", "Bloqué", "Terminé", "À faire")},
+                                        Patch('[LME] Workload', LookUp('[LME] Workload', ID = ThisItem.ID), {Statut: {Value: nv}});
+                                        If(nv = "Terminé",
+                                          Patch('[LME] Workload', LookUp('[LME] Workload', ID = ThisItem.ID), {TermineLe: Now()});
+                                          Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success))
+                                      );
+                                      Select(btnRefresh)
+                                    Size: =13
+                                    Font: =Font.'Segoe UI'
+            - cntCal:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  X: =20
+                  Y: =72
+                  Width: =Parent.Width - 40
+                  Height: =Parent.Height - 88
+                  Visible: =varVue = "cal"
+                Children:
+                  - lblTitreCal:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =0
+                        Y: =0
+                        Width: =330
+                        Height: =40
+                        Text: =Text(Date(Coalesce(varAn, Year(Today())), Coalesce(varMois, Month(Today())), 1), "mmmm yyyy")
+                        Size: =26
+                        FontWeight: =FontWeight.Bold
+                        Color: =RGBA(16, 26, 46, 1)
+                        Font: =Font.'Segoe UI'
+                  - btnMoisPrec:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        X: =340
+                        Y: =3
+                        Width: =40
+                        Height: =34
+                        Text: ="◀"
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Color: =RGBA(16, 26, 46, 1)
+                        OnSelect: |-
+                          =Set(varAn, Coalesce(varAn, Year(Today())));
+                          Set(varMois, Coalesce(varMois, Month(Today())));
+                          If(varMois = 1,
+                            Set(varAn, varAn - 1); Set(varMois, 12),
+                            Set(varMois, varMois - 1))
+                        Size: =13
+                        Font: =Font.'Segoe UI'
+                  - btnMoisSuiv:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        X: =388
+                        Y: =3
+                        Width: =40
+                        Height: =34
+                        Text: ="▶"
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Color: =RGBA(16, 26, 46, 1)
+                        OnSelect: |-
+                          =Set(varAn, Coalesce(varAn, Year(Today())));
+                          Set(varMois, Coalesce(varMois, Month(Today())));
+                          If(varMois = 12,
+                            Set(varAn, varAn + 1); Set(varMois, 1),
+                            Set(varMois, varMois + 1))
+                        Size: =13
+                        Font: =Font.'Segoe UI'
+                  - cntCalGrille:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        X: =0
+                        Y: =52
+                        Width: =Parent.Width * 0.68
+                        Height: =Parent.Height - 52
+                      Children:
+                        - galJoursEntete:
+                            Control: Gallery@2.15.0
+                            Variant: Horizontal
+                            Properties:
+                              X: =0
+                              Y: =0
+                              Width: =Parent.Width
+                              Height: =28
+                              Items: |-
+                                =Table({j: "lun"}, {j: "mar"}, {j: "mer"}, {j: "jeu"}, {j: "ven"}, {j: "sam"}, {j: "dim"})
+                              TemplateSize: =Self.Width / 7
+                              TemplatePadding: =0
+                            Children:
+                              - lblJourEntete:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =0
+                                    Y: =0
+                                    Width: =Parent.TemplateWidth
+                                    Height: =Parent.TemplateHeight
+                                    Text: =Upper(ThisItem.j)
+                                    Align: =Align.Center
+                                    Size: =11
+                                    Color: =RGBA(100, 114, 138, 1)
+                                    Font: =Font.'Segoe UI'
+                        - galJours:
+                            Control: Gallery@2.15.0
+                            Variant: Vertical
+                            Properties:
+                              X: =0
+                              Y: =32
+                              Width: =Parent.Width
+                              Height: =Parent.Height - 32
+                              Items: |-
+                                =With({debut: DateAdd(Date(Coalesce(varAn, Year(Today())), Coalesce(varMois, Month(Today())), 1), -(Weekday(Date(Coalesce(varAn, Year(Today())), Coalesce(varMois, Month(Today())), 1), StartOfWeek.Monday) - 1), TimeUnit.Days)},
+                                  ForAll(Sequence(42, 0), {d: DateAdd(debut, Value, TimeUnit.Days)})
+                                )
+                              WrapCount: =7
+                              TemplateSize: =Self.Height / 6
+                              TemplatePadding: =2
+                            Children:
+                              - recJour:
+                                  Control: Rectangle@2.3.0
+                                  Properties:
+                                    X: =0
+                                    Y: =0
+                                    Width: =Parent.TemplateWidth
+                                    Height: =Parent.TemplateHeight
+                                    Fill: =If(ThisItem.d = Today(), RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
+                                    BorderColor: =If(ThisItem.d = Today(), RGBA(31, 79, 216, 1), RGBA(227, 232, 240, 1))
+                                    BorderThickness: =1
+                              - lblNumJour:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =6
+                                    Y: =4
+                                    Width: =40
+                                    Height: =22
+                                    Text: =Day(ThisItem.d)
+                                    Size: =12
+                                    Color: =If(Month(ThisItem.d) = Coalesce(varMois, Month(Today())), RGBA(16, 26, 46, 1), RGBA(170, 180, 196, 1))
+                                    Font: =Font.'Segoe UI'
+                              - lblEv1:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =4
+                                    Y: =28
+                                    Width: =Parent.TemplateWidth - 8
+                                    Height: =20
+                                    Text: =Coalesce(Last(FirstN(Filter(colWL, Echeance = ThisItem.d), 1)).Title, "")
+                                    Size: =11
+                                    Fill: =If(IsBlank(Self.Text), RGBA(0, 0, 0, 0), RGBA(227, 235, 255, 1))
+                                    Color: =RGBA(31, 79, 216, 1)
+                                    Font: =Font.'Segoe UI'
+                              - lblEv2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =4
+                                    Y: =50
+                                    Width: =Parent.TemplateWidth - 8
+                                    Height: =20
+                                    Text: =If(CountRows(Filter(colWL, Echeance = ThisItem.d)) >= 2, Last(FirstN(Filter(colWL, Echeance = ThisItem.d), 2)).Title, "")
+                                    Size: =11
+                                    Fill: =If(IsBlank(Self.Text), RGBA(0, 0, 0, 0), RGBA(227, 235, 255, 1))
+                                    Color: =RGBA(31, 79, 216, 1)
+                                    Font: =Font.'Segoe UI'
+                              - lblEvPlus:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =4
+                                    Y: =72
+                                    Width: =60
+                                    Height: =18
+                                    Text: =If(CountRows(Filter(colWL, Echeance = ThisItem.d)) > 2, "+" & (CountRows(Filter(colWL, Echeance = ThisItem.d)) - 2), "")
+                                    Size: =11
+                                    Color: =RGBA(100, 114, 138, 1)
+                                    Font: =Font.'Segoe UI'
+                  - cntCalCote:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        X: =Parent.Width * 0.68 + 16
+                        Y: =52
+                        Width: =Parent.Width * 0.32 - 16
+                        Height: =Parent.Height - 52
+                      Children:
+                        - cntCalAuj:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =0
+                              Y: =0
+                              Width: =Parent.Width
+                              Height: =Parent.Height * 0.32 - 6
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblHAuj:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =16
+                                    Y: =12
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Text: ="Aujourd'hui"
+                                    FontWeight: =FontWeight.Semibold
+                                    Color: =RGBA(16, 26, 46, 1)
+                                    Size: =15
+                                    Font: =Font.'Segoe UI'
+                              - galAuj:
+                                  Control: Gallery@2.15.0
+                                  Variant: Vertical
+                                  Properties:
+                                    X: =8
+                                    Y: =44
+                                    Width: =Parent.Width - 16
+                                    Height: =Parent.Height - 52
+                                    Items: =Filter('[LME] Workload', Echeance = Today(), Statut.Value <> "Terminé")
+                                    TemplateSize: =52
+                                    TemplatePadding: =0
+                                    OnSelect: =Set(varSel, ThisItem)
+                                  Children:
+                                    - lblAujTitre:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          X: =6
+                                          Y: =4
+                                          Width: =Parent.TemplateWidth - 12
+                                          Height: =24
+                                          Text: =ThisItem.Title
+                                          Size: =13
+                                          Color: =RGBA(16, 26, 46, 1)
+                                          Font: =Font.'Segoe UI'
+                                    - lblAujMeta:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          X: =6
+                                          Y: =29
+                                          Width: =Parent.TemplateWidth - 12
+                                          Height: =20
+                                          Text: =ThisItem.TypeTache.Value & " · " & Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) & " %"
+                                          Size: =11
+                                          Color: =RGBA(100, 114, 138, 1)
+                                          Font: =Font.'Segoe UI'
+                        - cntCalAvenir:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =0
+                              Y: =Parent.Height * 0.32 + 6
+                              Width: =Parent.Width
+                              Height: =Parent.Height * 0.68 - 6
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblHAvenir:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =16
+                                    Y: =12
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Text: ="À venir"
+                                    FontWeight: =FontWeight.Semibold
+                                    Color: =RGBA(16, 26, 46, 1)
+                                    Size: =15
+                                    Font: =Font.'Segoe UI'
+                              - galAvenir:
+                                  Control: Gallery@2.15.0
+                                  Variant: Vertical
+                                  Properties:
+                                    X: =8
+                                    Y: =44
+                                    Width: =Parent.Width - 16
+                                    Height: =Parent.Height - 52
+                                    Items: =FirstN(SortByColumns(Filter('[LME] Workload', Echeance > Today(), Statut.Value <> "Terminé"), "Echeance", SortOrder.Ascending), 8)
+                                    TemplateSize: =54
+                                    TemplatePadding: =0
+                                    OnSelect: =Set(varSel, ThisItem)
+                                  Children:
+                                    - lblAvTitre:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          X: =6
+                                          Y: =4
+                                          Width: =Parent.TemplateWidth - 76
+                                          Height: =24
+                                          Text: =ThisItem.Title
+                                          Size: =13
+                                          Color: =RGBA(16, 26, 46, 1)
+                                          Font: =Font.'Segoe UI'
+                                    - lblAvMeta:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          X: =6
+                                          Y: =29
+                                          Width: =Parent.TemplateWidth - 76
+                                          Height: =20
+                                          Text: =ThisItem.TypeTache.Value
+                                          Size: =11
+                                          Color: =Coalesce(LookUp(colTC, T = ThisItem.TypeTache.Value, C), RGBA(107, 119, 140, 1))
+                                          Font: =Font.'Segoe UI'
+                                    - lblAvDate:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          X: =Parent.TemplateWidth - 66
+                                          Y: =14
+                                          Width: =58
+                                          Height: =24
+                                          Text: =Text(ThisItem.Echeance, "dd/mm")
+                                          Align: =Align.Right
+                                          Size: =12
+                                          Color: =RGBA(16, 26, 46, 1)
+                                          Font: =Font.'Segoe UI'
+            - cntStats:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  X: =20
+                  Y: =72
+                  Width: =Parent.Width - 40
+                  Height: =Parent.Height - 88
+                  Visible: =varVue = "stats"
+                Children:
+                  - lblTitreStats:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =0
+                        Y: =0
+                        Width: =Parent.Width
+                        Height: =40
+                        Text: ="Analyse"
+                        Size: =26
+                        FontWeight: =FontWeight.Bold
+                        Color: =RGBA(16, 26, 46, 1)
+                        Font: =Font.'Segoe UI'
+                  - cntStatsKpi:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        X: =0
+                        Y: =48
+                        Width: =Parent.Width
+                        Height: =92
+                      Children:
+                        - cntSt1:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =0
+                              Y: =0
+                              Width: =(Parent.Width - 36) / 4
+                              Height: =92
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblSt1V:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: =CountRows(Filter('[LME] Workload', Statut.Value = "Terminé"))
+                                    Size: =32
+                                    Color: =RGBA(31, 79, 216, 1)
+                                    X: =16
+                                    Y: =10
+                                    Width: =Parent.Width - 32
+                                    Height: =46
+                                    Font: =Font.'Segoe UI'
+                                    FontWeight: =FontWeight.Bold
+                              - lblSt1C:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: ="Tâches terminées"
+                                    Size: =13
+                                    Color: =RGBA(100, 114, 138, 1)
+                                    X: =16
+                                    Y: =58
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Font: =Font.'Segoe UI'
+                        - cntSt2:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =(Parent.Width - 36) / 4 * 1 + 12
+                              Y: =0
+                              Width: =(Parent.Width - 36) / 4
+                              Height: =92
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblSt2V:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: =CountRows(Filter(colEtapes, Fait))
+                                    Size: =32
+                                    Color: =RGBA(14, 138, 125, 1)
+                                    X: =16
+                                    Y: =10
+                                    Width: =Parent.Width - 32
+                                    Height: =46
+                                    Font: =Font.'Segoe UI'
+                                    FontWeight: =FontWeight.Bold
+                              - lblSt2C:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: ="Étapes cochées"
+                                    Size: =13
+                                    Color: =RGBA(100, 114, 138, 1)
+                                    X: =16
+                                    Y: =58
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Font: =Font.'Segoe UI'
+                        - cntSt3:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =(Parent.Width - 36) / 4 * 2 + 24
+                              Y: =0
+                              Width: =(Parent.Width - 36) / 4
+                              Height: =92
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblSt3V:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: |-
+                                      =With({fin: Filter('[LME] Workload', Statut.Value = "Terminé")},
+                                        If(CountRows(fin) = 0, "0", Round(100 * CountRows(Filter(fin, Date(Year(TermineLe), Month(TermineLe), Day(TermineLe)) <= Echeance)) / CountRows(fin), 0)) & " %"
+                                      )
+                                    Size: =32
+                                    Color: =RGBA(19, 122, 74, 1)
+                                    X: =16
+                                    Y: =10
+                                    Width: =Parent.Width - 32
+                                    Height: =46
+                                    Font: =Font.'Segoe UI'
+                                    FontWeight: =FontWeight.Bold
+                              - lblSt3C:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: ="Clôturées dans les temps"
+                                    Size: =13
+                                    Color: =RGBA(100, 114, 138, 1)
+                                    X: =16
+                                    Y: =58
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Font: =Font.'Segoe UI'
+                        - cntSt4:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =(Parent.Width - 36) / 4 * 3 + 36
+                              Y: =0
+                              Width: =(Parent.Width - 36) / 4
+                              Height: =92
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblSt4V:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: =CountRows(Filter('[LME] Workload', Statut.Value <> "Terminé", Echeance < Today()))
+                                    Size: =32
+                                    Color: =RGBA(192, 51, 43, 1)
+                                    X: =16
+                                    Y: =10
+                                    Width: =Parent.Width - 32
+                                    Height: =46
+                                    Font: =Font.'Segoe UI'
+                                    FontWeight: =FontWeight.Bold
+                              - lblSt4C:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Text: ="En retard"
+                                    Size: =13
+                                    Color: =RGBA(100, 114, 138, 1)
+                                    X: =16
+                                    Y: =58
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Font: =Font.'Segoe UI'
+                  - cntStatsRow:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        X: =0
+                        Y: =152
+                        Width: =Parent.Width
+                        Height: =Parent.Height - 152
+                      Children:
+                        - cntStatsCourbe:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =0
+                              Y: =0
+                              Width: =(Parent.Width - 12) * 0.64
+                              Height: =Parent.Height
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblHCourbe:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =16
+                                    Y: =12
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Text: ="Tâches terminées par semaine (8 dernières semaines)"
+                                    FontWeight: =FontWeight.Semibold
+                                    Color: =RGBA(16, 26, 46, 1)
+                                    Size: =15
+                                    Font: =Font.'Segoe UI'
+                              - imgCourbe:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    X: =16
+                                    Y: =48
+                                    Width: =Parent.Width - 32
+                                    Height: =Parent.Height - 64
+                                    Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 190'><polygon fill='#1f4fd8' fill-opacity='0.15' points='" & Concat(colSem, Text(20 + i * 85) & "," & Text(170 - Round(150 * n / Max(Max(colSem, n), 1), 0)) & " ") & "605,170 20,170'/><polyline fill='none' stroke='#1f4fd8' stroke-width='3' points='" & Concat(colSem, Text(20 + i * 85) & "," & Text(170 - Round(150 * n / Max(Max(colSem, n), 1), 0)) & " ") & "'/>" & Concat(colSem, "<text x='" & Text(20 + i * 85) & "' y='186' font-family='Segoe UI,Arial,sans-serif' font-size='11' text-anchor='middle' fill='#64728a'>" & n & "</text>") & "</svg>")
+                        - cntStatsDonut:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              X: =(Parent.Width - 12) * 0.64 + 12
+                              Y: =0
+                              Width: =(Parent.Width - 12) * 0.36
+                              Height: =Parent.Height
+                              Fill: =RGBA(255, 255, 255, 1)
+                            Children:
+                              - lblHDonut:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =16
+                                    Y: =12
+                                    Width: =Parent.Width - 32
+                                    Height: =26
+                                    Text: ="Tâches ouvertes par projet"
+                                    FontWeight: =FontWeight.Semibold
+                                    Color: =RGBA(16, 26, 46, 1)
+                                    Size: =15
+                                    Font: =Font.'Segoe UI'
+                              - imgDonut:
+                                  Control: Image@2.2.3
+                                  Properties:
+                                    X: =(Parent.Width - Self.Width) / 2
+                                    Y: =48
+                                    Width: =Min(Parent.Width - 32, Parent.Height * 0.5)
+                                    Height: =Min(Parent.Width - 32, Parent.Height * 0.5)
+                                    Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'>" & Concat(colDonut, "<circle r='40' cx='60' cy='60' fill='none' pathLength='100' stroke='" & Switch(k, 1, "#1f4fd8", 2, "#0e8a7d", 3, "#b86a00", "#6b778c") & "' stroke-width='16' stroke-dasharray='" & share & " " & (100 - share) & "' stroke-dashoffset='" & -start & "' transform='rotate(-90 60 60)'/>") & "<text x='60' y='58' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='20' font-weight='700' fill='#101a2e'>" & varTotalOuv & "</text><text x='60' y='73' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='9' fill='#64728a'>ouvertes</text></svg>")
+                              - lblLegende:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =16
+                                    Y: =56 + Parent.Height * 0.5
+                                    Width: =Parent.Width - 32
+                                    Height: =Parent.Height - 56 - Parent.Height * 0.5 - 8
+                                    Text: |-
+                                      =Concat(colDonut, name & " : " & n, Char(10))
+                                    Size: =13
+                                    Color: =RGBA(16, 26, 46, 1)
+                                    Font: =Font.'Segoe UI'
+            - cntTrier:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  X: =20
+                  Y: =72
+                  Width: =Parent.Width - 40
+                  Height: =Parent.Height - 88
+                  Visible: =varVue = "trier"
+                Children:
+                  - lblTitreTrier:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =0
+                        Y: =0
+                        Width: =Parent.Width
+                        Height: =40
+                        Text: ="À trier"
+                        Size: =26
+                        FontWeight: =FontWeight.Bold
+                        Color: =RGBA(16, 26, 46, 1)
+                        Font: =Font.'Segoe UI'
+                  - lblSousTrier:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =0
+                        Y: =42
+                        Width: =Parent.Width
+                        Height: =26
+                        Text: ="Mails sans catégorie reconnue et tâches manuelles. Choisis le type et le projet, les étapes du modèle se créent ensuite."
+                        Size: =13
+                        Color: =RGBA(100, 114, 138, 1)
+                        Font: =Font.'Segoe UI'
+                  - lblVideTrier:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =0
+                        Y: =110
+                        Width: =Parent.Width
+                        Height: =40
+                        Text: ="Rien à trier."
+                        Align: =Align.Center
+                        Color: =RGBA(100, 114, 138, 1)
+                        Visible: =CountRows(galTrier.AllItems) = 0
+                        Size: =14
+                        Font: =Font.'Segoe UI'
+                  - galTrier:
+                      Control: Gallery@2.15.0
+                      Variant: Vertical
+                      Properties:
+                        X: =0
+                        Y: =76
+                        Width: =Parent.Width
+                        Height: =Parent.Height - 76
+                        Items: =Filter('[LME] Workload', TypeTache.Value = "À trier", Statut.Value <> "Terminé")
+                        TemplateSize: =100
+                        TemplatePadding: =6
+                      Children:
+                        - recTrier:
+                            Control: Rectangle@2.3.0
+                            Properties:
+                              X: =0
+                              Y: =0
+                              Width: =Parent.TemplateWidth
+                              Height: =Parent.TemplateHeight - 6
+                              Fill: =RGBA(255, 255, 255, 1)
+                        - lblTrierTitre:
                             Control: Label@2.5.1
                             Properties:
+                              X: =16
+                              Y: =10
+                              Width: =Parent.TemplateWidth - 32
+                              Height: =26
                               Text: =ThisItem.Title
-                              Size: =12
                               FontWeight: =FontWeight.Semibold
-                              Color: =If(ThisItem.Statut.Value = "Terminé", RGBA(100, 114, 138, 1), RGBA(16, 26, 46, 1))
-                              X: =8
-                              Y: =22
-                              Width: =Parent.TemplateWidth - 16
-                              Height: =42
-                        - recCBack:
-                            Control: Rectangle@2.3.0
-                            Properties:
-                              Fill: =RGBA(227, 232, 240, 1)
-                              X: =8
-                              Y: =68
-                              Width: =Parent.TemplateWidth - 16
-                              Height: =5
-                        - recCFill:
-                            Control: Rectangle@2.3.0
-                            Properties:
-                              Fill: =RGBA(31, 79, 216, 1)
-                              X: =8
-                              Y: =68
-                              Width: =(Parent.TemplateWidth - 16) * Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) / 100
-                              Height: =5
-                        - lblCDue:
+                              Color: =RGBA(16, 26, 46, 1)
+                              Size: =14
+                              Font: =Font.'Segoe UI'
+                        - lblTrierMeta:
                             Control: Label@2.5.1
                             Properties:
-                              Text: =Text(ThisItem.Echeance, "dd/mm") & " · " & Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) & " %"
-                              Size: =10
-                              Color: =If(ThisItem.Statut.Value <> "Terminé" && ThisItem.Echeance < Today(), RGBA(192, 51, 43, 1), RGBA(100, 114, 138, 1))
-                              X: =8
-                              Y: =78
-                              Width: =Parent.TemplateWidth - 90
-                              Height: =22
-                        - btnPrev:
+                              X: =16
+                              Y: =38
+                              Width: =Parent.TemplateWidth - 32
+                              Height: =20
+                              Text: =ThisItem.Source.Value & " · échéance " & Text(ThisItem.Echeance, "dd/mm")
+                              Size: =12
+                              Color: =RGBA(100, 114, 138, 1)
+                              Font: =Font.'Segoe UI'
+                        - ddTrierType:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              X: =16
+                              Y: =62
+                              Width: =Parent.TemplateWidth * 0.25
+                              Height: =32
+                              Items: =["Support", "Amélioration", "Monthly eng", "Projet"]
+                              Size: =13
+                              Font: =Font.'Segoe UI'
+                        - ddTrierProjet:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              X: =Parent.TemplateWidth * 0.25 + 28
+                              Y: =62
+                              Width: =Parent.TemplateWidth * 0.30
+                              Height: =32
+                              Items: |-
+                                =ForAll(Filter('[LME] Projets', StatutProjet.Value = "Actif"), {Value: Title, ID: ID})
+                              Size: =13
+                              Font: =Font.'Segoe UI'
+                        - btnClasser:
                             Control: Classic/Button@2.2.0
                             Properties:
-                              Text: ="◀"
-                              Fill: =RGBA(255, 255, 255, 1)
-                              Color: =RGBA(16, 26, 46, 1)
-                              Visible: =ThisItem.Statut.Value <> "À faire"
-                              X: =Parent.TemplateWidth - 78
-                              Y: =76
-                              Width: =34
-                              Height: =26
+                              X: =Parent.TemplateWidth * 0.55 + 40
+                              Y: =62
+                              Width: =130
+                              Height: =32
+                              Text: ="Classer"
+                              Fill: =RGBA(31, 79, 216, 1)
+                              Color: =RGBA(255, 255, 255, 1)
                               OnSelect: |-
                                 =Patch('[LME] Workload', LookUp('[LME] Workload', ID = ThisItem.ID),
-                                  {Statut: {Value: Switch(ThisItem.Statut.Value, "En cours", "À faire", "Bloqué", "En cours", "Terminé", "Bloqué", "À faire")}});
-                                If(ThisItem.Statut.Value = "Terminé",
-                                  Patch('[LME] Workload', LookUp('[LME] Workload', ID = ThisItem.ID), {TermineLe: Blank(), Propage: false}));
-                                Select(btnRefresh)
-                        - btnNext:
-                            Control: Classic/Button@2.2.0
-                            Properties:
-                              Text: ="▶"
-                              Fill: =RGBA(255, 255, 255, 1)
-                              Color: =RGBA(16, 26, 46, 1)
-                              Visible: =ThisItem.Statut.Value <> "Terminé"
-                              X: =Parent.TemplateWidth - 40
-                              Y: =76
-                              Width: =34
-                              Height: =26
-                              OnSelect: |-
-                                =With({nv: Switch(ThisItem.Statut.Value, "À faire", "En cours", "En cours", "Bloqué", "Bloqué", "Terminé", "À faire")},
-                                  Patch('[LME] Workload', LookUp('[LME] Workload', ID = ThisItem.ID), {Statut: {Value: nv}});
-                                  If(nv = "Terminé",
-                                    Patch('[LME] Workload', LookUp('[LME] Workload', ID = ThisItem.ID), {TermineLe: Now()});
-                                    Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success))
-                                );
-                                Select(btnRefresh)
-      - cntCal:
-          Control: GroupContainer@1.5.0
-          Variant: ManualLayout
-          Properties:
-            Height: =Parent.Height - 64
-            Visible: =varVue = "cal"
-            Width: =1088
-            X: =254
-            Y: =64
-          Children:
-            - lblTitreCal:
-                Control: Label@2.5.1
-                Properties:
-                  Text: =Text(Date(Coalesce(varAn, Year(Today())), Coalesce(varMois, Month(Today())), 1), "mmmm yyyy")
-                  Size: =24
-                  FontWeight: =FontWeight.Bold
-                  Color: =RGBA(16, 26, 46, 1)
-                  X: =0
-                  Y: =8
-                  Width: =400
-                  Height: =44
-            - btnMoisPrec:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  Text: ="◀"
-                  Fill: =RGBA(255, 255, 255, 1)
-                  Color: =RGBA(16, 26, 46, 1)
-                  X: =366
-                  Y: =14
-                  Width: =40
-                  Height: =34
-                  OnSelect: |-
-                    =Set(varAn, Coalesce(varAn, Year(Today())));
-                    Set(varMois, Coalesce(varMois, Month(Today())));
-                    If(varMois = 1,
-                      Set(varAn, varAn - 1); Set(varMois, 12),
-                      Set(varMois, varMois - 1))
-            - btnMoisSuiv:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  Text: ="▶"
-                  Fill: =RGBA(255, 255, 255, 1)
-                  Color: =RGBA(16, 26, 46, 1)
-                  X: =414
-                  Y: =14
-                  Width: =40
-                  Height: =34
-                  OnSelect: |-
-                    =Set(varAn, Coalesce(varAn, Year(Today())));
-                    Set(varMois, Coalesce(varMois, Month(Today())));
-                    If(varMois = 12,
-                      Set(varAn, varAn + 1); Set(varMois, 1),
-                      Set(varMois, varMois + 1))
-            - cntCalGrille:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  Height: =624
-                  Width: =700
-                  X: =0
-                  Y: =60
-                Children:
-                  - galJoursEntete:
-                      Control: Gallery@2.15.0
-                      Variant: Horizontal
-                      Properties:
-                        Items: |-
-                          =Table({j: "lun"}, {j: "mar"}, {j: "mer"}, {j: "jeu"}, {j: "ven"}, {j: "sam"}, {j: "dim"})
-                        X: =0
-                        Y: =0
-                        Width: =700
-                        Height: =28
-                        TemplateSize: =100
-                        TemplatePadding: =0
-                      Children:
-                        - lblJourEntete:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =Upper(ThisItem.j)
-                              Align: =Align.Center
-                              Size: =10
-                              Color: =RGBA(100, 114, 138, 1)
-                              X: =0
-                              Y: =0
-                              Width: =Parent.TemplateWidth
-                              Height: =Parent.TemplateHeight
-                  - galJours:
-                      Control: Gallery@2.15.0
-                      Variant: Vertical
-                      Properties:
-                        Items: |-
-                          =With({debut: DateAdd(Date(Coalesce(varAn, Year(Today())), Coalesce(varMois, Month(Today())), 1), -(Weekday(Date(Coalesce(varAn, Year(Today())), Coalesce(varMois, Month(Today())), 1), StartOfWeek.Monday) - 1), TimeUnit.Days)},
-                            ForAll(Sequence(42, 0), {d: DateAdd(debut, Value, TimeUnit.Days)})
-                          )
-                        WrapCount: =7
-                        X: =0
-                        Y: =30
-                        Width: =700
-                        Height: =594
-                        TemplateSize: =98
-                        TemplatePadding: =2
-                      Children:
-                        - recJour:
-                            Control: Rectangle@2.3.0
-                            Properties:
-                              Fill: =If(ThisItem.d = Today(), RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
-                              BorderColor: =If(ThisItem.d = Today(), RGBA(31, 79, 216, 1), RGBA(227, 232, 240, 1))
-                              BorderThickness: =1
-                              X: =0
-                              Y: =0
-                              Width: =Parent.TemplateWidth
-                              Height: =Parent.TemplateHeight
-                        - lblNumJour:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =Day(ThisItem.d)
-                              Size: =11
-                              Color: =If(Month(ThisItem.d) = Coalesce(varMois, Month(Today())), RGBA(16, 26, 46, 1), RGBA(170, 180, 196, 1))
-                              X: =4
-                              Y: =2
-                              Width: =40
-                              Height: =20
-                        - lblEv1:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =Coalesce(Last(FirstN(Filter(colWL, Echeance = ThisItem.d), 1)).Title, "")
-                              Size: =9
-                              Fill: =If(IsBlank(Self.Text), RGBA(0, 0, 0, 0), RGBA(227, 235, 255, 1))
-                              Color: =RGBA(31, 79, 216, 1)
-                              X: =4
-                              Y: =24
-                              Width: =Parent.TemplateWidth - 8
-                              Height: =18
-                        - lblEv2:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =If(CountRows(Filter(colWL, Echeance = ThisItem.d)) >= 2, Last(FirstN(Filter(colWL, Echeance = ThisItem.d), 2)).Title, "")
-                              Size: =9
-                              Fill: =If(IsBlank(Self.Text), RGBA(0, 0, 0, 0), RGBA(227, 235, 255, 1))
-                              Color: =RGBA(31, 79, 216, 1)
-                              X: =4
-                              Y: =44
-                              Width: =Parent.TemplateWidth - 8
-                              Height: =18
-                        - lblEvPlus:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =If(CountRows(Filter(colWL, Echeance = ThisItem.d)) > 2, "+" & (CountRows(Filter(colWL, Echeance = ThisItem.d)) - 2), "")
-                              Size: =9
-                              Color: =RGBA(100, 114, 138, 1)
-                              X: =4
-                              Y: =64
-                              Width: =60
-                              Height: =18
-            - cntCalCote:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  Height: =624
-                  Width: =368
-                  X: =720
-                  Y: =60
-                Children:
-                  - lblHAuj:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: ="Aujourd'hui"
-                        FontWeight: =FontWeight.Semibold
-                        Color: =RGBA(16, 26, 46, 1)
-                        X: =0
-                        Y: =0
-                        Width: =360
-                        Height: =26
-                  - galAuj:
-                      Control: Gallery@2.15.0
-                      Variant: Vertical
-                      Properties:
-                        Items: =Filter('[LME] Workload', Echeance = Today(), Statut.Value <> "Terminé")
-                        X: =0
-                        Y: =28
-                        Width: =368
-                        Height: =150
-                        TemplateSize: =44
-                        TemplatePadding: =0
-                        OnSelect: =Set(varSel, ThisItem)
-                      Children:
-                        - lblAujTitre:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =ThisItem.Title
-                              Size: =12
-                              Color: =RGBA(16, 26, 46, 1)
-                              X: =4
-                              Y: =2
-                              Width: =Parent.TemplateWidth - 8
-                              Height: =22
-                        - lblAujMeta:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =ThisItem.TypeTache.Value & " · " & Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) & " %"
-                              Size: =10
-                              Color: =RGBA(100, 114, 138, 1)
-                              X: =4
-                              Y: =22
-                              Width: =Parent.TemplateWidth - 8
-                              Height: =18
-                  - lblHAvenir:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: ="À venir"
-                        FontWeight: =FontWeight.Semibold
-                        Color: =RGBA(16, 26, 46, 1)
-                        X: =0
-                        Y: =194
-                        Width: =360
-                        Height: =26
-                  - galAvenir:
-                      Control: Gallery@2.15.0
-                      Variant: Vertical
-                      Properties:
-                        Items: =FirstN(SortByColumns(Filter('[LME] Workload', Echeance > Today(), Statut.Value <> "Terminé"), "Echeance", SortOrder.Ascending), 8)
-                        X: =0
-                        Y: =222
-                        Width: =368
-                        Height: =400
-                        TemplateSize: =48
-                        TemplatePadding: =0
-                        OnSelect: =Set(varSel, ThisItem)
-                      Children:
-                        - lblAvTitre:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =ThisItem.Title
-                              Size: =12
-                              Color: =RGBA(16, 26, 46, 1)
-                              X: =4
-                              Y: =2
-                              Width: =Parent.TemplateWidth - 70
-                              Height: =22
-                        - lblAvMeta:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =ThisItem.TypeTache.Value
-                              Size: =10
-                              Color: =Coalesce(LookUp(colTC, T = ThisItem.TypeTache.Value, C), RGBA(107, 119, 140, 1))
-                              X: =4
-                              Y: =24
-                              Width: =Parent.TemplateWidth - 70
-                              Height: =18
-                        - lblAvDate:
-                            Control: Label@2.5.1
-                            Properties:
-                              Text: =Text(ThisItem.Echeance, "dd/mm")
-                              Align: =Align.Right
-                              Size: =11
-                              Color: =RGBA(16, 26, 46, 1)
-                              X: =Parent.TemplateWidth - 60
-                              Y: =10
-                              Width: =56
-                              Height: =22
-      - cntStats:
-          Control: GroupContainer@1.5.0
-          Variant: ManualLayout
-          Properties:
-            Height: =Parent.Height - 64
-            Visible: =varVue = "stats"
-            Width: =1088
-            X: =254
-            Y: =64
-          Children:
-            - lblTitreStats:
-                Control: Label@2.5.1
-                Properties:
-                  Text: ="Analyse"
-                  Size: =24
-                  FontWeight: =FontWeight.Bold
-                  Color: =RGBA(16, 26, 46, 1)
-                  X: =0
-                  Y: =8
-                  Width: =300
-                  Height: =44
-            - cntStatsKpi:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  Height: =96
-                  Width: =1072
-                  X: =0
-                  Y: =60
-                Children:
-                  - lblSt1:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: =CountRows(Filter('[LME] Workload', Statut.Value = "Terminé")) & Char(10) & "Tâches terminées"
-                        Size: =18
-                        FontWeight: =FontWeight.Bold
-                        Fill: =RGBA(255, 255, 255, 1)
-                        Color: =RGBA(31, 79, 216, 1)
-                        PaddingLeft: =14
-                        X: =0
-                        Y: =0
-                        Width: =256
-                        Height: =96
-                  - lblSt2:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: =CountRows(Filter(colEtapes, Fait)) & Char(10) & "Étapes cochées"
-                        Size: =18
-                        FontWeight: =FontWeight.Bold
-                        Fill: =RGBA(255, 255, 255, 1)
-                        Color: =RGBA(14, 138, 125, 1)
-                        PaddingLeft: =14
-                        X: =272
-                        Y: =0
-                        Width: =256
-                        Height: =96
-                  - lblSt3:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: |-
-                          =With({fin: Filter('[LME] Workload', Statut.Value = "Terminé")},
-                            If(CountRows(fin) = 0, "0", Round(100 * CountRows(Filter(fin, Date(Year(TermineLe), Month(TermineLe), Day(TermineLe)) <= Echeance)) / CountRows(fin), 0)) & " %"
-                          ) & Char(10) & "Clôturées dans les temps"
-                        Size: =18
-                        FontWeight: =FontWeight.Bold
-                        Fill: =RGBA(255, 255, 255, 1)
-                        Color: =RGBA(19, 122, 74, 1)
-                        PaddingLeft: =14
-                        X: =544
-                        Y: =0
-                        Width: =256
-                        Height: =96
-                  - lblSt4:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: =CountRows(Filter('[LME] Workload', Statut.Value <> "Terminé", Echeance < Today())) & Char(10) & "En retard"
-                        Size: =18
-                        FontWeight: =FontWeight.Bold
-                        Fill: =RGBA(255, 255, 255, 1)
-                        Color: =RGBA(192, 51, 43, 1)
-                        PaddingLeft: =14
-                        X: =816
-                        Y: =0
-                        Width: =256
-                        Height: =96
-            - cntStatsCourbe:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  Height: =330
-                  Width: =680
-                  X: =0
-                  Y: =172
-                Children:
-                  - recCardCourbe:
-                      Control: Rectangle@2.3.0
-                      Properties:
-                        Fill: =RGBA(255, 255, 255, 1)
-                        X: =0
-                        Y: =0
-                        Width: =680
-                        Height: =330
-                  - lblHCourbe:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: ="Tâches terminées par semaine (8 dernières semaines)"
-                        FontWeight: =FontWeight.Semibold
-                        Color: =RGBA(16, 26, 46, 1)
-                        X: =16
-                        Y: =8
-                        Width: =640
-                        Height: =26
-                  - imgCourbe:
-                      Control: Image@2.2.3
-                      Properties:
-                        Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 190'><polygon fill='#1f4fd8' fill-opacity='0.15' points='" & Concat(colSem, Text(20 + i * 85) & "," & Text(170 - Round(150 * n / Max(Max(colSem, n), 1), 0)) & " ") & "605,170 20,170'/><polyline fill='none' stroke='#1f4fd8' stroke-width='3' points='" & Concat(colSem, Text(20 + i * 85) & "," & Text(170 - Round(150 * n / Max(Max(colSem, n), 1), 0)) & " ") & "'/>" & Concat(colSem, "<text x='" & Text(20 + i * 85) & "' y='186' font-size='11' text-anchor='middle' fill='#64728a'>" & n & "</text>") & "</svg>")
-                        X: =16
-                        Y: =40
-                        Width: =648
-                        Height: =280
-            - cntStatsDonut:
-                Control: GroupContainer@1.5.0
-                Variant: ManualLayout
-                Properties:
-                  Height: =330
-                  Width: =392
-                  X: =696
-                  Y: =172
-                Children:
-                  - recCardDonut:
-                      Control: Rectangle@2.3.0
-                      Properties:
-                        Fill: =RGBA(255, 255, 255, 1)
-                        X: =0
-                        Y: =0
-                        Width: =392
-                        Height: =330
-                  - lblHDonut:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: ="Tâches ouvertes par projet"
-                        FontWeight: =FontWeight.Semibold
-                        Color: =RGBA(16, 26, 46, 1)
-                        X: =16
-                        Y: =8
-                        Width: =360
-                        Height: =26
-                  - imgDonut:
-                      Control: Image@2.2.3
-                      Properties:
-                        Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'>" & Concat(colDonut, "<circle r='40' cx='60' cy='60' fill='none' pathLength='100' stroke='" & Switch(k, 1, "#1f4fd8", 2, "#0e8a7d", 3, "#b86a00", "#6b778c") & "' stroke-width='16' stroke-dasharray='" & share & " " & (100 - share) & "' stroke-dashoffset='" & -start & "' transform='rotate(-90 60 60)'/>") & "<text x='60' y='58' text-anchor='middle' font-size='20' font-weight='700' fill='#101a2e'>" & varTotalOuv & "</text><text x='60' y='73' text-anchor='middle' font-size='9' fill='#64728a'>ouvertes</text></svg>")
-                        X: =80
-                        Y: =40
-                        Width: =232
-                        Height: =170
-                  - lblLegende:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: |-
-                          =Concat(colDonut, name & " : " & n, Char(10))
-                        Size: =12
-                        Color: =RGBA(16, 26, 46, 1)
-                        X: =16
-                        Y: =220
-                        Width: =360
-                        Height: =100
-      - cntTrier:
-          Control: GroupContainer@1.5.0
-          Variant: ManualLayout
-          Properties:
-            Height: =Parent.Height - 64
-            Visible: =varVue = "trier"
-            Width: =1088
-            X: =254
-            Y: =64
-          Children:
-            - lblTitreTrier:
-                Control: Label@2.5.1
-                Properties:
-                  Text: ="À trier"
-                  Size: =24
-                  FontWeight: =FontWeight.Bold
-                  Color: =RGBA(16, 26, 46, 1)
-                  X: =0
-                  Y: =8
-                  Width: =300
-                  Height: =44
-            - lblSousTrier:
-                Control: Label@2.5.1
-                Properties:
-                  Text: ="Mails sans catégorie reconnue et tâches manuelles. Choisis le type et le projet, les étapes du modèle se créent ensuite."
-                  Size: =12
-                  Color: =RGBA(100, 114, 138, 1)
-                  X: =0
-                  Y: =48
-                  Width: =1000
-                  Height: =24
-            - lblVideTrier:
-                Control: Label@2.5.1
-                Properties:
-                  Text: ="Rien à trier."
-                  Align: =Align.Center
-                  Color: =RGBA(100, 114, 138, 1)
-                  Visible: =CountRows(galTrier.AllItems) = 0
-                  X: =0
-                  Y: =136
-                  Width: =1088
-                  Height: =40
-            - galTrier:
-                Control: Gallery@2.15.0
-                Variant: Vertical
-                Properties:
-                  Items: =Filter('[LME] Workload', TypeTache.Value = "À trier", Statut.Value <> "Terminé")
-                  X: =0
-                  Y: =80
-                  Width: =1088
-                  Height: =604
-                  TemplateSize: =92
-                  TemplatePadding: =6
-                Children:
-                  - recTrier:
-                      Control: Rectangle@2.3.0
-                      Properties:
-                        Fill: =RGBA(255, 255, 255, 1)
-                        X: =0
-                        Y: =0
-                        Width: =Parent.TemplateWidth
-                        Height: =Parent.TemplateHeight - 6
-                  - lblTrierTitre:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: =ThisItem.Title
-                        FontWeight: =FontWeight.Semibold
-                        Color: =RGBA(16, 26, 46, 1)
-                        X: =14
-                        Y: =8
-                        Width: =Parent.TemplateWidth - 28
-                        Height: =26
-                  - lblTrierMeta:
-                      Control: Label@2.5.1
-                      Properties:
-                        Text: =ThisItem.Source.Value & " · échéance " & Text(ThisItem.Echeance, "dd/mm")
-                        Size: =11
-                        Color: =RGBA(100, 114, 138, 1)
-                        X: =14
-                        Y: =34
-                        Width: =Parent.TemplateWidth - 28
-                        Height: =20
-                  - ddTrierType:
-                      Control: Classic/DropDown@2.3.1
-                      Properties:
-                        Items: =["Support", "Amélioration", "Monthly eng", "Projet"]
-                        X: =14
-                        Y: =54
-                        Width: =240
-                        Height: =28
-                  - ddTrierProjet:
-                      Control: Classic/DropDown@2.3.1
-                      Properties:
-                        Items: |-
-                          =ForAll(Filter('[LME] Projets', StatutProjet.Value = "Actif"), {Value: Title, ID: ID})
-                        X: =266
-                        Y: =54
-                        Width: =260
-                        Height: =28
-                  - btnClasser:
-                      Control: Classic/Button@2.2.0
-                      Properties:
-                        Text: ="Classer"
-                        Fill: =RGBA(31, 79, 216, 1)
-                        Color: =RGBA(255, 255, 255, 1)
-                        X: =540
-                        Y: =54
-                        Width: =120
-                        Height: =28
-                        OnSelect: |-
-                          =Patch('[LME] Workload', LookUp('[LME] Workload', ID = ThisItem.ID),
-                            {
-                              TypeTache: {Value: ddTrierType.Selected.Value},
-                              Projet: {Id: ddTrierProjet.Selected.ID, Value: ddTrierProjet.Selected.Value}
-                            });
-                          Select(btnRefresh);
-                          Notify("Classée : les étapes du modèle vont être créées par le flux.", NotificationType.Success)
+                                  {
+                                    TypeTache: {Value: ddTrierType.Selected.Value},
+                                    Projet: {Id: ddTrierProjet.Selected.ID, Value: ddTrierProjet.Selected.Value}
+                                  });
+                                Select(btnRefresh);
+                                Notify("Classée : les étapes du modèle vont être créées par le flux.", NotificationType.Success)
+                              Size: =13
+                              Font: =Font.'Segoe UI'
       - cntDrawer:
           Control: GroupContainer@1.5.0
           Variant: ManualLayout
           Properties:
+            X: =Parent.Width - 420
+            Y: =0
+            Width: =420
             Height: =Parent.Height
             Visible: =!IsBlank(varSel)
-            Width: =400
-            X: =Parent.Width - 400
-            Y: =0
+            Fill: =RGBA(255, 255, 255, 1)
           Children:
-            - recDrawer:
-                Control: Rectangle@2.3.0
-                Properties:
-                  Fill: =RGBA(255, 255, 255, 1)
-                  BorderColor: =RGBA(227, 232, 240, 1)
-                  BorderThickness: =1
-                  X: =0
-                  Y: =0
-                  Width: =400
-                  Height: =Parent.Height
             - btnFermer:
                 Control: Classic/Button@2.2.0
                 Properties:
+                  X: =Parent.Width - 54
+                  Y: =12
+                  Width: =38
+                  Height: =38
                   Text: ="✕"
                   Fill: =RGBA(255, 255, 255, 1)
                   Color: =RGBA(16, 26, 46, 1)
-                  X: =352
-                  Y: =12
-                  Width: =36
-                  Height: =36
                   OnSelect: =Set(varSel, Blank())
+                  Size: =13
+                  Font: =Font.'Segoe UI'
             - lblDType:
                 Control: Label@2.5.1
                 Properties:
+                  X: =20
+                  Y: =18
+                  Width: =320
+                  Height: =22
                   Text: =varSel.TypeTache.Value
-                  Size: =11
+                  Size: =12
                   FontWeight: =FontWeight.Semibold
                   Color: =Coalesce(LookUp(colTC, T = varSel.TypeTache.Value, C), RGBA(107, 119, 140, 1))
-                  X: =16
-                  Y: =16
-                  Width: =300
-                  Height: =22
+                  Font: =Font.'Segoe UI'
             - lblDTitre:
                 Control: Label@2.5.1
                 Properties:
+                  X: =20
+                  Y: =44
+                  Width: =372
+                  Height: =66
                   Text: =varSel.Title
-                  Size: =16
+                  Size: =18
                   FontWeight: =FontWeight.Semibold
                   Color: =RGBA(16, 26, 46, 1)
-                  X: =16
-                  Y: =42
-                  Width: =340
-                  Height: =64
+                  Font: =Font.'Segoe UI'
             - lblDMeta:
                 Control: Label@2.5.1
                 Properties:
-                  Text: =varSel.Statut.Value & " · " & varSel.Source.Value & " · " & Coalesce(varSel.Projet.Value, "sans projet") & Char(10) & "Échéance " & Text(varSel.Echeance, "dd/mm/yyyy")
-                  Size: =12
-                  Color: =RGBA(100, 114, 138, 1)
-                  X: =16
-                  Y: =110
-                  Width: =368
+                  X: =20
+                  Y: =114
+                  Width: =380
                   Height: =44
+                  Text: =varSel.Statut.Value & " · " & varSel.Source.Value & " · " & Coalesce(varSel.Projet.Value, "sans projet") & Char(10) & "Échéance " & Text(varSel.Echeance, "dd/mm/yyyy")
+                  Size: =13
+                  Color: =RGBA(100, 114, 138, 1)
+                  Font: =Font.'Segoe UI'
             - lblDPct:
                 Control: Label@2.5.1
                 Properties:
+                  X: =20
+                  Y: =162
+                  Width: =380
+                  Height: =26
                   Text: =Coalesce(LookUp(colPct, ID = varSel.ID, pct), 0) & " %  ·  " & CountRows(Filter(colEtapes, Tache.Id = varSel.ID, Fait)) & " étape(s) sur " & CountRows(Filter(colEtapes, Tache.Id = varSel.ID))
                   FontWeight: =FontWeight.Semibold
                   Color: =RGBA(31, 79, 216, 1)
-                  X: =16
-                  Y: =158
-                  Width: =368
-                  Height: =26
+                  Size: =14
+                  Font: =Font.'Segoe UI'
             - recDBack:
                 Control: Rectangle@2.3.0
                 Properties:
-                  Fill: =RGBA(238, 241, 247, 1)
-                  X: =16
-                  Y: =188
-                  Width: =368
+                  X: =20
+                  Y: =194
+                  Width: =380
                   Height: =8
+                  Fill: =RGBA(238, 241, 247, 1)
             - recDFill:
                 Control: Rectangle@2.3.0
                 Properties:
-                  Fill: =RGBA(31, 79, 216, 1)
-                  X: =16
-                  Y: =188
-                  Width: =368 * Coalesce(LookUp(colPct, ID = varSel.ID, pct), 0) / 100
+                  X: =20
+                  Y: =194
+                  Width: =380 * Coalesce(LookUp(colPct, ID = varSel.ID, pct), 0) / 100
                   Height: =8
+                  Fill: =RGBA(31, 79, 216, 1)
             - galEtapes:
                 Control: Gallery@2.15.0
                 Variant: Vertical
                 Properties:
+                  X: =20
+                  Y: =212
+                  Width: =380
+                  Height: =Parent.Height - 212 - 250
                   Items: =SortByColumns(Filter(colEtapes, Tache.Id = varSel.ID), "Ordre")
-                  X: =16
-                  Y: =204
-                  Width: =368
-                  Height: =200
-                  TemplateSize: =36
+                  TemplateSize: =38
                   TemplatePadding: =0
                 Children:
                   - chkEtape:
                       Control: Classic/CheckBox@2.1.0
                       Properties:
+                        X: =0
+                        Y: =0
+                        Width: =Parent.TemplateWidth
+                        Height: =Parent.TemplateHeight
                         Text: =ThisItem.Title
                         Default: =ThisItem.Fait
                         OnCheck: |-
@@ -1751,28 +2018,29 @@ Screens:
                         OnUncheck: |-
                           =Patch('[LME] Etapes', LookUp('[LME] Etapes', ID = ThisItem.ID), {Fait: false});
                           Select(btnRefresh)
-                        X: =0
-                        Y: =0
-                        Width: =Parent.TemplateWidth
-                        Height: =Parent.TemplateHeight
+                        Size: =13
+                        Font: =Font.'Segoe UI'
             - txtEtape:
                 Control: Classic/TextInput@2.3.2
                 Properties:
+                  X: =20
+                  Y: =Parent.Height - 232
+                  Width: =290
+                  Height: =36
                   HintText: ="Ajouter une étape"
                   Visible: =varSel.Statut.Value <> "Terminé"
-                  X: =16
-                  Y: =412
-                  Width: =270
-                  Height: =34
+                  Size: =13
+                  Font: =Font.'Segoe UI'
+                  Default: =""
             - btnAjouterEtape:
                 Control: Classic/Button@2.2.0
                 Properties:
+                  X: =320
+                  Y: =Parent.Height - 232
+                  Width: =80
+                  Height: =36
                   Text: ="Ajouter"
                   Visible: =varSel.Statut.Value <> "Terminé"
-                  X: =294
-                  Y: =412
-                  Width: =90
-                  Height: =34
                   DisplayMode: =If(IsBlank(txtEtape.Text), DisplayMode.Disabled, DisplayMode.Edit)
                   OnSelect: |-
                     =Patch('[LME] Etapes', Defaults('[LME] Etapes'),
@@ -1784,51 +2052,63 @@ Screens:
                       });
                     Reset(txtEtape);
                     Select(btnRefresh)
+                  Size: =13
+                  Font: =Font.'Segoe UI'
             - btnStAFaire:
                 Control: Classic/Button@2.2.0
                 Properties:
+                  X: =20
+                  Y: =Parent.Height - 188
+                  Width: =120
+                  Height: =36
                   Text: ="À faire"
                   Fill: =If(varSel.Statut.Value = "À faire", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varSel.Statut.Value = "À faire", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
                   Visible: =varSel.Statut.Value <> "Terminé"
-                  X: =16
-                  Y: =456
-                  Width: =118
-                  Height: =34
                   OnSelect: |-
                     =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "À faire"}});
                     Select(btnRefresh)
+                  Size: =13
+                  Font: =Font.'Segoe UI'
             - btnStEnCours:
                 Control: Classic/Button@2.2.0
                 Properties:
+                  X: =148
+                  Y: =Parent.Height - 188
+                  Width: =120
+                  Height: =36
                   Text: ="En cours"
                   Fill: =If(varSel.Statut.Value = "En cours", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varSel.Statut.Value = "En cours", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
                   Visible: =varSel.Statut.Value <> "Terminé"
-                  X: =141
-                  Y: =456
-                  Width: =118
-                  Height: =34
                   OnSelect: |-
                     =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "En cours"}});
                     Select(btnRefresh)
+                  Size: =13
+                  Font: =Font.'Segoe UI'
             - btnStBloque:
                 Control: Classic/Button@2.2.0
                 Properties:
+                  X: =276
+                  Y: =Parent.Height - 188
+                  Width: =120
+                  Height: =36
                   Text: ="Bloqué"
                   Fill: =If(varSel.Statut.Value = "Bloqué", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varSel.Statut.Value = "Bloqué", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
                   Visible: =varSel.Statut.Value <> "Terminé"
-                  X: =266
-                  Y: =456
-                  Width: =118
-                  Height: =34
                   OnSelect: |-
                     =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "Bloqué"}});
                     Select(btnRefresh)
+                  Size: =13
+                  Font: =Font.'Segoe UI'
             - lblSync:
                 Control: Label@2.5.1
                 Properties:
+                  X: =20
+                  Y: =Parent.Height - 144
+                  Width: =380
+                  Height: =50
                   Text: |-
                     =If(varSel.Statut.Value = "Terminé", "Clôture propagée par le flux.",
                       Switch(varSel.Source.Value,
@@ -1836,43 +2116,44 @@ Screens:
                         "Teams", "Terminer clôt la liste et la tâche To Do.",
                         "Loop", "Terminer clôt la liste. À cocher aussi dans Loop si non synchronisé.",
                         "Terminer clôt la liste."))
-                  Size: =11
+                  Size: =12
                   Color: =RGBA(100, 114, 138, 1)
-                  X: =16
-                  Y: =500
-                  Width: =368
-                  Height: =44
+                  Font: =Font.'Segoe UI'
             - btnTerminer:
                 Control: Classic/Button@2.2.0
                 Properties:
+                  X: =20
+                  Y: =Parent.Height - 84
+                  Width: =380
+                  Height: =48
                   Text: ="Terminer partout"
                   Fill: =RGBA(31, 79, 216, 1)
                   Color: =RGBA(255, 255, 255, 1)
                   Visible: =varSel.Statut.Value <> "Terminé"
-                  X: =16
-                  Y: =Parent.Height - 64
-                  Width: =368
-                  Height: =44
                   OnSelect: |-
                     =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID),
                       {Statut: {Value: "Terminé"}, TermineLe: Now()});
                     Select(btnRefresh);
                     Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success)
+                  Size: =13
+                  Font: =Font.'Segoe UI'
             - btnRouvrir:
                 Control: Classic/Button@2.2.0
                 Properties:
+                  X: =20
+                  Y: =Parent.Height - 84
+                  Width: =380
+                  Height: =48
                   Text: ="Rouvrir"
                   Fill: =RGBA(255, 255, 255, 1)
                   Color: =RGBA(16, 26, 46, 1)
                   Visible: =varSel.Statut.Value = "Terminé"
-                  X: =16
-                  Y: =Parent.Height - 64
-                  Width: =368
-                  Height: =44
                   OnSelect: |-
                     =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID),
                       {Statut: {Value: "En cours"}, TermineLe: Blank(), Propage: false});
                     Select(btnRefresh)
+                  Size: =13
+                  Font: =Font.'Segoe UI'
 ```
 
 ## Après chaque collage : exécuter `OnVisible`
@@ -1891,6 +2172,14 @@ L'application affiche uniquement ce qui est dans tes listes. Si `[LME] Workload`
 2. Dans Studio, sélectionne `btnRefresh`, propriété `OnSelect` : les erreurs de formule sont soulignées en rouge, et le **Vérificateur d'application** (icône en haut à droite) les liste toutes.
 3. Si le clic sur « Actualiser » ne produit ni bandeau ni donnée, c'est qu'une erreur de syntaxe empêche toute la formule de s'exécuter : cherche le soulignement rouge.
 4. Envoie-moi le texte des bandeaux ou des erreurs, ou une nouvelle trace faite après le clic.
+
+## Propriétés ajoutées pour l'interface
+
+Ces propriétés n'étaient pas dans la version précédente. Si Studio en refuse une (message « Unknown property »), supprime simplement la ligne : le reste fonctionne.
+
+- `Font: =Font.'Segoe UI'` sur les labels, boutons, champs, listes déroulantes et cases à cocher.
+- `Default: =""` sur les champs de saisie : sans elle, un champ affiche « Text input » au lieu de son texte d'aide.
+- `Align: =Align.Left` sur les boutons du menu.
 
 ## Points à surveiller
 
