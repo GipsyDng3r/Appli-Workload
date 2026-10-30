@@ -1168,18 +1168,31 @@ Screens:
                                     X: =10
                                     Y: =26
                                     Width: =Parent.TemplateWidth - 20
-                                    Height: =48
+                                    Height: =34
                                     Text: =ThisItem.Title
                                     Size: =10
                                     FontWeight: =FontWeight.Semibold
                                     Color: =If(ThisItem.Statut.Value = "Terminé", RGBA(100, 114, 138, 1), RGBA(16, 26, 46, 1))
                                     Font: =Font.'Segoe UI'
                                     OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
+                              - lblCProjet:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    X: =10
+                                    Y: =62
+                                    Width: =Parent.TemplateWidth - 20
+                                    Height: =18
+                                    Text: ="▸ " & Coalesce(ThisItem.Projet.Value, "Sans projet")
+                                    Size: =9
+                                    Color: =RGBA(14, 138, 125, 1)
+                                    FontWeight: =FontWeight.Semibold
+                                    Font: =Font.'Segoe UI'
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
                               - recCBack:
                                   Control: Rectangle@2.3.0
                                   Properties:
                                     X: =10
-                                    Y: =78
+                                    Y: =82
                                     Width: =Parent.TemplateWidth - 20
                                     Height: =6
                                     Fill: =RGBA(227, 232, 240, 1)
@@ -1188,7 +1201,7 @@ Screens:
                                   Control: Rectangle@2.3.0
                                   Properties:
                                     X: =10
-                                    Y: =78
+                                    Y: =82
                                     Width: =(Parent.TemplateWidth - 20) * Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) / 100
                                     Height: =6
                                     Fill: =RGBA(31, 79, 216, 1)
@@ -1197,7 +1210,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     X: =10
-                                    Y: =90
+                                    Y: =92
                                     Width: =Parent.TemplateWidth - 100
                                     Height: =24
                                     Text: =Text(ThisItem.Echeance, "dd/mm") & " · " & Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) & " %"
@@ -1222,7 +1235,7 @@ Screens:
                                   Control: Classic/Button@2.2.0
                                   Properties:
                                     X: =Parent.TemplateWidth - 84
-                                    Y: =88
+                                    Y: =90
                                     Width: =32
                                     Height: =24
                                     Text: ="◀"
@@ -1241,7 +1254,7 @@ Screens:
                                   Control: Classic/Button@2.2.0
                                   Properties:
                                     X: =Parent.TemplateWidth - 44
-                                    Y: =88
+                                    Y: =90
                                     Width: =32
                                     Height: =24
                                     Text: ="▶"
@@ -1949,45 +1962,6 @@ Screens:
             Visible: =!IsBlank(varSel)
             Fill: =RGBA(255, 255, 255, 1)
           Children:
-            - btnFermer:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  X: =Parent.Width - 54
-                  Y: =12
-                  Width: =38
-                  Height: =38
-                  Text: ="✕"
-                  Fill: =RGBA(255, 255, 255, 1)
-                  Color: =RGBA(16, 26, 46, 1)
-                  OnSelect: =Set(varSel, Blank()); Set(varEdit, false)
-                  Size: =10
-                  Font: =Font.'Segoe UI'
-            - lblDType:
-                Control: Label@2.5.1
-                Properties:
-                  X: =20
-                  Y: =18
-                  Width: =240
-                  Height: =22
-                  Text: =varSel.TypeTache.Value
-                  Size: =9
-                  FontWeight: =FontWeight.Semibold
-                  Color: =Coalesce(LookUp(colTC, T = varSel.TypeTache.Value, C), RGBA(107, 119, 140, 1))
-                  Font: =Font.'Segoe UI'
-            - btnModifier:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  X: =Parent.Width - 150
-                  Y: =12
-                  Width: =90
-                  Height: =30
-                  Text: ="Modifier"
-                  Fill: =RGBA(255, 255, 255, 1)
-                  Color: =RGBA(31, 79, 216, 1)
-                  Size: =10
-                  Font: =Font.'Segoe UI'
-                  Visible: =!varEdit
-                  OnSelect: =Set(varEdit, true)
             - cntDrawerVue:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
@@ -2401,6 +2375,45 @@ Screens:
                         Size: =11
                         Font: =Font.'Segoe UI'
                         OnSelect: =Set(varEdit, false)
+            - lblDType:
+                Control: Label@2.5.1
+                Properties:
+                  X: =20
+                  Y: =18
+                  Width: =240
+                  Height: =22
+                  Text: =varSel.TypeTache.Value
+                  Size: =9
+                  FontWeight: =FontWeight.Semibold
+                  Color: =Coalesce(LookUp(colTC, T = varSel.TypeTache.Value, C), RGBA(107, 119, 140, 1))
+                  Font: =Font.'Segoe UI'
+            - btnModifier:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  X: =Parent.Width - 150
+                  Y: =12
+                  Width: =90
+                  Height: =30
+                  Text: ="Modifier"
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Color: =RGBA(31, 79, 216, 1)
+                  Size: =10
+                  Font: =Font.'Segoe UI'
+                  Visible: =!varEdit
+                  OnSelect: =Set(varEdit, true)
+            - btnFermer:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  X: =Parent.Width - 54
+                  Y: =12
+                  Width: =38
+                  Height: =38
+                  Text: ="✕"
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Color: =RGBA(16, 26, 46, 1)
+                  OnSelect: =Set(varEdit, false); Set(varSel, Blank())
+                  Size: =10
+                  Font: =Font.'Segoe UI'
 ```
 
 ## Après chaque collage : exécuter `OnVisible`
@@ -2447,6 +2460,10 @@ Ces propriétés n'étaient pas dans la version précédente. Si Studio en refus
 - `Font: =Font.'Segoe UI'` sur les labels, boutons, champs, listes déroulantes et cases à cocher.
 - `Default: =""` sur les champs de saisie : sans elle, un champ affiche « Text input » au lieu de son texte d'aide.
 - `Align: =Align.Left` sur les boutons du menu.
+
+## Ordre d'empilement (important)
+
+Dans Power Apps, un contrôle ou un container placé plus bas dans la liste est affiché au-dessus et reçoit les clics, même s'il est transparent. Dans `cntDrawer`, les boutons « ✕ » et « Modifier » doivent donc rester **après** `cntDrawerVue` et `cntDrawerEdit`. Si tu ajoutes un container plein écran, mets-le avant les boutons.
 
 ## Points à surveiller
 
