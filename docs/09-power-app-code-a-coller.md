@@ -1148,18 +1148,20 @@ Screens:
                                     Width: =Parent.TemplateWidth
                                     Height: =Parent.TemplateHeight - 8
                                     Fill: =RGBA(244, 246, 250, 1)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
                               - lblCType:
                                   Control: Label@2.5.1
                                   Properties:
                                     X: =10
                                     Y: =6
-                                    Width: =Parent.TemplateWidth - 20
+                                    Width: =Parent.TemplateWidth - 112
                                     Height: =18
                                     Text: =ThisItem.TypeTache.Value
                                     Size: =8
                                     FontWeight: =FontWeight.Semibold
                                     Color: =Coalesce(LookUp(colTC, T = ThisItem.TypeTache.Value, C), RGBA(107, 119, 140, 1))
                                     Font: =Font.'Segoe UI'
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
                               - lblCTitre:
                                   Control: Label@2.5.1
                                   Properties:
@@ -1172,6 +1174,7 @@ Screens:
                                     FontWeight: =FontWeight.Semibold
                                     Color: =If(ThisItem.Statut.Value = "Terminé", RGBA(100, 114, 138, 1), RGBA(16, 26, 46, 1))
                                     Font: =Font.'Segoe UI'
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
                               - recCBack:
                                   Control: Rectangle@2.3.0
                                   Properties:
@@ -1180,6 +1183,7 @@ Screens:
                                     Width: =Parent.TemplateWidth - 20
                                     Height: =6
                                     Fill: =RGBA(227, 232, 240, 1)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
                               - recCFill:
                                   Control: Rectangle@2.3.0
                                   Properties:
@@ -1188,6 +1192,7 @@ Screens:
                                     Width: =(Parent.TemplateWidth - 20) * Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) / 100
                                     Height: =6
                                     Fill: =RGBA(31, 79, 216, 1)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
                               - lblCDue:
                                   Control: Label@2.5.1
                                   Properties:
@@ -1199,6 +1204,20 @@ Screens:
                                     Size: =9
                                     Color: =If(ThisItem.Statut.Value <> "Terminé" && ThisItem.Echeance < Today(), RGBA(192, 51, 43, 1), RGBA(100, 114, 138, 1))
                                     Font: =Font.'Segoe UI'
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
+                              - btnDetail:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    X: =Parent.TemplateWidth - 98
+                                    Y: =3
+                                    Width: =88
+                                    Height: =22
+                                    Text: ="✎ Modifier"
+                                    Fill: =RGBA(255, 255, 255, 1)
+                                    Color: =RGBA(31, 79, 216, 1)
+                                    Size: =9
+                                    Font: =Font.'Segoe UI'
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, true)
                               - btnPrev:
                                   Control: Classic/Button@2.2.0
                                   Properties:
@@ -2403,7 +2422,7 @@ L'application affiche uniquement ce qui est dans tes listes. Si `[LME] Workload`
 
 ## Modifier une tâche depuis le Kanban
 
-Un clic sur une carte (Kanban, tableau de bord, calendrier) ouvre le volet de détail à droite. Le bouton **Modifier**, en haut du volet, bascule sur un formulaire :
+Dans la vue **Tâches**, chaque carte du Kanban a un bouton **✎ Modifier** en haut à droite : il ouvre le volet de détail directement sur le formulaire. Un clic n'importe où ailleurs sur la carte (titre, type, barre d'avancement, date) ouvre le volet en lecture, avec un bouton **Modifier** en haut. Le même volet s'ouvre aussi depuis le tableau de bord et le calendrier. Le formulaire contient :
 
 | Champ | Contrôle |
 |---|---|
