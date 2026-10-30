@@ -992,12 +992,23 @@ Screens:
                       Properties:
                         X: =0
                         Y: =0
-                        Width: =Parent.Width
+                        Width: =110
                         Height: =40
                         Text: ="Tâches"
                         Size: =22
                         FontWeight: =FontWeight.Bold
                         Color: =RGBA(16, 26, 46, 1)
+                        Font: =Font.'Segoe UI'
+                  - lblSousTasks:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =120
+                        Y: =11
+                        Width: =Parent.Width - 120
+                        Height: =24
+                        Text: ="Ouvre une carte pour le détail, utilise ◀ ▶ pour changer de colonne."
+                        Size: =12
+                        Color: =RGBA(100, 114, 138, 1)
                         Font: =Font.'Segoe UI'
                   - cntTasksFiltres:
                       Control: GroupContainer@1.5.0
@@ -1008,70 +1019,62 @@ Screens:
                         Width: =Parent.Width
                         Height: =36
                       Children:
-                        - btnChipAll:
-                            Control: Classic/Button@2.2.0
+                        - imgChipAll:
+                            Control: Image@2.2.3
                             Properties:
                               X: =0
                               Y: =0
-                              Width: =120
+                              Width: =104
                               Height: =36
-                              Text: ="Toutes"
-                              Fill: =If(IsBlank(varType), RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
-                              Color: =If(IsBlank(varType), RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+                              Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 104 36'><rect x='0.5' y='0.5' width='103' height='35' rx='17.5' fill='" & If(IsBlank(varType), "#1f4fd8", "#ffffff") & "' stroke='" & If(IsBlank(varType), "#1f4fd8", "#dde3ee") & "'/><text x='18' y='23' font-family='Segoe UI,Arial,sans-serif' font-size='13' font-weight='600' fill='" & If(IsBlank(varType), "#ffffff", "#101a2e") & "'>Toutes</text><rect x='66' y='8' width='28' height='20' rx='10' fill='" & If(IsBlank(varType), "#ffffff", "#eef1f7") & "' fill-opacity='" & If(IsBlank(varType), "0.25", "1") & "'/><text x='80' y='22.5' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='11' font-weight='700' fill='" & If(IsBlank(varType), "#ffffff", "#64728a") & "'>" & CountRows(Filter(colWL, Statut.Value <> "Terminé", TypeTache.Value <> "À trier")) & "</text></svg>")
                               OnSelect: =Set(varType, Blank())
-                              Size: =12
-                              Font: =Font.'Segoe UI'
-                        - btnChipSupport:
-                            Control: Classic/Button@2.2.0
+                        - imgChipSupport:
+                            Control: Image@2.2.3
                             Properties:
-                              X: =128
+                              X: =112
                               Y: =0
-                              Width: =120
+                              Width: =118
                               Height: =36
-                              Text: ="Support"
-                              Fill: =If(varType = "Support", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
-                              Color: =If(varType = "Support", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+                              Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 118 36'><rect x='0.5' y='0.5' width='117' height='35' rx='17.5' fill='" & If(varType = "Support", "#1f4fd8", "#ffffff") & "' stroke='" & If(varType = "Support", "#1f4fd8", "#dde3ee") & "'/><circle cx='17' cy='18' r='5' fill='" & If(varType = "Support", "#ffffff", "#2f62d6") & "'/><text x='30' y='23' font-family='Segoe UI,Arial,sans-serif' font-size='13' font-weight='600' fill='" & If(varType = "Support", "#ffffff", "#101a2e") & "'>Support</text><rect x='80' y='8' width='28' height='20' rx='10' fill='" & If(varType = "Support", "#ffffff", "#eef1f7") & "' fill-opacity='" & If(varType = "Support", "0.25", "1") & "'/><text x='94' y='22.5' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='11' font-weight='700' fill='" & If(varType = "Support", "#ffffff", "#64728a") & "'>" & CountRows(Filter(colWL, Statut.Value <> "Terminé", TypeTache.Value = "Support")) & "</text></svg>")
                               OnSelect: =Set(varType, If(varType = "Support", Blank(), "Support"))
-                              Size: =12
-                              Font: =Font.'Segoe UI'
-                        - btnChipAmel:
-                            Control: Classic/Button@2.2.0
+                        - imgChipAmel:
+                            Control: Image@2.2.3
                             Properties:
-                              X: =256
+                              X: =238
                               Y: =0
-                              Width: =120
+                              Width: =158
                               Height: =36
-                              Text: ="Amélioration"
-                              Fill: =If(varType = "Amélioration", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
-                              Color: =If(varType = "Amélioration", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+                              Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 158 36'><rect x='0.5' y='0.5' width='157' height='35' rx='17.5' fill='" & If(varType = "Amélioration", "#1f4fd8", "#ffffff") & "' stroke='" & If(varType = "Amélioration", "#1f4fd8", "#dde3ee") & "'/><circle cx='17' cy='18' r='5' fill='" & If(varType = "Amélioration", "#ffffff", "#7b4fc4") & "'/><text x='30' y='23' font-family='Segoe UI,Arial,sans-serif' font-size='13' font-weight='600' fill='" & If(varType = "Amélioration", "#ffffff", "#101a2e") & "'>Amélioration</text><rect x='120' y='8' width='28' height='20' rx='10' fill='" & If(varType = "Amélioration", "#ffffff", "#eef1f7") & "' fill-opacity='" & If(varType = "Amélioration", "0.25", "1") & "'/><text x='134' y='22.5' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='11' font-weight='700' fill='" & If(varType = "Amélioration", "#ffffff", "#64728a") & "'>" & CountRows(Filter(colWL, Statut.Value <> "Terminé", TypeTache.Value = "Amélioration")) & "</text></svg>")
                               OnSelect: =Set(varType, If(varType = "Amélioration", Blank(), "Amélioration"))
-                              Size: =12
-                              Font: =Font.'Segoe UI'
-                        - btnChipMonthly:
-                            Control: Classic/Button@2.2.0
+                        - imgChipMonthly:
+                            Control: Image@2.2.3
                             Properties:
-                              X: =384
+                              X: =404
                               Y: =0
-                              Width: =120
+                              Width: =150
                               Height: =36
-                              Text: ="Monthly eng"
-                              Fill: =If(varType = "Monthly eng", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
-                              Color: =If(varType = "Monthly eng", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+                              Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 36'><rect x='0.5' y='0.5' width='149' height='35' rx='17.5' fill='" & If(varType = "Monthly eng", "#1f4fd8", "#ffffff") & "' stroke='" & If(varType = "Monthly eng", "#1f4fd8", "#dde3ee") & "'/><circle cx='17' cy='18' r='5' fill='" & If(varType = "Monthly eng", "#ffffff", "#b86a00") & "'/><text x='30' y='23' font-family='Segoe UI,Arial,sans-serif' font-size='13' font-weight='600' fill='" & If(varType = "Monthly eng", "#ffffff", "#101a2e") & "'>Monthly eng</text><rect x='112' y='8' width='28' height='20' rx='10' fill='" & If(varType = "Monthly eng", "#ffffff", "#eef1f7") & "' fill-opacity='" & If(varType = "Monthly eng", "0.25", "1") & "'/><text x='126' y='22.5' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='11' font-weight='700' fill='" & If(varType = "Monthly eng", "#ffffff", "#64728a") & "'>" & CountRows(Filter(colWL, Statut.Value <> "Terminé", TypeTache.Value = "Monthly eng")) & "</text></svg>")
                               OnSelect: =Set(varType, If(varType = "Monthly eng", Blank(), "Monthly eng"))
-                              Size: =12
-                              Font: =Font.'Segoe UI'
-                        - btnChipProjet:
-                            Control: Classic/Button@2.2.0
+                        - imgChipProjet:
+                            Control: Image@2.2.3
                             Properties:
-                              X: =512
+                              X: =562
                               Y: =0
-                              Width: =120
+                              Width: =116
                               Height: =36
-                              Text: ="Projet"
-                              Fill: =If(varType = "Projet", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
-                              Color: =If(varType = "Projet", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+                              Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 116 36'><rect x='0.5' y='0.5' width='115' height='35' rx='17.5' fill='" & If(varType = "Projet", "#1f4fd8", "#ffffff") & "' stroke='" & If(varType = "Projet", "#1f4fd8", "#dde3ee") & "'/><circle cx='17' cy='18' r='5' fill='" & If(varType = "Projet", "#ffffff", "#0e8a7d") & "'/><text x='30' y='23' font-family='Segoe UI,Arial,sans-serif' font-size='13' font-weight='600' fill='" & If(varType = "Projet", "#ffffff", "#101a2e") & "'>Projet</text><rect x='78' y='8' width='28' height='20' rx='10' fill='" & If(varType = "Projet", "#ffffff", "#eef1f7") & "' fill-opacity='" & If(varType = "Projet", "0.25", "1") & "'/><text x='92' y='22.5' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='11' font-weight='700' fill='" & If(varType = "Projet", "#ffffff", "#64728a") & "'>" & CountRows(Filter(colWL, Statut.Value <> "Terminé", TypeTache.Value = "Projet")) & "</text></svg>")
                               OnSelect: =Set(varType, If(varType = "Projet", Blank(), "Projet"))
+                        - lblTasksCount:
+                            Control: Label@2.5.1
+                            Properties:
+                              X: =Parent.Width - 280
+                              Y: =6
+                              Width: =280
+                              Height: =24
+                              Text: =CountRows(Filter(colWL, TypeTache.Value <> "À trier", IsBlank(varType) || TypeTache.Value = varType, IsBlank(txtRecherche.Text) || txtRecherche.Text in Title)) & " tâches affichées"
                               Size: =12
+                              Color: =RGBA(100, 114, 138, 1)
+                              Align: =Align.Right
                               Font: =Font.'Segoe UI'
                   - galCols:
                       Control: Gallery@2.15.0
@@ -2177,6 +2180,10 @@ L'application affiche uniquement ce qui est dans tes listes. Si `[LME] Workload`
 2. Dans Studio, sélectionne `btnRefresh`, propriété `OnSelect` : les erreurs de formule sont soulignées en rouge, et le **Vérificateur d'application** (icône en haut à droite) les liste toutes.
 3. Si le clic sur « Actualiser » ne produit ni bandeau ni donnée, c'est qu'une erreur de syntaxe empêche toute la formule de s'exécuter : cherche le soulignement rouge.
 4. Envoie-moi le texte des bandeaux ou des erreurs, ou une nouvelle trace faite après le clic.
+
+## Pastilles de filtre de la vue Tâches
+
+Les cinq filtres (Toutes, Support, Amélioration, Monthly eng, Projet) sont des contrôles `Image` qui affichent un SVG généré par formule : pastille arrondie, point de la couleur du type, nom et badge du nombre de tâches ouvertes. La pastille active passe en bleu plein. Un clic sur la pastille active la désélectionne. Le compteur « N tâches affichées » à droite tient compte du filtre et de la recherche. Les nombres viennent de la collection locale `colWL`, chargée par « Actualiser ».
 
 ## Propriétés ajoutées pour l'interface
 
