@@ -1,438 +1,1245 @@
-# 9. Power App : code à coller
+# 9. Power App : code complet à coller
 
-Ce document remplace la construction à la main de l'écran décrite en [07](07-power-app.md). Tu colles le code de l'écran dans Power Apps Studio, et les contrôles se créent avec leurs formules.
+Application canvas au format **Tablette** (1366 x 768), dans le style de la maquette [maquette/workload.html](../maquette/workload.html) : tableau de bord, Kanban, calendrier, analyse, vue « À trier » et volet de détail. Un seul écran `scrMain` : les vues sont des groupes de contrôles dont la propriété `Visible` dépend de la variable `varVue`.
+
+Le même code est dans [power-app/scrMain.pa.yaml](../power-app/scrMain.pa.yaml), plus pratique à copier depuis GitHub (bouton « Copy raw file »).
 
 ## Ce qui n'est pas garanti
 
-Je n'ai pas pu tester ce code dans Power Apps Studio. Le format de collage est un sous-ensemble de YAML dont la syntaxe exacte évolue : un nom de type de contrôle, une propriété ou un niveau d'indentation peuvent être refusés au premier collage. Les messages d'erreur de Studio indiquent la ligne en cause. La section « Si le collage échoue » donne une méthode pour corriger sans réécrire.
+Je n'ai pas pu tester ce code dans Power Apps Studio. Deux niveaux de risque :
+- **Le format de collage** (YAML) : un nom de type de contrôle ou une propriété peut être refusé au premier essai. Voir « Si le collage échoue ».
+- **Les formules Power Fx** : elles ne dépendent pas du format et se corrigent contrôle par contrôle. Les points les plus délicats sont signalés dans « Points à surveiller ».
+
+La structure du YAML a été vérifiée avec un analyseur YAML : indentation correcte, aucun nom de contrôle en double, aucune référence à un contrôle inexistant.
+
+## Différences avec la maquette
+
+| Maquette | Power App |
+|---|---|
+| Glisser-déposer des cartes du Kanban | Boutons ◀ ▶ sur chaque carte : Power Apps n'a pas de glisser-déposer natif |
+| Courbes et anneau dessinés en JavaScript | Images SVG générées par formule (`data:image/svg+xml`) |
+| Barres en pilule hachurée | Barres pleines arrondies |
+| Tiroir de détail animé | Volet fixe à droite, affiché quand une tâche est sélectionnée |
+| Bouton « Simuler un mail flaggé » | Absent : ce sont les vrais flux qui créent les tâches. Un champ « Nouvelle tâche manuelle » le remplace |
+| Données d'exemple | Données de tes listes SharePoint |
+| Modèles d'étapes | Se modifient dans la liste `ModelesEtapes` |
 
 ## Avant de coller
 
-1. Les quatre listes SharePoint existent avec les noms internes de colonnes de [02](02-listes-sharepoint.md) (`TypeTache`, `Statut`, `Source`, `Echeance`, `Projet`, `TermineLe`, `Tache`, `Fait`, `Ordre`, `StatutProjet`).
+1. Les quatre listes SharePoint existent avec les noms internes de colonnes de [02](02-listes-sharepoint.md) : `Workload` (`TypeTache`, `Source`, `Statut`, `Echeance`, `Projet`, `TermineLe`, `Propage`, `EtapesCreees`), `Projets` (`StatutProjet`), `Etapes` (`Tache`, `Fait`, `Ordre`).
 2. Crée une application canvas vide au format **Tablette**.
-3. Menu **Données** → ajoute les sources `Workload`, `Projets` et `Etapes` (SharePoint, ton site). Les noms dans l'app doivent être exactement ceux-là (supprime un éventuel suffixe).
+3. Menu **Données** → ajoute `Workload`, `Projets` et `Etapes` (connecteur SharePoint). Les noms dans l'app doivent être exactement ceux-là.
 4. Paramètres → Général : porte la **limite de lignes de données** à 2000.
-5. Vérifie que la **barre de formule Power Fx** est active (Paramètres → Mises à jour, ou option par défaut sur les nouvelles apps) : le collage de code en dépend.
-6. Supprime l'écran vide `Screen1` après le collage, ou garde-le comme écran de secours.
+5. Vérifie que la **barre de formule Power Fx** est active : le collage de code en dépend.
+6. Paramètres → Affichage : décoche « Adapter à l'écran » et « Verrouiller le format » si tu veux garder les coordonnées exactes.
 
 ## Coller
 
 1. Copie tout le bloc YAML ci-dessous.
-2. Dans l'arborescence (vue Arborescence à gauche), clic droit sur **l'application / la liste des écrans** → **Coller le code**. Un écran `scrMain` se crée avec tous ses contrôles.
-3. Ouvre `scrMain`, ajuste si besoin, puis lance l'application (F5). L'écran charge les données à l'ouverture.
+2. Dans l'arborescence, clic droit sur la liste des écrans → **Coller le code**. L'écran `scrMain` se crée avec ses 125 contrôles.
+3. Définis `scrMain` comme écran de démarrage, puis lance l'application (F5). L'`OnVisible` charge les données.
 
 ## Le code
 
 ```yaml
 Screens:
   scrMain As screen:
-    Fill: =RGBA(243, 245, 247, 1)
+    Fill: =RGBA(238, 241, 247, 1)
     OnVisible: |-
-      =Set(varVue, "today");
-      Set(varProjet, Blank());
+      =Set(varVue, "dash");
       Set(varType, Blank());
       Set(varSel, Blank());
+      Set(varAn, Year(Today()));
+      Set(varMois, Month(Today()));
+      ClearCollect(colTC,
+        {T: "Support", C: RGBA(47, 98, 214, 1)},
+        {T: "Amélioration", C: RGBA(123, 79, 196, 1)},
+        {T: "Monthly eng", C: RGBA(184, 106, 0, 1)},
+        {T: "Projet", C: RGBA(14, 138, 125, 1)},
+        {T: "À trier", C: RGBA(107, 119, 140, 1)}
+      );
       Select(btnRefresh)
     Children:
-    - recTop As rectangle:
-        Fill: =RGBA(11, 110, 110, 1)
+    # ---------- Barre latérale ----------
+    - recSide As rectangle:
+        Fill: =RGBA(255, 255, 255, 1)
         X: =0
         Y: =0
-        Width: =Parent.Width
-        Height: =48
-    - lblTitle As label:
+        Width: =230
+        Height: =Parent.Height
+    - lblLogo As label:
         Text: ="Workload"
-        Color: =RGBA(255, 255, 255, 1)
         Size: =18
-        FontWeight: =FontWeight.Semibold
-        X: =16
-        Y: =0
+        FontWeight: =FontWeight.Bold
+        Color: =RGBA(16, 26, 46, 1)
+        X: =20
+        Y: =16
+        Width: =190
+        Height: =40
+    - navDash As button:
+        Text: ="Tableau de bord"
+        Fill: =If(varVue = "dash", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
+        Color: =If(varVue = "dash", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
+        BorderColor: =Self.Fill
+        X: =12
+        Y: =84
+        Width: =206
+        Height: =38
+        OnSelect: =Set(varVue, "dash"); Set(varSel, Blank())
+    - navTasks As button:
+        Text: ="Tâches"
+        Fill: =If(varVue = "tasks", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
+        Color: =If(varVue = "tasks", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
+        BorderColor: =Self.Fill
+        X: =12
+        Y: =128
+        Width: =206
+        Height: =38
+        OnSelect: =Set(varVue, "tasks"); Set(varSel, Blank())
+    - navCal As button:
+        Text: ="Calendrier"
+        Fill: =If(varVue = "cal", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
+        Color: =If(varVue = "cal", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
+        BorderColor: =Self.Fill
+        X: =12
+        Y: =172
+        Width: =206
+        Height: =38
+        OnSelect: =Set(varVue, "cal"); Set(varSel, Blank())
+    - navStats As button:
+        Text: ="Analyse"
+        Fill: =If(varVue = "stats", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
+        Color: =If(varVue = "stats", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
+        BorderColor: =Self.Fill
+        X: =12
+        Y: =216
+        Width: =206
+        Height: =38
+        OnSelect: =Set(varVue, "stats"); Set(varSel, Blank())
+    - navTrier As button:
+        Text: ="À trier (" & CountRows(Filter(Workload, TypeTache.Value = "À trier", Statut.Value <> "Terminé")) & ")"
+        Fill: =If(varVue = "trier", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
+        Color: =If(varVue = "trier", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
+        BorderColor: =Self.Fill
+        X: =12
+        Y: =260
+        Width: =206
+        Height: =38
+        OnSelect: =Set(varVue, "trier"); Set(varSel, Blank())
+
+    # ---------- Barre du haut ----------
+    - txtRecherche As text:
+        HintText: ="Rechercher une tâche"
+        X: =254
+        Y: =12
         Width: =300
-        Height: =48
+        Height: =40
+    - txtNouvelle As text:
+        HintText: ="Nouvelle tâche manuelle"
+        X: =570
+        Y: =12
+        Width: =260
+        Height: =40
+    - btnAjouter As button:
+        Text: ="Ajouter"
+        Fill: =RGBA(31, 79, 216, 1)
+        Color: =RGBA(255, 255, 255, 1)
+        X: =838
+        Y: =12
+        Width: =100
+        Height: =40
+        DisplayMode: =If(IsBlank(txtNouvelle.Text), DisplayMode.Disabled, DisplayMode.Edit)
+        OnSelect: |-
+          =Patch(Workload, Defaults(Workload),
+            {
+              Title: txtNouvelle.Text,
+              TypeTache: {Value: "À trier"},
+              Source: {Value: "Manuel"},
+              Statut: {Value: "À faire"},
+              Echeance: DateAdd(Today(), 7, TimeUnit.Days),
+              Propage: false,
+              EtapesCreees: false
+            });
+          Reset(txtNouvelle);
+          Select(btnRefresh);
+          Set(varVue, "trier");
+          Notify("Tâche créée dans À trier : choisis son type et son projet.", NotificationType.Success)
     - btnRefresh As button:
         Text: ="Actualiser"
         Fill: =RGBA(255, 255, 255, 1)
-        Color: =RGBA(11, 110, 110, 1)
-        X: =Parent.Width - 136
-        Y: =8
-        Width: =120
-        Height: =32
+        Color: =RGBA(16, 26, 46, 1)
+        X: =Parent.Width - 130
+        Y: =12
+        Width: =112
+        Height: =40
         OnSelect: |-
           =Refresh(Workload);
           Refresh(Etapes);
+          Refresh(Projets);
           ClearCollect(colEtapes, Etapes);
           ClearCollect(colPct,
             ForAll(Workload As w,
               {
                 ID: w.ID,
                 ProjetId: w.Projet.Id,
+                TypeT: w.TypeTache.Value,
                 pct: If(w.Statut.Value = "Terminé", 100,
                   With({e: Filter(colEtapes, Tache.Id = w.ID)},
                     If(CountRows(e) = 0, 0, Round(100 * CountRows(Filter(e, Fait)) / CountRows(e), 0))))
               }
             )
-          )
+          );
+          Set(varGlobal, Round(Coalesce(Average(colPct, pct), 0), 0));
+          Set(varNext, First(SortByColumns(Filter(Workload, Statut.Value <> "Terminé", TypeTache.Value <> "À trier"), "Echeance", SortOrder.Ascending)));
+          ClearCollect(colTypes,
+            ForAll(["Support", "Amélioration", "Monthly eng", "Projet"] As t,
+              {
+                T: t.Value,
+                n: CountRows(Filter(Workload, TypeTache.Value = t.Value)),
+                pct: Round(Coalesce(Average(Filter(colPct, TypeT = t.Value), pct), 0), 0)
+              }
+            )
+          );
+          ClearCollect(colProjCount,
+            ForAll(Sequence(CountRows(Projets)),
+              With({p: Index(Projets, Value)},
+                {
+                  k: Value,
+                  name: p.Title,
+                  n: CountRows(Filter(Workload, Projet.Id = p.ID, Statut.Value <> "Terminé"))
+                }
+              )
+            )
+          );
+          Set(varTotalOuv, Sum(colProjCount, n));
+          ClearCollect(colDonut,
+            ForAll(colProjCount As c,
+              {
+                k: c.k,
+                name: c.name,
+                n: c.n,
+                share: Round(100 * c.n / Max(varTotalOuv, 1), 0),
+                start: Round(100 * Sum(Filter(colProjCount, k < c.k), n) / Max(varTotalOuv, 1), 0)
+              }
+            )
+          );
+          ClearCollect(colSem,
+            ForAll(Sequence(8, 0),
+              {
+                i: Value,
+                n: CountRows(Filter(Workload, Statut.Value = "Terminé",
+                     TermineLe >= DateAdd(Today(), 1 - 7 * (8 - Value), TimeUnit.Days),
+                     TermineLe < DateAdd(Today(), 1 - 7 * (7 - Value), TimeUnit.Days)))
+              }
+            )
+          );
+          If(!IsBlank(varSel), Set(varSel, LookUp(Workload, ID = varSel.ID)))
 
-    - recRail As rectangle:
-        Fill: =RGBA(238, 241, 244, 1)
-        X: =0
-        Y: =48
-        Width: =200
-        Height: =Parent.Height - 48
-    - btnVueToday As button:
-        Text: ="Aujourd'hui (" & CountRows(Filter(Workload, Statut.Value <> "Terminé", Echeance <= Today())) & ")"
-        Fill: =If(varVue = "today", RGBA(217, 239, 238, 1), RGBA(238, 241, 244, 1))
-        Color: =RGBA(23, 33, 43, 1)
-        BorderColor: =RGBA(238, 241, 244, 1)
-        X: =8
-        Y: =64
-        Width: =184
-        Height: =36
-        OnSelect: =Set(varVue, "today")
-    - btnVueOpen As button:
-        Text: ="Toutes ouvertes (" & CountRows(Filter(Workload, Statut.Value <> "Terminé")) & ")"
-        Fill: =If(varVue = "open", RGBA(217, 239, 238, 1), RGBA(238, 241, 244, 1))
-        Color: =RGBA(23, 33, 43, 1)
-        BorderColor: =RGBA(238, 241, 244, 1)
-        X: =8
-        Y: =104
-        Width: =184
-        Height: =36
-        OnSelect: =Set(varVue, "open")
-    - btnVueLate As button:
-        Text: ="En retard (" & CountRows(Filter(Workload, Statut.Value <> "Terminé", Echeance < Today())) & ")"
-        Fill: =If(varVue = "late", RGBA(217, 239, 238, 1), RGBA(238, 241, 244, 1))
-        Color: =RGBA(23, 33, 43, 1)
-        BorderColor: =RGBA(238, 241, 244, 1)
-        X: =8
-        Y: =144
-        Width: =184
-        Height: =36
-        OnSelect: =Set(varVue, "late")
-    - btnVueDone As button:
-        Text: ="Terminées (" & CountRows(Filter(Workload, Statut.Value = "Terminé")) & ")"
-        Fill: =If(varVue = "done", RGBA(217, 239, 238, 1), RGBA(238, 241, 244, 1))
-        Color: =RGBA(23, 33, 43, 1)
-        BorderColor: =RGBA(238, 241, 244, 1)
-        X: =8
-        Y: =184
-        Width: =184
-        Height: =36
-        OnSelect: =Set(varVue, "done")
-    - btnVueTrier As button:
-        Text: ="À trier (" & CountRows(Filter(Workload, TypeTache.Value = "À trier", Statut.Value <> "Terminé")) & ")"
-        Fill: =If(varVue = "trier", RGBA(217, 239, 238, 1), RGBA(238, 241, 244, 1))
-        Color: =RGBA(23, 33, 43, 1)
-        BorderColor: =RGBA(238, 241, 244, 1)
-        X: =8
-        Y: =224
-        Width: =184
-        Height: =36
-        OnSelect: =Set(varVue, "trier")
-    - btnTousProjets As button:
-        Text: ="Tous les projets"
-        Fill: =RGBA(255, 255, 255, 1)
-        Color: =RGBA(11, 110, 110, 1)
-        X: =8
-        Y: =284
-        Width: =184
-        Height: =36
-        Visible: =!IsBlank(varProjet)
-        OnSelect: =Set(varProjet, Blank())
-
+    # ---------- Vue : Tableau de bord ----------
+    - lblTitreDash As label:
+        Text: ="Tableau de bord"
+        Size: =24
+        FontWeight: =FontWeight.Bold
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "dash"
+        X: =254
+        Y: =72
+        Width: =500
+        Height: =44
     - lblKpiOuvertes As label:
-        Text: =CountRows(Filter(Workload, Statut.Value <> "Terminé")) & Char(10) & "Ouvertes"
-        Fill: =RGBA(255, 255, 255, 1)
-        Color: =RGBA(23, 33, 43, 1)
-        BorderColor: =RGBA(221, 226, 232, 1)
-        BorderThickness: =1
-        PaddingLeft: =10
-        X: =216
-        Y: =64
-        Width: =196
-        Height: =60
+        Text: =CountRows(Filter(Workload, Statut.Value <> "Terminé")) & Char(10) & "Tâches ouvertes"
+        Size: =18
+        FontWeight: =FontWeight.Bold
+        Fill: =RGBA(21, 62, 170, 1)
+        Color: =RGBA(255, 255, 255, 1)
+        PaddingLeft: =14
+        Visible: =varVue = "dash"
+        X: =254
+        Y: =124
+        Width: =256
+        Height: =96
     - lblKpiRetard As label:
         Text: =CountRows(Filter(Workload, Statut.Value <> "Terminé", Echeance < Today())) & Char(10) & "En retard"
+        Size: =18
+        FontWeight: =FontWeight.Bold
         Fill: =RGBA(255, 255, 255, 1)
-        Color: =RGBA(179, 38, 30, 1)
-        BorderColor: =RGBA(221, 226, 232, 1)
-        BorderThickness: =1
-        PaddingLeft: =10
-        X: =426
-        Y: =64
-        Width: =196
-        Height: =60
+        Color: =RGBA(192, 51, 43, 1)
+        PaddingLeft: =14
+        Visible: =varVue = "dash"
+        X: =526
+        Y: =124
+        Width: =256
+        Height: =96
     - lblKpiSemaine As label:
-        Text: =CountRows(Filter(Workload, Statut.Value = "Terminé", TermineLe >= DateAdd(Today(), -7, TimeUnit.Days))) & Char(10) & "Terminées sur 7 jours"
+        Text: =CountRows(Filter(Workload, Statut.Value = "Terminé", TermineLe >= DateAdd(Today(), -6, TimeUnit.Days))) & Char(10) & "Terminées sur 7 jours"
+        Size: =18
+        FontWeight: =FontWeight.Bold
         Fill: =RGBA(255, 255, 255, 1)
-        Color: =RGBA(30, 122, 70, 1)
-        BorderColor: =RGBA(221, 226, 232, 1)
-        BorderThickness: =1
-        PaddingLeft: =10
-        X: =636
-        Y: =64
-        Width: =196
-        Height: =60
-    - lblKpiGlobal As label:
-        Text: =Round(Coalesce(Average(colPct, pct), 0), 0) & " %" & Char(10) & "Avancement global"
+        Color: =RGBA(19, 122, 74, 1)
+        PaddingLeft: =14
+        Visible: =varVue = "dash"
+        X: =798
+        Y: =124
+        Width: =256
+        Height: =96
+    - lblKpiTrier As label:
+        Text: =CountRows(Filter(Workload, TypeTache.Value = "À trier", Statut.Value <> "Terminé")) & Char(10) & "À trier"
+        Size: =18
+        FontWeight: =FontWeight.Bold
         Fill: =RGBA(255, 255, 255, 1)
-        Color: =RGBA(23, 33, 43, 1)
-        BorderColor: =RGBA(221, 226, 232, 1)
-        BorderThickness: =1
-        PaddingLeft: =10
-        X: =846
-        Y: =64
-        Width: =196
-        Height: =60
-
+        Color: =RGBA(16, 26, 46, 1)
+        PaddingLeft: =14
+        Visible: =varVue = "dash"
+        X: =1070
+        Y: =124
+        Width: =256
+        Height: =96
+    - recCardProj As rectangle:
+        Fill: =RGBA(255, 255, 255, 1)
+        Visible: =varVue = "dash"
+        X: =254
+        Y: =236
+        Width: =460
+        Height: =236
+    - lblHProj As label:
+        Text: ="Avancement par projet"
+        FontWeight: =FontWeight.Semibold
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "dash"
+        X: =270
+        Y: =244
+        Width: =300
+        Height: =26
     - galProjets As gallery.galleryHorizontal:
         Items: =Filter(Projets, StatutProjet.Value = "Actif")
-        X: =216
-        Y: =136
-        Width: =830
-        Height: =96
-        TemplateSize: =270
-        TemplatePadding: =6
-        OnSelect: =Set(varProjet, ThisItem.Title); Set(varVue, "open")
+        Visible: =varVue = "dash"
+        X: =262
+        Y: =272
+        Width: =444
+        Height: =196
+        TemplateSize: =148
+        TemplatePadding: =0
         Children:
-        - recProjCard As rectangle:
-            Fill: =If(varProjet = ThisItem.Title, RGBA(217, 239, 238, 1), RGBA(255, 255, 255, 1))
-            BorderColor: =RGBA(221, 226, 232, 1)
-            BorderThickness: =1
+        - lblPctProj As label:
+            Text: =Round(Coalesce(Average(Filter(colPct, ProjetId = ThisItem.ID), pct), 0), 0) & " %"
+            Align: =Align.Center
+            FontWeight: =FontWeight.Semibold
+            Color: =RGBA(16, 26, 46, 1)
             X: =0
             Y: =0
             Width: =Parent.TemplateWidth
-            Height: =Parent.TemplateHeight
-        - lblProjNom As label:
+            Height: =22
+        - recTube As rectangle:
+            Fill: =RGBA(238, 241, 247, 1)
+            RadiusTopLeft: =22
+            RadiusTopRight: =22
+            RadiusBottomLeft: =22
+            RadiusBottomRight: =22
+            X: =Parent.TemplateWidth / 2 - 22
+            Y: =26
+            Width: =44
+            Height: =116
+        - recFillProj As rectangle:
+            Fill: =RGBA(31, 79, 216, 1)
+            RadiusTopLeft: =22
+            RadiusTopRight: =22
+            RadiusBottomLeft: =22
+            RadiusBottomRight: =22
+            X: =Parent.TemplateWidth / 2 - 22
+            Y: =26 + 116 - Self.Height
+            Width: =44
+            Height: =Max(8, 116 * Coalesce(Average(Filter(colPct, ProjetId = ThisItem.ID), pct), 0) / 100)
+        - lblNomProj As label:
             Text: =ThisItem.Title
-            FontWeight: =FontWeight.Semibold
-            Color: =RGBA(23, 33, 43, 1)
-            X: =8
-            Y: =6
-            Width: =Parent.TemplateWidth - 80
-            Height: =28
-        - lblProjPct As label:
-            Text: =Round(Coalesce(Average(Filter(colPct, ProjetId = ThisItem.ID), pct), 0), 0) & " %"
-            Align: =Align.Right
-            FontWeight: =FontWeight.Semibold
-            Color: =RGBA(11, 110, 110, 1)
-            X: =Parent.TemplateWidth - 76
-            Y: =6
-            Width: =68
-            Height: =28
-        - recProjBarBack As rectangle:
-            Fill: =RGBA(238, 241, 244, 1)
-            X: =8
-            Y: =42
-            Width: =Parent.TemplateWidth - 16
-            Height: =8
-        - recProjBar As rectangle:
-            Fill: =RGBA(11, 110, 110, 1)
-            X: =8
-            Y: =42
-            Width: =(Parent.TemplateWidth - 16) * Coalesce(Average(Filter(colPct, ProjetId = ThisItem.ID), pct), 0) / 100
-            Height: =8
-        - lblProjCompte As label:
-            Text: =CountRows(Filter(Workload, Projet.Id = ThisItem.ID, Statut.Value = "Terminé")) & " terminée(s) sur " & CountRows(Filter(Workload, Projet.Id = ThisItem.ID))
-            Color: =RGBA(93, 107, 122, 1)
+            Align: =Align.Center
             Size: =11
-            X: =8
-            Y: =56
-            Width: =Parent.TemplateWidth - 16
-            Height: =26
-
-    - txtRecherche As text:
-        HintText: ="Rechercher une tâche"
-        X: =216
+            Color: =RGBA(100, 114, 138, 1)
+            X: =0
+            Y: =146
+            Width: =Parent.TemplateWidth
+            Height: =40
+    - recCardNext As rectangle:
+        Fill: =RGBA(255, 255, 255, 1)
+        Visible: =varVue = "dash"
+        X: =730
+        Y: =236
+        Width: =300
+        Height: =236
+    - lblHNext As label:
+        Text: ="Prochaine échéance"
+        FontWeight: =FontWeight.Semibold
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "dash"
+        X: =746
         Y: =244
-        Width: =240
+        Width: =270
+        Height: =26
+    - lblNextTitre As label:
+        Text: =Coalesce(varNext.Title, "Rien à échéance")
+        Size: =15
+        FontWeight: =FontWeight.Semibold
+        Color: =RGBA(31, 79, 216, 1)
+        Visible: =varVue = "dash"
+        X: =746
+        Y: =274
+        Width: =268
+        Height: =62
+    - lblNextMeta As label:
+        Text: =If(IsBlank(varNext), "", varNext.TypeTache.Value & " · " & varNext.Source.Value & " · " & Text(varNext.Echeance, "dd/mm"))
+        Size: =11
+        Color: =RGBA(100, 114, 138, 1)
+        Visible: =varVue = "dash"
+        X: =746
+        Y: =338
+        Width: =268
+        Height: =22
+    - btnNextTerminer As button:
+        Text: ="Terminer partout"
+        Fill: =RGBA(31, 79, 216, 1)
+        Color: =RGBA(255, 255, 255, 1)
+        Visible: =varVue = "dash" && !IsBlank(varNext)
+        X: =746
+        Y: =374
+        Width: =268
+        Height: =40
+        OnSelect: |-
+          =Patch(Workload, LookUp(Workload, ID = varNext.ID),
+            {Statut: {Value: "Terminé"}, TermineLe: Now()});
+          Select(btnRefresh);
+          Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success)
+    - btnNextOuvrir As button:
+        Text: ="Ouvrir le détail"
+        Fill: =RGBA(255, 255, 255, 1)
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "dash" && !IsBlank(varNext)
+        X: =746
+        Y: =422
+        Width: =268
         Height: =36
-    - btnTypeSupport As button:
-        Text: ="Support"
-        Fill: =If(varType = "Support", RGBA(11, 110, 110, 1), RGBA(255, 255, 255, 1))
-        Color: =If(varType = "Support", RGBA(255, 255, 255, 1), RGBA(23, 33, 43, 1))
-        X: =464
+        OnSelect: =Set(varSel, varNext)
+    - recCardList As rectangle:
+        Fill: =RGBA(255, 255, 255, 1)
+        Visible: =varVue = "dash"
+        X: =1046
+        Y: =236
+        Width: =296
+        Height: =236
+    - lblHList As label:
+        Text: ="À traiter"
+        FontWeight: =FontWeight.Semibold
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "dash"
+        X: =1062
         Y: =244
-        Width: =100
-        Height: =36
-        OnSelect: =Set(varType, If(varType = "Support", Blank(), "Support"))
-    - btnTypeAmel As button:
-        Text: ="Amélioration"
-        Fill: =If(varType = "Amélioration", RGBA(11, 110, 110, 1), RGBA(255, 255, 255, 1))
-        Color: =If(varType = "Amélioration", RGBA(255, 255, 255, 1), RGBA(23, 33, 43, 1))
-        X: =572
-        Y: =244
-        Width: =120
-        Height: =36
-        OnSelect: =Set(varType, If(varType = "Amélioration", Blank(), "Amélioration"))
-    - btnTypeMonthly As button:
-        Text: ="Monthly eng"
-        Fill: =If(varType = "Monthly eng", RGBA(11, 110, 110, 1), RGBA(255, 255, 255, 1))
-        Color: =If(varType = "Monthly eng", RGBA(255, 255, 255, 1), RGBA(23, 33, 43, 1))
-        X: =700
-        Y: =244
-        Width: =120
-        Height: =36
-        OnSelect: =Set(varType, If(varType = "Monthly eng", Blank(), "Monthly eng"))
-    - btnTypeProjet As button:
-        Text: ="Projet"
-        Fill: =If(varType = "Projet", RGBA(11, 110, 110, 1), RGBA(255, 255, 255, 1))
-        Color: =If(varType = "Projet", RGBA(255, 255, 255, 1), RGBA(23, 33, 43, 1))
-        X: =828
-        Y: =244
-        Width: =100
-        Height: =36
-        OnSelect: =Set(varType, If(varType = "Projet", Blank(), "Projet"))
-
-    - galTaches As gallery.galleryVertical:
-        Items: |-
-          =SortByColumns(
-            Filter(Workload,
-              (varVue = "today" && Statut.Value <> "Terminé" && Echeance <= Today()) ||
-              (varVue = "open" && Statut.Value <> "Terminé") ||
-              (varVue = "late" && Statut.Value <> "Terminé" && Echeance < Today()) ||
-              (varVue = "done" && Statut.Value = "Terminé") ||
-              (varVue = "trier" && TypeTache.Value = "À trier" && Statut.Value <> "Terminé"),
-              IsBlank(varProjet) || Projet.Value = varProjet,
-              IsBlank(varType) || TypeTache.Value = varType,
-              IsBlank(txtRecherche.Text) || txtRecherche.Text in Title
-            ),
-            "Echeance", SortOrder.Ascending
-          )
-        X: =216
-        Y: =288
-        Width: =830
-        Height: =Parent.Height - 296
-        TemplateSize: =64
+        Width: =260
+        Height: =26
+    - galATraiter As gallery.galleryVertical:
+        Items: =FirstN(SortByColumns(Filter(Workload, Statut.Value <> "Terminé"), "Echeance", SortOrder.Ascending), 5)
+        Visible: =varVue = "dash"
+        X: =1054
+        Y: =272
+        Width: =280
+        Height: =196
+        TemplateSize: =39
         TemplatePadding: =0
         OnSelect: =Set(varSel, ThisItem)
         Children:
-        - recLigne As rectangle:
-            Fill: =If(varSel.ID = ThisItem.ID, RGBA(217, 239, 238, 1), RGBA(255, 255, 255, 1))
-            BorderColor: =RGBA(221, 226, 232, 1)
+        - lblATTitre As label:
+            Text: =ThisItem.Title
+            Wrap: =false
+            Size: =12
+            Color: =RGBA(16, 26, 46, 1)
+            X: =8
+            Y: =0
+            Width: =Parent.TemplateWidth - 64
+            Height: =22
+        - lblATMeta As label:
+            Text: =ThisItem.TypeTache.Value
+            Size: =10
+            Color: =Coalesce(LookUp(colTC, T = ThisItem.TypeTache.Value, C), RGBA(107, 119, 140, 1))
+            X: =8
+            Y: =20
+            Width: =Parent.TemplateWidth - 64
+            Height: =18
+        - lblATDue As label:
+            Text: =Text(ThisItem.Echeance, "dd/mm")
+            Align: =Align.Right
+            Size: =11
+            Color: =If(ThisItem.Echeance < Today(), RGBA(192, 51, 43, 1), RGBA(16, 26, 46, 1))
+            X: =Parent.TemplateWidth - 56
+            Y: =8
+            Width: =50
+            Height: =22
+    - recCardType As rectangle:
+        Fill: =RGBA(255, 255, 255, 1)
+        Visible: =varVue = "dash"
+        X: =254
+        Y: =488
+        Width: =440
+        Height: =260
+    - lblHType As label:
+        Text: ="Avancement par type"
+        FontWeight: =FontWeight.Semibold
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "dash"
+        X: =270
+        Y: =496
+        Width: =300
+        Height: =26
+    - galParType As gallery.galleryVertical:
+        Items: =colTypes
+        Visible: =varVue = "dash"
+        X: =262
+        Y: =526
+        Width: =424
+        Height: =216
+        TemplateSize: =52
+        TemplatePadding: =0
+        Children:
+        - lblTypeNom As label:
+            Text: =ThisItem.T & " · " & ThisItem.n
+            Size: =12
+            Color: =RGBA(16, 26, 46, 1)
+            X: =8
+            Y: =2
+            Width: =Parent.TemplateWidth - 80
+            Height: =24
+        - lblTypePct As label:
+            Text: =ThisItem.pct & " %"
+            Align: =Align.Right
+            Size: =12
+            FontWeight: =FontWeight.Semibold
+            Color: =RGBA(16, 26, 46, 1)
+            X: =Parent.TemplateWidth - 70
+            Y: =2
+            Width: =62
+            Height: =24
+        - recTypeBack As rectangle:
+            Fill: =RGBA(238, 241, 247, 1)
+            X: =8
+            Y: =30
+            Width: =Parent.TemplateWidth - 16
+            Height: =8
+        - recTypeFill As rectangle:
+            Fill: =Coalesce(LookUp(colTC, T = ThisItem.T, C), RGBA(31, 79, 216, 1))
+            X: =8
+            Y: =30
+            Width: =(Parent.TemplateWidth - 16) * ThisItem.pct / 100
+            Height: =8
+    - recCardGauge As rectangle:
+        Fill: =RGBA(255, 255, 255, 1)
+        Visible: =varVue = "dash"
+        X: =710
+        Y: =488
+        Width: =300
+        Height: =260
+    - lblHGauge As label:
+        Text: ="Avancement global"
+        FontWeight: =FontWeight.Semibold
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "dash"
+        X: =726
+        Y: =496
+        Width: =260
+        Height: =26
+    - imgGauge As image:
+        Image: |-
+          ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 74'><path d='M10 64 A50 50 0 0 1 110 64' fill='none' stroke='#eef1f7' stroke-width='12' stroke-linecap='round'/><path d='M10 64 A50 50 0 0 1 110 64' pathLength='100' fill='none' stroke='#1f4fd8' stroke-width='12' stroke-linecap='round' stroke-dasharray='" & varGlobal & " 100'/><text x='60' y='58' text-anchor='middle' font-size='22' font-weight='700' fill='#101a2e'>" & varGlobal & "%</text></svg>")
+        Visible: =varVue = "dash"
+        X: =726
+        Y: =540
+        Width: =268
+        Height: =180
+    - recCardDark As rectangle:
+        Fill: =RGBA(12, 29, 74, 1)
+        Visible: =varVue = "dash"
+        X: =1026
+        Y: =488
+        Width: =316
+        Height: =260
+    - lblDark As label:
+        Text: =CountRows(Filter(Workload, Statut.Value = "Terminé")) & " / " & CountRows(Workload) & Char(10) & "tâches clôturées partout"
+        Size: =20
+        FontWeight: =FontWeight.Bold
+        Color: =RGBA(255, 255, 255, 1)
+        Visible: =varVue = "dash"
+        X: =1042
+        Y: =504
+        Width: =284
+        Height: =120
+
+    # ---------- Vue : Tâches (Kanban) ----------
+    - lblTitreTasks As label:
+        Text: ="Tâches"
+        Size: =24
+        FontWeight: =FontWeight.Bold
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "tasks"
+        X: =254
+        Y: =72
+        Width: =300
+        Height: =44
+    - btnChipAll As button:
+        Text: ="Toutes"
+        Fill: =If(IsBlank(varType), RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+        Color: =If(IsBlank(varType), RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+        Visible: =varVue = "tasks"
+        X: =254
+        Y: =120
+        Width: =100
+        Height: =34
+        OnSelect: =Set(varType, Blank())
+    - btnChipSupport As button:
+        Text: ="Support"
+        Fill: =If(varType = "Support", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+        Color: =If(varType = "Support", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+        Visible: =varVue = "tasks"
+        X: =362
+        Y: =120
+        Width: =100
+        Height: =34
+        OnSelect: =Set(varType, If(varType = "Support", Blank(), "Support"))
+    - btnChipAmel As button:
+        Text: ="Amélioration"
+        Fill: =If(varType = "Amélioration", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+        Color: =If(varType = "Amélioration", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+        Visible: =varVue = "tasks"
+        X: =470
+        Y: =120
+        Width: =120
+        Height: =34
+        OnSelect: =Set(varType, If(varType = "Amélioration", Blank(), "Amélioration"))
+    - btnChipMonthly As button:
+        Text: ="Monthly eng"
+        Fill: =If(varType = "Monthly eng", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+        Color: =If(varType = "Monthly eng", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+        Visible: =varVue = "tasks"
+        X: =598
+        Y: =120
+        Width: =120
+        Height: =34
+        OnSelect: =Set(varType, If(varType = "Monthly eng", Blank(), "Monthly eng"))
+    - btnChipProjet As button:
+        Text: ="Projet"
+        Fill: =If(varType = "Projet", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+        Color: =If(varType = "Projet", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+        Visible: =varVue = "tasks"
+        X: =726
+        Y: =120
+        Width: =100
+        Height: =34
+        OnSelect: =Set(varType, If(varType = "Projet", Blank(), "Projet"))
+    - galCols As gallery.galleryHorizontal:
+        Items: |-
+          =Table({S: "À faire"}, {S: "En cours"}, {S: "Bloqué"}, {S: "Terminé"})
+        Visible: =varVue = "tasks"
+        X: =254
+        Y: =164
+        Width: =1088
+        Height: =584
+        TemplateSize: =272
+        TemplatePadding: =4
+        Children:
+        - recCol As rectangle:
+            Fill: =RGBA(255, 255, 255, 1)
+            X: =0
+            Y: =0
+            Width: =Parent.TemplateWidth
+            Height: =Parent.TemplateHeight
+        - lblColHead As label:
+            Text: =ThisItem.S & " (" & CountRows(Filter(Workload, Statut.Value = ThisItem.S, TypeTache.Value <> "À trier")) & ")"
+            FontWeight: =FontWeight.Semibold
+            Color: =Switch(ThisItem.S, "En cours", RGBA(31, 79, 216, 1), "Bloqué", RGBA(192, 51, 43, 1), "Terminé", RGBA(19, 122, 74, 1), RGBA(100, 114, 138, 1))
+            X: =12
+            Y: =8
+            Width: =Parent.TemplateWidth - 24
+            Height: =28
+        - galCartes As gallery.galleryVertical:
+            Items: |-
+              =SortByColumns(
+                Filter(Workload,
+                  Statut.Value = ThisItem.S,
+                  TypeTache.Value <> "À trier",
+                  IsBlank(varType) || TypeTache.Value = varType,
+                  IsBlank(txtRecherche.Text) || txtRecherche.Text in Title
+                ),
+                "Echeance", SortOrder.Ascending
+              )
+            X: =6
+            Y: =40
+            Width: =Parent.TemplateWidth - 12
+            Height: =Parent.TemplateHeight - 48
+            TemplateSize: =118
+            TemplatePadding: =0
+            OnSelect: =Set(varSel, ThisItem)
+            Children:
+            - recCarte As rectangle:
+                Fill: =RGBA(244, 246, 250, 1)
+                X: =0
+                Y: =0
+                Width: =Parent.TemplateWidth
+                Height: =Parent.TemplateHeight - 8
+            - lblCType As label:
+                Text: =ThisItem.TypeTache.Value
+                Size: =10
+                FontWeight: =FontWeight.Semibold
+                Color: =Coalesce(LookUp(colTC, T = ThisItem.TypeTache.Value, C), RGBA(107, 119, 140, 1))
+                X: =8
+                Y: =4
+                Width: =Parent.TemplateWidth - 16
+                Height: =18
+            - lblCTitre As label:
+                Text: =ThisItem.Title
+                Size: =12
+                FontWeight: =FontWeight.Semibold
+                Color: =If(ThisItem.Statut.Value = "Terminé", RGBA(100, 114, 138, 1), RGBA(16, 26, 46, 1))
+                X: =8
+                Y: =22
+                Width: =Parent.TemplateWidth - 16
+                Height: =42
+            - recCBack As rectangle:
+                Fill: =RGBA(227, 232, 240, 1)
+                X: =8
+                Y: =68
+                Width: =Parent.TemplateWidth - 16
+                Height: =5
+            - recCFill As rectangle:
+                Fill: =RGBA(31, 79, 216, 1)
+                X: =8
+                Y: =68
+                Width: =(Parent.TemplateWidth - 16) * Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) / 100
+                Height: =5
+            - lblCDue As label:
+                Text: =Text(ThisItem.Echeance, "dd/mm") & " · " & Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) & " %"
+                Size: =10
+                Color: =If(ThisItem.Statut.Value <> "Terminé" && ThisItem.Echeance < Today(), RGBA(192, 51, 43, 1), RGBA(100, 114, 138, 1))
+                X: =8
+                Y: =78
+                Width: =Parent.TemplateWidth - 90
+                Height: =22
+            - btnPrev As button:
+                Text: ="◀"
+                Fill: =RGBA(255, 255, 255, 1)
+                Color: =RGBA(16, 26, 46, 1)
+                Visible: =ThisItem.Statut.Value <> "À faire"
+                X: =Parent.TemplateWidth - 78
+                Y: =76
+                Width: =34
+                Height: =26
+                OnSelect: |-
+                  =Patch(Workload, LookUp(Workload, ID = ThisItem.ID),
+                    {Statut: {Value: Switch(ThisItem.Statut.Value, "En cours", "À faire", "Bloqué", "En cours", "Terminé", "Bloqué", "À faire")}});
+                  If(ThisItem.Statut.Value = "Terminé",
+                    Patch(Workload, LookUp(Workload, ID = ThisItem.ID), {TermineLe: Blank(), Propage: false}));
+                  Select(btnRefresh)
+            - btnNext As button:
+                Text: ="▶"
+                Fill: =RGBA(255, 255, 255, 1)
+                Color: =RGBA(16, 26, 46, 1)
+                Visible: =ThisItem.Statut.Value <> "Terminé"
+                X: =Parent.TemplateWidth - 40
+                Y: =76
+                Width: =34
+                Height: =26
+                OnSelect: |-
+                  =With({nv: Switch(ThisItem.Statut.Value, "À faire", "En cours", "En cours", "Bloqué", "Bloqué", "Terminé", "À faire")},
+                    Patch(Workload, LookUp(Workload, ID = ThisItem.ID), {Statut: {Value: nv}});
+                    If(nv = "Terminé",
+                      Patch(Workload, LookUp(Workload, ID = ThisItem.ID), {TermineLe: Now()});
+                      Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success))
+                  );
+                  Select(btnRefresh)
+
+    # ---------- Vue : Calendrier ----------
+    - lblTitreCal As label:
+        Text: =Text(Date(varAn, varMois, 1), "mmmm yyyy")
+        Size: =24
+        FontWeight: =FontWeight.Bold
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "cal"
+        X: =254
+        Y: =72
+        Width: =400
+        Height: =44
+    - btnMoisPrec As button:
+        Text: ="◀"
+        Fill: =RGBA(255, 255, 255, 1)
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "cal"
+        X: =620
+        Y: =78
+        Width: =40
+        Height: =34
+        OnSelect: |-
+          =If(varMois = 1,
+            Set(varAn, varAn - 1); Set(varMois, 12),
+            Set(varMois, varMois - 1))
+    - btnMoisSuiv As button:
+        Text: ="▶"
+        Fill: =RGBA(255, 255, 255, 1)
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "cal"
+        X: =668
+        Y: =78
+        Width: =40
+        Height: =34
+        OnSelect: |-
+          =If(varMois = 12,
+            Set(varAn, varAn + 1); Set(varMois, 1),
+            Set(varMois, varMois + 1))
+    - galJoursEntete As gallery.galleryHorizontal:
+        Items: |-
+          =Table({j: "lun"}, {j: "mar"}, {j: "mer"}, {j: "jeu"}, {j: "ven"}, {j: "sam"}, {j: "dim"})
+        Visible: =varVue = "cal"
+        X: =254
+        Y: =124
+        Width: =700
+        Height: =28
+        TemplateSize: =100
+        TemplatePadding: =0
+        Children:
+        - lblJourEntete As label:
+            Text: =Upper(ThisItem.j)
+            Align: =Align.Center
+            Size: =10
+            Color: =RGBA(100, 114, 138, 1)
+            X: =0
+            Y: =0
+            Width: =Parent.TemplateWidth
+            Height: =Parent.TemplateHeight
+    - galJours As gallery.galleryVertical:
+        Items: |-
+          =With({debut: DateAdd(Date(varAn, varMois, 1), -(Weekday(Date(varAn, varMois, 1), StartOfWeek.Monday) - 1), TimeUnit.Days)},
+            ForAll(Sequence(42, 0), {d: DateAdd(debut, Value, TimeUnit.Days)})
+          )
+        Visible: =varVue = "cal"
+        WrapCount: =7
+        X: =254
+        Y: =154
+        Width: =700
+        Height: =594
+        TemplateSize: =98
+        TemplatePadding: =2
+        Children:
+        - recJour As rectangle:
+            Fill: =If(ThisItem.d = Today(), RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
+            BorderColor: =If(ThisItem.d = Today(), RGBA(31, 79, 216, 1), RGBA(227, 232, 240, 1))
             BorderThickness: =1
             X: =0
             Y: =0
             Width: =Parent.TemplateWidth
             Height: =Parent.TemplateHeight
-        - recStripe As rectangle:
-            Fill: =If(ThisItem.Statut.Value = "Terminé", RGBA(30, 122, 70, 1), Switch(ThisItem.TypeTache.Value, "Support", RGBA(43, 95, 180, 1), "Amélioration", RGBA(122, 75, 176, 1), "Monthly eng", RGBA(161, 92, 0, 1), "Projet", RGBA(11, 110, 110, 1), RGBA(93, 107, 122, 1)))
+        - lblNumJour As label:
+            Text: =Day(ThisItem.d)
+            Size: =11
+            Color: =If(Month(ThisItem.d) = varMois, RGBA(16, 26, 46, 1), RGBA(170, 180, 196, 1))
+            X: =4
+            Y: =2
+            Width: =40
+            Height: =20
+        - lblEv1 As label:
+            Text: =Coalesce(Last(FirstN(Filter(Workload, Echeance = ThisItem.d), 1)).Title, "")
+            Size: =9
+            Wrap: =false
+            Fill: =If(IsBlank(Self.Text), RGBA(0, 0, 0, 0), RGBA(227, 235, 255, 1))
+            Color: =RGBA(31, 79, 216, 1)
+            X: =4
+            Y: =24
+            Width: =Parent.TemplateWidth - 8
+            Height: =18
+        - lblEv2 As label:
+            Text: =If(CountRows(Filter(Workload, Echeance = ThisItem.d)) >= 2, Last(FirstN(Filter(Workload, Echeance = ThisItem.d), 2)).Title, "")
+            Size: =9
+            Wrap: =false
+            Fill: =If(IsBlank(Self.Text), RGBA(0, 0, 0, 0), RGBA(227, 235, 255, 1))
+            Color: =RGBA(31, 79, 216, 1)
+            X: =4
+            Y: =44
+            Width: =Parent.TemplateWidth - 8
+            Height: =18
+        - lblEvPlus As label:
+            Text: =If(CountRows(Filter(Workload, Echeance = ThisItem.d)) > 2, "+" & (CountRows(Filter(Workload, Echeance = ThisItem.d)) - 2), "")
+            Size: =9
+            Color: =RGBA(100, 114, 138, 1)
+            X: =4
+            Y: =64
+            Width: =60
+            Height: =18
+    - lblHAuj As label:
+        Text: ="Aujourd'hui"
+        FontWeight: =FontWeight.Semibold
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "cal"
+        X: =974
+        Y: =124
+        Width: =360
+        Height: =26
+    - galAuj As gallery.galleryVertical:
+        Items: =Filter(Workload, Echeance = Today(), Statut.Value <> "Terminé")
+        Visible: =varVue = "cal"
+        X: =974
+        Y: =152
+        Width: =368
+        Height: =150
+        TemplateSize: =44
+        TemplatePadding: =0
+        OnSelect: =Set(varSel, ThisItem)
+        Children:
+        - lblAujTitre As label:
+            Text: =ThisItem.Title
+            Size: =12
+            Wrap: =false
+            Color: =RGBA(16, 26, 46, 1)
+            X: =4
+            Y: =2
+            Width: =Parent.TemplateWidth - 8
+            Height: =22
+        - lblAujMeta As label:
+            Text: =ThisItem.TypeTache.Value & " · " & Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) & " %"
+            Size: =10
+            Color: =RGBA(100, 114, 138, 1)
+            X: =4
+            Y: =22
+            Width: =Parent.TemplateWidth - 8
+            Height: =18
+    - lblHAvenir As label:
+        Text: ="À venir"
+        FontWeight: =FontWeight.Semibold
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "cal"
+        X: =974
+        Y: =318
+        Width: =360
+        Height: =26
+    - galAvenir As gallery.galleryVertical:
+        Items: =FirstN(SortByColumns(Filter(Workload, Echeance > Today(), Statut.Value <> "Terminé"), "Echeance", SortOrder.Ascending), 8)
+        Visible: =varVue = "cal"
+        X: =974
+        Y: =346
+        Width: =368
+        Height: =400
+        TemplateSize: =48
+        TemplatePadding: =0
+        OnSelect: =Set(varSel, ThisItem)
+        Children:
+        - lblAvTitre As label:
+            Text: =ThisItem.Title
+            Size: =12
+            Wrap: =false
+            Color: =RGBA(16, 26, 46, 1)
+            X: =4
+            Y: =2
+            Width: =Parent.TemplateWidth - 70
+            Height: =22
+        - lblAvMeta As label:
+            Text: =ThisItem.TypeTache.Value
+            Size: =10
+            Color: =Coalesce(LookUp(colTC, T = ThisItem.TypeTache.Value, C), RGBA(107, 119, 140, 1))
+            X: =4
+            Y: =24
+            Width: =Parent.TemplateWidth - 70
+            Height: =18
+        - lblAvDate As label:
+            Text: =Text(ThisItem.Echeance, "dd/mm")
+            Align: =Align.Right
+            Size: =11
+            Color: =RGBA(16, 26, 46, 1)
+            X: =Parent.TemplateWidth - 60
+            Y: =10
+            Width: =56
+            Height: =22
+
+    # ---------- Vue : Analyse ----------
+    - lblTitreStats As label:
+        Text: ="Analyse"
+        Size: =24
+        FontWeight: =FontWeight.Bold
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "stats"
+        X: =254
+        Y: =72
+        Width: =300
+        Height: =44
+    - lblSt1 As label:
+        Text: =CountRows(Filter(Workload, Statut.Value = "Terminé")) & Char(10) & "Tâches terminées"
+        Size: =18
+        FontWeight: =FontWeight.Bold
+        Fill: =RGBA(255, 255, 255, 1)
+        Color: =RGBA(31, 79, 216, 1)
+        PaddingLeft: =14
+        Visible: =varVue = "stats"
+        X: =254
+        Y: =124
+        Width: =256
+        Height: =96
+    - lblSt2 As label:
+        Text: =CountRows(Filter(colEtapes, Fait)) & Char(10) & "Étapes cochées"
+        Size: =18
+        FontWeight: =FontWeight.Bold
+        Fill: =RGBA(255, 255, 255, 1)
+        Color: =RGBA(14, 138, 125, 1)
+        PaddingLeft: =14
+        Visible: =varVue = "stats"
+        X: =526
+        Y: =124
+        Width: =256
+        Height: =96
+    - lblSt3 As label:
+        Text: |-
+          =With({fin: Filter(Workload, Statut.Value = "Terminé")},
+            If(CountRows(fin) = 0, "0", Round(100 * CountRows(Filter(fin, Date(Year(TermineLe), Month(TermineLe), Day(TermineLe)) <= Echeance)) / CountRows(fin), 0)) & " %"
+          ) & Char(10) & "Clôturées dans les temps"
+        Size: =18
+        FontWeight: =FontWeight.Bold
+        Fill: =RGBA(255, 255, 255, 1)
+        Color: =RGBA(19, 122, 74, 1)
+        PaddingLeft: =14
+        Visible: =varVue = "stats"
+        X: =798
+        Y: =124
+        Width: =256
+        Height: =96
+    - lblSt4 As label:
+        Text: =CountRows(Filter(Workload, Statut.Value <> "Terminé", Echeance < Today())) & Char(10) & "En retard"
+        Size: =18
+        FontWeight: =FontWeight.Bold
+        Fill: =RGBA(255, 255, 255, 1)
+        Color: =RGBA(192, 51, 43, 1)
+        PaddingLeft: =14
+        Visible: =varVue = "stats"
+        X: =1070
+        Y: =124
+        Width: =256
+        Height: =96
+    - recCardCourbe As rectangle:
+        Fill: =RGBA(255, 255, 255, 1)
+        Visible: =varVue = "stats"
+        X: =254
+        Y: =236
+        Width: =680
+        Height: =330
+    - lblHCourbe As label:
+        Text: ="Tâches terminées par semaine (8 dernières semaines)"
+        FontWeight: =FontWeight.Semibold
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "stats"
+        X: =270
+        Y: =244
+        Width: =640
+        Height: =26
+    - imgCourbe As image:
+        Image: |-
+          ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 190'><polygon fill='#1f4fd8' fill-opacity='0.15' points='" & Concat(colSem, Text(20 + i * 85) & "," & Text(170 - Round(150 * n / Max(Max(colSem, n), 1), 0)) & " ") & "605,170 20,170'/><polyline fill='none' stroke='#1f4fd8' stroke-width='3' points='" & Concat(colSem, Text(20 + i * 85) & "," & Text(170 - Round(150 * n / Max(Max(colSem, n), 1), 0)) & " ") & "'/>" & Concat(colSem, "<text x='" & Text(20 + i * 85) & "' y='186' font-size='11' text-anchor='middle' fill='#64728a'>" & n & "</text>") & "</svg>")
+        Visible: =varVue = "stats"
+        X: =270
+        Y: =276
+        Width: =648
+        Height: =280
+    - recCardDonut As rectangle:
+        Fill: =RGBA(255, 255, 255, 1)
+        Visible: =varVue = "stats"
+        X: =950
+        Y: =236
+        Width: =392
+        Height: =330
+    - lblHDonut As label:
+        Text: ="Tâches ouvertes par projet"
+        FontWeight: =FontWeight.Semibold
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "stats"
+        X: =966
+        Y: =244
+        Width: =360
+        Height: =26
+    - imgDonut As image:
+        Image: |-
+          ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'>" & Concat(colDonut, "<circle r='40' cx='60' cy='60' fill='none' pathLength='100' stroke='" & Switch(k, 1, "#1f4fd8", 2, "#0e8a7d", 3, "#b86a00", "#6b778c") & "' stroke-width='16' stroke-dasharray='" & share & " " & (100 - share) & "' stroke-dashoffset='" & -start & "' transform='rotate(-90 60 60)'/>") & "<text x='60' y='58' text-anchor='middle' font-size='20' font-weight='700' fill='#101a2e'>" & varTotalOuv & "</text><text x='60' y='73' text-anchor='middle' font-size='9' fill='#64728a'>ouvertes</text></svg>")
+        Visible: =varVue = "stats"
+        X: =1030
+        Y: =276
+        Width: =232
+        Height: =170
+    - lblLegende As label:
+        Text: |-
+          =Concat(colDonut, name & " : " & n, Char(10))
+        Size: =12
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "stats"
+        X: =966
+        Y: =456
+        Width: =360
+        Height: =100
+
+    # ---------- Vue : À trier ----------
+    - lblTitreTrier As label:
+        Text: ="À trier"
+        Size: =24
+        FontWeight: =FontWeight.Bold
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =varVue = "trier"
+        X: =254
+        Y: =72
+        Width: =300
+        Height: =44
+    - lblSousTrier As label:
+        Text: ="Mails sans catégorie reconnue et tâches manuelles. Choisis le type et le projet, les étapes du modèle se créent ensuite."
+        Size: =12
+        Color: =RGBA(100, 114, 138, 1)
+        Visible: =varVue = "trier"
+        X: =254
+        Y: =112
+        Width: =1000
+        Height: =24
+    - lblVideTrier As label:
+        Text: ="Rien à trier."
+        Align: =Align.Center
+        Color: =RGBA(100, 114, 138, 1)
+        Visible: =varVue = "trier" && CountRows(galTrier.AllItems) = 0
+        X: =254
+        Y: =200
+        Width: =1088
+        Height: =40
+    - galTrier As gallery.galleryVertical:
+        Items: =Filter(Workload, TypeTache.Value = "À trier", Statut.Value <> "Terminé")
+        Visible: =varVue = "trier"
+        X: =254
+        Y: =144
+        Width: =1088
+        Height: =604
+        TemplateSize: =92
+        TemplatePadding: =6
+        Children:
+        - recTrier As rectangle:
+            Fill: =RGBA(255, 255, 255, 1)
             X: =0
             Y: =0
-            Width: =5
-            Height: =Parent.TemplateHeight
-        - lblTitre As label:
+            Width: =Parent.TemplateWidth
+            Height: =Parent.TemplateHeight - 6
+        - lblTrierTitre As label:
             Text: =ThisItem.Title
-            Color: =If(ThisItem.Statut.Value = "Terminé", RGBA(93, 107, 122, 1), RGBA(23, 33, 43, 1))
-            Wrap: =false
-            X: =14
-            Y: =6
-            Width: =Parent.TemplateWidth - 220
-            Height: =24
-        - lblMeta As label:
-            Text: =ThisItem.Source.Value & " · " & Coalesce(ThisItem.Projet.Value, "sans projet") & " · " & ThisItem.Statut.Value
-            Color: =RGBA(93, 107, 122, 1)
-            Size: =11
-            X: =14
-            Y: =30
-            Width: =Parent.TemplateWidth - 220
-            Height: =18
-        - recBarBack As rectangle:
-            Fill: =RGBA(238, 241, 244, 1)
-            X: =16
-            Y: =52
-            Width: =200
-            Height: =6
-        - recBar As rectangle:
-            Fill: =RGBA(11, 110, 110, 1)
-            X: =16
-            Y: =52
-            Width: =200 * Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) / 100
-            Height: =6
-        - lblPctLigne As label:
-            Text: =Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) & " %"
-            Color: =RGBA(93, 107, 122, 1)
-            Size: =10
-            X: =222
-            Y: =46
-            Width: =50
-            Height: =18
-        - lblTypeLigne As label:
-            Text: =ThisItem.TypeTache.Value
-            Align: =Align.Center
-            Size: =11
             FontWeight: =FontWeight.Semibold
-            Color: =Switch(ThisItem.TypeTache.Value, "Support", RGBA(43, 95, 180, 1), "Amélioration", RGBA(122, 75, 176, 1), "Monthly eng", RGBA(161, 92, 0, 1), "Projet", RGBA(11, 110, 110, 1), RGBA(93, 107, 122, 1))
-            X: =Parent.TemplateWidth - 200
-            Y: =18
-            Width: =110
+            Color: =RGBA(16, 26, 46, 1)
+            X: =14
+            Y: =8
+            Width: =Parent.TemplateWidth - 28
             Height: =26
-        - lblEcheanceLigne As label:
-            Text: =If(ThisItem.Statut.Value = "Terminé", "fait " & Text(ThisItem.TermineLe, "dd/mm"), If(ThisItem.Echeance < Today(), "retard ", "") & Text(ThisItem.Echeance, "dd/mm"))
-            Align: =Align.Right
-            Size: =12
-            Color: =If(ThisItem.Statut.Value <> "Terminé" && ThisItem.Echeance < Today(), RGBA(179, 38, 30, 1), RGBA(23, 33, 43, 1))
-            X: =Parent.TemplateWidth - 90
-            Y: =18
-            Width: =80
-            Height: =26
+        - lblTrierMeta As label:
+            Text: =ThisItem.Source.Value & " · échéance " & Text(ThisItem.Echeance, "dd/mm")
+            Size: =11
+            Color: =RGBA(100, 114, 138, 1)
+            X: =14
+            Y: =34
+            Width: =Parent.TemplateWidth - 28
+            Height: =20
+        - ddTrierType As dropdown:
+            Items: |-
+              =["Support", "Amélioration", "Monthly eng", "Projet"]
+            X: =14
+            Y: =54
+            Width: =240
+            Height: =28
+        - ddTrierProjet As dropdown:
+            Items: =Filter(Projets, StatutProjet.Value = "Actif")
+            Value: ="Title"
+            X: =266
+            Y: =54
+            Width: =260
+            Height: =28
+        - btnClasser As button:
+            Text: ="Classer"
+            Fill: =RGBA(31, 79, 216, 1)
+            Color: =RGBA(255, 255, 255, 1)
+            X: =540
+            Y: =54
+            Width: =120
+            Height: =28
+            OnSelect: |-
+              =Patch(Workload, LookUp(Workload, ID = ThisItem.ID),
+                {
+                  TypeTache: {Value: ddTrierType.Selected.Value},
+                  Projet: {Id: ddTrierProjet.Selected.ID, Value: ddTrierProjet.Selected.Title}
+                });
+              Select(btnRefresh);
+              Notify("Classée : les étapes du modèle vont être créées par le flux.", NotificationType.Success)
 
-    - recSide As rectangle:
+    # ---------- Volet de détail (au-dessus de tout) ----------
+    - recDrawer As rectangle:
         Fill: =RGBA(255, 255, 255, 1)
-        BorderColor: =RGBA(221, 226, 232, 1)
+        BorderColor: =RGBA(227, 232, 240, 1)
         BorderThickness: =1
-        X: =1046
-        Y: =48
-        Width: =Parent.Width - 1046
-        Height: =Parent.Height - 48
+        Visible: =!IsBlank(varSel)
+        X: =Parent.Width - 400
+        Y: =0
+        Width: =400
+        Height: =Parent.Height
+    - btnFermer As button:
+        Text: ="✕"
+        Fill: =RGBA(255, 255, 255, 1)
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =!IsBlank(varSel)
+        X: =Parent.Width - 48
+        Y: =12
+        Width: =36
+        Height: =36
+        OnSelect: =Set(varSel, Blank())
+    - lblDType As label:
+        Text: =varSel.TypeTache.Value
+        Size: =11
+        FontWeight: =FontWeight.Semibold
+        Color: =Coalesce(LookUp(colTC, T = varSel.TypeTache.Value, C), RGBA(107, 119, 140, 1))
+        Visible: =!IsBlank(varSel)
+        X: =Parent.Width - 384
+        Y: =16
+        Width: =300
+        Height: =22
     - lblDTitre As label:
         Text: =varSel.Title
+        Size: =16
         FontWeight: =FontWeight.Semibold
-        Size: =15
-        Color: =RGBA(23, 33, 43, 1)
+        Color: =RGBA(16, 26, 46, 1)
         Visible: =!IsBlank(varSel)
-        X: =1062
-        Y: =60
-        Width: =288
-        Height: =56
+        X: =Parent.Width - 384
+        Y: =42
+        Width: =340
+        Height: =64
     - lblDMeta As label:
-        Text: =varSel.TypeTache.Value & " · " & varSel.Source.Value & " · " & Coalesce(varSel.Projet.Value, "sans projet") & Char(10) & "Échéance " & Text(varSel.Echeance, "dd/mm/yyyy") & " · " & varSel.Statut.Value
+        Text: =varSel.Statut.Value & " · " & varSel.Source.Value & " · " & Coalesce(varSel.Projet.Value, "sans projet") & Char(10) & "Échéance " & Text(varSel.Echeance, "dd/mm/yyyy")
         Size: =12
-        Color: =RGBA(93, 107, 122, 1)
+        Color: =RGBA(100, 114, 138, 1)
         Visible: =!IsBlank(varSel)
-        X: =1062
-        Y: =118
-        Width: =288
-        Height: =40
+        X: =Parent.Width - 384
+        Y: =110
+        Width: =368
+        Height: =44
     - lblDPct As label:
         Text: =Coalesce(LookUp(colPct, ID = varSel.ID, pct), 0) & " %  ·  " & CountRows(Filter(colEtapes, Tache.Id = varSel.ID, Fait)) & " étape(s) sur " & CountRows(Filter(colEtapes, Tache.Id = varSel.ID))
         FontWeight: =FontWeight.Semibold
-        Color: =RGBA(11, 110, 110, 1)
+        Color: =RGBA(31, 79, 216, 1)
         Visible: =!IsBlank(varSel)
-        X: =1062
-        Y: =162
-        Width: =288
+        X: =Parent.Width - 384
+        Y: =158
+        Width: =368
         Height: =26
-    - recDBarBack As rectangle:
-        Fill: =RGBA(238, 241, 244, 1)
+    - recDBack As rectangle:
+        Fill: =RGBA(238, 241, 247, 1)
         Visible: =!IsBlank(varSel)
-        X: =1062
-        Y: =192
-        Width: =288
+        X: =Parent.Width - 384
+        Y: =188
+        Width: =368
         Height: =8
-    - recDBar As rectangle:
-        Fill: =RGBA(11, 110, 110, 1)
+    - recDFill As rectangle:
+        Fill: =RGBA(31, 79, 216, 1)
         Visible: =!IsBlank(varSel)
-        X: =1062
-        Y: =192
-        Width: =288 * Coalesce(LookUp(colPct, ID = varSel.ID, pct), 0) / 100
+        X: =Parent.Width - 384
+        Y: =188
+        Width: =368 * Coalesce(LookUp(colPct, ID = varSel.ID, pct), 0) / 100
         Height: =8
     - galEtapes As gallery.galleryVertical:
         Items: =SortByColumns(Filter(colEtapes, Tache.Id = varSel.ID), "Ordre")
         Visible: =!IsBlank(varSel)
-        X: =1062
-        Y: =210
-        Width: =288
+        X: =Parent.Width - 384
+        Y: =204
+        Width: =368
         Height: =200
         TemplateSize: =36
         TemplatePadding: =0
@@ -442,11 +1249,9 @@ Screens:
             Default: =ThisItem.Fait
             OnCheck: |-
               =Patch(Etapes, LookUp(Etapes, ID = ThisItem.ID), {Fait: true});
-              Select(btnRefresh);
               If(varSel.Statut.Value = "À faire",
-                Patch(Workload, LookUp(Workload, ID = varSel.ID), {Statut: {Value: "En cours"}});
-                Set(varSel, LookUp(Workload, ID = varSel.ID))
-              )
+                Patch(Workload, LookUp(Workload, ID = varSel.ID), {Statut: {Value: "En cours"}}));
+              Select(btnRefresh)
             OnUncheck: |-
               =Patch(Etapes, LookUp(Etapes, ID = ThisItem.ID), {Fait: false});
               Select(btnRefresh)
@@ -457,16 +1262,16 @@ Screens:
     - txtEtape As text:
         HintText: ="Ajouter une étape"
         Visible: =!IsBlank(varSel) && varSel.Statut.Value <> "Terminé"
-        X: =1062
-        Y: =418
-        Width: =200
+        X: =Parent.Width - 384
+        Y: =412
+        Width: =270
         Height: =34
     - btnAjouterEtape As button:
         Text: ="Ajouter"
         Visible: =!IsBlank(varSel) && varSel.Statut.Value <> "Terminé"
-        X: =1270
-        Y: =418
-        Width: =80
+        X: =Parent.Width - 106
+        Y: =412
+        Width: =90
         Height: =34
         DisplayMode: =If(IsBlank(txtEtape.Text), DisplayMode.Disabled, DisplayMode.Edit)
         OnSelect: |-
@@ -479,87 +1284,114 @@ Screens:
             });
           Reset(txtEtape);
           Select(btnRefresh)
-    - lblSync As label:
-        Text: =If(varSel.Statut.Value = "Terminé", "Clôture propagée par le flux.", Switch(varSel.Source.Value, "Mail", "Terminer clôt la liste, le flag Outlook et To Do.", "Teams", "Terminer clôt la liste et la tâche To Do.", "Loop", "Terminer clôt la liste. À cocher aussi dans Loop si non synchronisé.", "Terminer clôt la liste."))
-        Size: =11
-        Color: =RGBA(93, 107, 122, 1)
-        Visible: =!IsBlank(varSel)
-        X: =1062
-        Y: =458
-        Width: =288
-        Height: =44
-    - ddType As dropdown:
-        Items: =Filter(Choices(Workload.TypeTache), Value <> "À trier")
-        Visible: =!IsBlank(varSel) && varSel.TypeTache.Value = "À trier"
-        X: =1062
-        Y: =510
-        Width: =288
+    - btnStAFaire As button:
+        Text: ="À faire"
+        Fill: =If(varSel.Statut.Value = "À faire", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+        Color: =If(varSel.Statut.Value = "À faire", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+        Visible: =!IsBlank(varSel) && varSel.Statut.Value <> "Terminé"
+        X: =Parent.Width - 384
+        Y: =456
+        Width: =118
         Height: =34
-    - ddProjet As dropdown:
-        Items: =Filter(Projets, StatutProjet.Value = "Actif")
-        Value: ="Title"
-        Visible: =!IsBlank(varSel) && varSel.TypeTache.Value = "À trier"
-        X: =1062
-        Y: =550
-        Width: =288
-        Height: =34
-    - btnClasser As button:
-        Text: ="Classer"
-        Visible: =!IsBlank(varSel) && varSel.TypeTache.Value = "À trier"
-        X: =1062
-        Y: =590
-        Width: =288
-        Height: =36
         OnSelect: |-
-          =Patch(Workload, LookUp(Workload, ID = varSel.ID),
-            {
-              TypeTache: {Value: ddType.Selected.Value},
-              Projet: {Id: ddProjet.Selected.ID, Value: ddProjet.Selected.Title}
-            });
-          Set(varSel, LookUp(Workload, ID = varSel.ID));
+          =Patch(Workload, LookUp(Workload, ID = varSel.ID), {Statut: {Value: "À faire"}});
           Select(btnRefresh)
+    - btnStEnCours As button:
+        Text: ="En cours"
+        Fill: =If(varSel.Statut.Value = "En cours", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+        Color: =If(varSel.Statut.Value = "En cours", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+        Visible: =!IsBlank(varSel) && varSel.Statut.Value <> "Terminé"
+        X: =Parent.Width - 259
+        Y: =456
+        Width: =118
+        Height: =34
+        OnSelect: |-
+          =Patch(Workload, LookUp(Workload, ID = varSel.ID), {Statut: {Value: "En cours"}});
+          Select(btnRefresh)
+    - btnStBloque As button:
+        Text: ="Bloqué"
+        Fill: =If(varSel.Statut.Value = "Bloqué", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+        Color: =If(varSel.Statut.Value = "Bloqué", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+        Visible: =!IsBlank(varSel) && varSel.Statut.Value <> "Terminé"
+        X: =Parent.Width - 134
+        Y: =456
+        Width: =118
+        Height: =34
+        OnSelect: |-
+          =Patch(Workload, LookUp(Workload, ID = varSel.ID), {Statut: {Value: "Bloqué"}});
+          Select(btnRefresh)
+    - lblSync As label:
+        Text: |-
+          =If(varSel.Statut.Value = "Terminé", "Clôture propagée par le flux.",
+            Switch(varSel.Source.Value,
+              "Mail", "Terminer clôt la liste, le flag Outlook et To Do.",
+              "Teams", "Terminer clôt la liste et la tâche To Do.",
+              "Loop", "Terminer clôt la liste. À cocher aussi dans Loop si non synchronisé.",
+              "Terminer clôt la liste."))
+        Size: =11
+        Color: =RGBA(100, 114, 138, 1)
+        Visible: =!IsBlank(varSel)
+        X: =Parent.Width - 384
+        Y: =500
+        Width: =368
+        Height: =44
     - btnTerminer As button:
         Text: ="Terminer partout"
-        Fill: =RGBA(11, 110, 110, 1)
+        Fill: =RGBA(31, 79, 216, 1)
         Color: =RGBA(255, 255, 255, 1)
         Visible: =!IsBlank(varSel) && varSel.Statut.Value <> "Terminé"
-        X: =1062
+        X: =Parent.Width - 384
         Y: =Parent.Height - 64
-        Width: =288
+        Width: =368
         Height: =44
         OnSelect: |-
           =Patch(Workload, LookUp(Workload, ID = varSel.ID),
             {Statut: {Value: "Terminé"}, TermineLe: Now()});
-          Set(varSel, LookUp(Workload, ID = varSel.ID));
           Select(btnRefresh);
           Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success)
+    - btnRouvrir As button:
+        Text: ="Rouvrir"
+        Fill: =RGBA(255, 255, 255, 1)
+        Color: =RGBA(16, 26, 46, 1)
+        Visible: =!IsBlank(varSel) && varSel.Statut.Value = "Terminé"
+        X: =Parent.Width - 384
+        Y: =Parent.Height - 64
+        Width: =368
+        Height: =44
+        OnSelect: |-
+          =Patch(Workload, LookUp(Workload, ID = varSel.ID),
+            {Statut: {Value: "En cours"}, TermineLe: Blank(), Propage: false});
+          Select(btnRefresh)
 ```
 
-## Après le collage
+## Points à surveiller
 
-1. **Premier lancement.** Appuie sur « Actualiser » si les chiffres sont à zéro : il remplit les collections `colEtapes` et `colPct`.
-2. **Erreurs rouges sur les noms de colonnes.** Passe la souris sur le contrôle : Studio indique la colonne introuvable. Les noms de colonne attendus sont ceux de [02](02-listes-sharepoint.md). Corrige soit dans la formule, soit dans la liste.
-3. **Délégation.** Un triangle jaune sur `in` (recherche) ou sur un `Filter` est normal tant que les listes restent sous 2000 lignes.
-4. **Les cases d'étapes** se rafraîchissent après le flux de clôture : ajoute un bouton « Actualiser » visible, ou un `Timer` de 30 secondes qui appelle `Select(btnRefresh)`.
-5. **Vue « Modèles d'étapes »** : volontairement absente de l'app. Modifie les modèles directement dans la liste `ModelesEtapes`.
+1. **Colonnes de choix** : les formules utilisent `Statut.Value`, `TypeTache.Value`, `Source.Value`, `StatutProjet.Value`. Si tes colonnes sont de type texte et non choix, retire `.Value` partout (rechercher-remplacer `.Value`).
+2. **Colonnes de recherche** : `Projet.Id`, `Tache.Id`, `Projet.Value` supposent des colonnes de type recherche (lookup). Si Power Apps affiche une erreur, regarde la forme réelle avec une galerie temporaire sur `Workload`.
+3. **Valeurs `Value` des listes déroulantes** : dans `ddTrierProjet`, la propriété `Value` indique la colonne affichée. Si Studio la rejette, règle-la dans le panneau de droite, rubrique « Valeur ».
+4. **Calendrier** : la galerie `galJours` utilise `WrapCount: 7`. Si ta version ne la propose pas, remplace-la par une galerie horizontale de 7 colonnes sur 6 lignes, ou garde la vue « À venir » et supprime la grille.
+5. **Images SVG** : `imgGauge`, `imgCourbe` et `imgDonut` construisent une image par formule. Les nombres sont arrondis en entiers pour éviter la virgule décimale des paramètres régionaux français. Si une image reste vide, vérifie que le contrôle est de type *Image* (et non Image moderne).
+6. **Nombre de projets** : le graphique en anneau prévoit 4 couleurs. Au-delà, les projets suivants prennent la même teinte grise.
+7. **Délégation** : un triangle jaune sur `in` (recherche) ou sur certains `Filter` est attendu. Tant que tes listes restent sous 2000 lignes, le résultat est correct.
+8. **Performance** : le calendrier évalue des filtres sur 42 cases. Si l'app ralentit, remplace-les par une collection `colEcheances` calculée dans `btnRefresh`.
+
+## Fonctionnement
+
+| Élément | Rôle |
+|---|---|
+| `btnRefresh` | Recharge les listes et recalcule toutes les collections : `colEtapes`, `colPct` (avancement par tâche), `colTypes`, `colProjCount`, `colDonut`, `colSem`. Le bouton est appelé par `Select(btnRefresh)` après chaque action. |
+| `varVue` | Vue active : `dash`, `tasks`, `cal`, `stats`, `trier` |
+| `varSel` | Tâche affichée dans le volet de détail |
+| `varNext` | Prochaine échéance du tableau de bord |
+| `varType` | Filtre par type dans la vue Tâches |
+| `varAn` / `varMois` | Mois affiché dans le calendrier |
+
+Les clôtures passent toutes par une mise à jour de `Statut` et `TermineLe` : le flux de [05](05-flux-cloture.md) fait le reste (étapes, flag Outlook, To Do, Loop). Les étapes se cochent et se décochent dans le volet de détail. L'app ne touche jamais directement à Outlook.
 
 ## Si le collage échoue
 
-Le format de collage est strict. Méthode de correction, dans l'ordre :
-
 1. **Lis le message d'erreur.** Il cite le contrôle ou la ligne en cause.
-2. **Compare avec un contrôle réel.** Insère un contrôle du même type (un bouton, une galerie verticale, une galerie horizontale, une case à cocher, une liste déroulante) depuis le menu Insérer. Clic droit sur le contrôle → **Afficher le code**. Compare avec mon code : le nom du type après `As` (par exemple `gallery.galleryVertical`), la présence du mot `Children:` et l'indentation.
-3. **Corrige par rechercher-remplacer** dans un éditeur de texte, par exemple le nom d'un type de contrôle, puis colle à nouveau.
-4. **Repli en deux étapes.** Crée un écran vide, puis colle seulement la liste des contrôles : retire les lignes `Screens:`, `scrMain As screen:`, `Fill`, `OnVisible` et `Children:`, et supprime l'indentation en trop de façon à ce que chaque ligne `- nom As type:` commence en première colonne. Recopie ensuite l'`OnVisible` à la main dans la propriété `OnVisible` de l'écran.
-5. **Dernier recours.** Construis les contrôles à la main à partir de la maquette et colle uniquement les formules de ce document dans leurs propriétés. Les formules sont indépendantes du format de collage.
-
-## Variables et collections utilisées
-
-| Nom | Rôle |
-|---|---|
-| `varVue` | Vue active : today, open, late, done, trier |
-| `varProjet` | Nom du projet filtré, ou vide |
-| `varType` | Type filtré, ou vide |
-| `varSel` | Item Workload sélectionné |
-| `colEtapes` | Copie locale de la liste Etapes |
-| `colPct` | Avancement calculé par tâche (ID, ProjetId, pct) |
+2. **Compare avec un contrôle réel.** Insère un contrôle du même type depuis le menu Insérer, puis clic droit → **Afficher le code**. Compare le nom du type après `As` (par exemple `gallery.galleryVertical`), la présence de `Children:` et l'indentation.
+3. **Corrige par rechercher-remplacer** dans un éditeur de texte (par exemple un nom de type), puis recolle.
+4. **Colle par morceaux.** Colle un bloc à la fois (la barre latérale, puis le tableau de bord, etc.) dans un écran vide : retire les lignes `Screens:` et `scrMain As screen:` et recule chaque ligne `- nom As type:` d'un niveau pour qu'elle commence en première colonne.
+5. **Dernier recours.** Construis les contrôles à la main à partir de la maquette et ne colle que les formules : elles sont indépendantes du format de collage.
