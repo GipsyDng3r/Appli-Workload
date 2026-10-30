@@ -19,7 +19,6 @@ Principe : une liste SharePoint est la source de vérité. Les flux Power Automa
 | 7 | [docs/07-power-app.md](docs/07-power-app.md) | Écrans et formules Power Fx |
 | 8 | [docs/08-loop-et-tests.md](docs/08-loop-et-tests.md) | Test Loop et plan de recette |
 | 9 | [docs/09-power-app-code-a-coller.md](docs/09-power-app-code-a-coller.md) | Écran complet de la Power App à coller dans Studio |
-| 10 | [docs/10-categories-outlook.md](docs/10-categories-outlook.md) | Proposer les catégories Outlook comme projets (flux, liste et variante de l'app) |
 
 La maquette interactive de l'application est dans [maquette/workload.html](maquette/workload.html) (à ouvrir dans un navigateur).
 

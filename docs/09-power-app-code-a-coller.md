@@ -4,8 +4,6 @@ Application canvas dont la mise en page **s'adapte à la taille de l'écran** : 
 
 Typographie : police Segoe UI partout, échelle de tailles pensée pour un affichage à 100 % sur un écran large : 18 pour le titre de page, 21 pour les chiffres des compteurs, 12 pour les titres de carte, 10 pour le texte courant, 8 à 9 pour les légendes. Pour grossir ou réduire toute l'échelle, fais un rechercher-remplacer sur les lignes `Size: =` du fichier. Les titres trop longs des listes et du calendrier sont tronqués avec « … » selon la largeur disponible.
 
-Une variante qui propose tes **catégories Outlook** comme projets (création manuelle et vue « À trier ») est décrite dans [10](10-categories-outlook.md) : à coller seulement une fois la liste `[LME] Categories` créée et ajoutée aux données.
-
 Le même code est dans [power-app/scrMain.pa.yaml](../power-app/scrMain.pa.yaml), plus pratique à copier depuis GitHub (bouton « Copy raw file »).
 
 ## Ce qui n'est pas garanti
