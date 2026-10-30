@@ -59,67 +59,106 @@ Screens:
           {T: "Projet", C: RGBA(14, 138, 125, 1)},
           {T: "À trier", C: RGBA(107, 119, 140, 1)}
         );
-        Refresh(Workload);
-        Refresh(Etapes);
-        Refresh(Projets);
-        ClearCollect(colEtapes, Etapes);
-        ClearCollect(colPct,
-          ForAll(Workload As w,
-            {
-              ID: w.ID,
-              ProjetId: w.Projet.Id,
-              TypeT: w.TypeTache.Value,
-              pct: If(w.Statut.Value = "Terminé", 100,
-                With({e: Filter(colEtapes, Tache.Id = w.ID)},
-                  If(CountRows(e) = 0, 0, Round(100 * CountRows(Filter(e, Fait)) / CountRows(e), 0))))
-            }
-          )
+        IfError(
+          Refresh(Workload),
+          Notify("Refresh(Workload) : " & FirstError.Message, NotificationType.Error)
         );
-        Set(varGlobal, Round(Coalesce(Average(colPct, pct), 0), 0));
-        Set(varNext, First(SortByColumns(Filter(Workload, Statut.Value <> "Terminé", TypeTache.Value <> "À trier"), "Echeance", SortOrder.Ascending)));
-        ClearCollect(colTypes,
-          ForAll(["Support", "Amélioration", "Monthly eng", "Projet"] As t,
-            {
-              T: t.Value,
-              n: CountRows(Filter(Workload, TypeTache.Value = t.Value)),
-              pct: Round(Coalesce(Average(Filter(colPct, TypeT = t.Value), pct), 0), 0)
-            }
-          )
+        IfError(
+          Refresh(Etapes),
+          Notify("Refresh(Etapes) : " & FirstError.Message, NotificationType.Error)
         );
-        ClearCollect(colProjCount,
-          ForAll(Sequence(CountRows(Projets)),
-            With({p: Index(Projets, Value)},
+        IfError(
+          Refresh(Projets),
+          Notify("Refresh(Projets) : " & FirstError.Message, NotificationType.Error)
+        );
+        IfError(
+          ClearCollect(colEtapes, Etapes),
+          Notify("ClearCollect(colEtapes) : " & FirstError.Message, NotificationType.Error)
+        );
+        IfError(
+          ClearCollect(colPct,
+            ForAll(Workload As w,
               {
-                k: Value,
-                name: p.Title,
-                n: CountRows(Filter(Workload, Projet.Id = p.ID, Statut.Value <> "Terminé"))
+                ID: w.ID,
+                ProjetId: w.Projet.Id,
+                TypeT: w.TypeTache.Value,
+                pct: If(w.Statut.Value = "Terminé", 100,
+                  With({e: Filter(colEtapes, Tache.Id = w.ID)},
+                    If(CountRows(e) = 0, 0, Round(100 * CountRows(Filter(e, Fait)) / CountRows(e), 0))))
               }
             )
-          )
+          ),
+          Notify("ClearCollect(colPct) : " & FirstError.Message, NotificationType.Error)
         );
-        Set(varTotalOuv, Sum(colProjCount, n));
-        ClearCollect(colDonut,
-          ForAll(colProjCount As c,
-            {
-              k: c.k,
-              name: c.name,
-              n: c.n,
-              share: Round(100 * c.n / Max(varTotalOuv, 1), 0),
-              start: Round(100 * Sum(Filter(colProjCount, k < c.k), n) / Max(varTotalOuv, 1), 0)
-            }
-          )
+        IfError(
+          Set(varGlobal, Round(Coalesce(Average(colPct, pct), 0), 0)),
+          Notify("Set(varGlobal) : " & FirstError.Message, NotificationType.Error)
         );
-        ClearCollect(colSem,
-          ForAll(Sequence(8, 0),
-            {
-              i: Value,
-              n: CountRows(Filter(Workload, Statut.Value = "Terminé",
-                   TermineLe >= DateAdd(Today(), 1 - 7 * (8 - Value), TimeUnit.Days),
-                   TermineLe < DateAdd(Today(), 1 - 7 * (7 - Value), TimeUnit.Days)))
-            }
-          )
+        IfError(
+          Set(varNext, First(SortByColumns(Filter(Workload, Statut.Value <> "Terminé", TypeTache.Value <> "À trier"), "Echeance", SortOrder.Ascending))),
+          Notify("Set(varNext) : " & FirstError.Message, NotificationType.Error)
         );
-        If(!IsBlank(varSel), Set(varSel, LookUp(Workload, ID = varSel.ID)))
+        IfError(
+          ClearCollect(colTypes,
+            ForAll(["Support", "Amélioration", "Monthly eng", "Projet"] As t,
+              {
+                T: t.Value,
+                n: CountRows(Filter(Workload, TypeTache.Value = t.Value)),
+                pct: Round(Coalesce(Average(Filter(colPct, TypeT = t.Value), pct), 0), 0)
+              }
+            )
+          ),
+          Notify("ClearCollect(colTypes) : " & FirstError.Message, NotificationType.Error)
+        );
+        IfError(
+          ClearCollect(colProjCount,
+            ForAll(Sequence(CountRows(Projets)),
+              With({p: Index(Projets, Value)},
+                {
+                  k: Value,
+                  name: p.Title,
+                  n: CountRows(Filter(Workload, Projet.Id = p.ID, Statut.Value <> "Terminé"))
+                }
+              )
+            )
+          ),
+          Notify("ClearCollect(colProjCount) : " & FirstError.Message, NotificationType.Error)
+        );
+        IfError(
+          Set(varTotalOuv, Sum(colProjCount, n)),
+          Notify("Set(varTotalOuv) : " & FirstError.Message, NotificationType.Error)
+        );
+        IfError(
+          ClearCollect(colDonut,
+            ForAll(colProjCount As c,
+              {
+                k: c.k,
+                name: c.name,
+                n: c.n,
+                share: Round(100 * c.n / Max(varTotalOuv, 1), 0),
+                start: Round(100 * Sum(Filter(colProjCount, k < c.k), n) / Max(varTotalOuv, 1), 0)
+              }
+            )
+          ),
+          Notify("ClearCollect(colDonut) : " & FirstError.Message, NotificationType.Error)
+        );
+        IfError(
+          ClearCollect(colSem,
+            ForAll(Sequence(8, 0),
+              {
+                i: Value,
+                n: CountRows(Filter(Workload, Statut.Value = "Terminé",
+                     TermineLe >= DateAdd(Today(), 1 - 7 * (8 - Value), TimeUnit.Days),
+                     TermineLe < DateAdd(Today(), 1 - 7 * (7 - Value), TimeUnit.Days)))
+              }
+            )
+          ),
+          Notify("ClearCollect(colSem) : " & FirstError.Message, NotificationType.Error)
+        );
+        IfError(
+          If(!IsBlank(varSel), Set(varSel, LookUp(Workload, ID = varSel.ID))),
+          Notify("mise à jour de varSel : " & FirstError.Message, NotificationType.Error)
+        )
     Children:
       - cntSidebar:
           Control: GroupContainer@1.5.0
@@ -271,67 +310,106 @@ Screens:
                   Width: =112
                   Height: =40
                   OnSelect: |-
-                    =Refresh(Workload);
-                    Refresh(Etapes);
-                    Refresh(Projets);
-                    ClearCollect(colEtapes, Etapes);
-                    ClearCollect(colPct,
-                      ForAll(Workload As w,
-                        {
-                          ID: w.ID,
-                          ProjetId: w.Projet.Id,
-                          TypeT: w.TypeTache.Value,
-                          pct: If(w.Statut.Value = "Terminé", 100,
-                            With({e: Filter(colEtapes, Tache.Id = w.ID)},
-                              If(CountRows(e) = 0, 0, Round(100 * CountRows(Filter(e, Fait)) / CountRows(e), 0))))
-                        }
-                      )
+                    =IfError(
+                      Refresh(Workload),
+                      Notify("Refresh(Workload) : " & FirstError.Message, NotificationType.Error)
                     );
-                    Set(varGlobal, Round(Coalesce(Average(colPct, pct), 0), 0));
-                    Set(varNext, First(SortByColumns(Filter(Workload, Statut.Value <> "Terminé", TypeTache.Value <> "À trier"), "Echeance", SortOrder.Ascending)));
-                    ClearCollect(colTypes,
-                      ForAll(["Support", "Amélioration", "Monthly eng", "Projet"] As t,
-                        {
-                          T: t.Value,
-                          n: CountRows(Filter(Workload, TypeTache.Value = t.Value)),
-                          pct: Round(Coalesce(Average(Filter(colPct, TypeT = t.Value), pct), 0), 0)
-                        }
-                      )
+                    IfError(
+                      Refresh(Etapes),
+                      Notify("Refresh(Etapes) : " & FirstError.Message, NotificationType.Error)
                     );
-                    ClearCollect(colProjCount,
-                      ForAll(Sequence(CountRows(Projets)),
-                        With({p: Index(Projets, Value)},
+                    IfError(
+                      Refresh(Projets),
+                      Notify("Refresh(Projets) : " & FirstError.Message, NotificationType.Error)
+                    );
+                    IfError(
+                      ClearCollect(colEtapes, Etapes),
+                      Notify("ClearCollect(colEtapes) : " & FirstError.Message, NotificationType.Error)
+                    );
+                    IfError(
+                      ClearCollect(colPct,
+                        ForAll(Workload As w,
                           {
-                            k: Value,
-                            name: p.Title,
-                            n: CountRows(Filter(Workload, Projet.Id = p.ID, Statut.Value <> "Terminé"))
+                            ID: w.ID,
+                            ProjetId: w.Projet.Id,
+                            TypeT: w.TypeTache.Value,
+                            pct: If(w.Statut.Value = "Terminé", 100,
+                              With({e: Filter(colEtapes, Tache.Id = w.ID)},
+                                If(CountRows(e) = 0, 0, Round(100 * CountRows(Filter(e, Fait)) / CountRows(e), 0))))
                           }
                         )
-                      )
+                      ),
+                      Notify("ClearCollect(colPct) : " & FirstError.Message, NotificationType.Error)
                     );
-                    Set(varTotalOuv, Sum(colProjCount, n));
-                    ClearCollect(colDonut,
-                      ForAll(colProjCount As c,
-                        {
-                          k: c.k,
-                          name: c.name,
-                          n: c.n,
-                          share: Round(100 * c.n / Max(varTotalOuv, 1), 0),
-                          start: Round(100 * Sum(Filter(colProjCount, k < c.k), n) / Max(varTotalOuv, 1), 0)
-                        }
-                      )
+                    IfError(
+                      Set(varGlobal, Round(Coalesce(Average(colPct, pct), 0), 0)),
+                      Notify("Set(varGlobal) : " & FirstError.Message, NotificationType.Error)
                     );
-                    ClearCollect(colSem,
-                      ForAll(Sequence(8, 0),
-                        {
-                          i: Value,
-                          n: CountRows(Filter(Workload, Statut.Value = "Terminé",
-                               TermineLe >= DateAdd(Today(), 1 - 7 * (8 - Value), TimeUnit.Days),
-                               TermineLe < DateAdd(Today(), 1 - 7 * (7 - Value), TimeUnit.Days)))
-                        }
-                      )
+                    IfError(
+                      Set(varNext, First(SortByColumns(Filter(Workload, Statut.Value <> "Terminé", TypeTache.Value <> "À trier"), "Echeance", SortOrder.Ascending))),
+                      Notify("Set(varNext) : " & FirstError.Message, NotificationType.Error)
                     );
-                    If(!IsBlank(varSel), Set(varSel, LookUp(Workload, ID = varSel.ID)))
+                    IfError(
+                      ClearCollect(colTypes,
+                        ForAll(["Support", "Amélioration", "Monthly eng", "Projet"] As t,
+                          {
+                            T: t.Value,
+                            n: CountRows(Filter(Workload, TypeTache.Value = t.Value)),
+                            pct: Round(Coalesce(Average(Filter(colPct, TypeT = t.Value), pct), 0), 0)
+                          }
+                        )
+                      ),
+                      Notify("ClearCollect(colTypes) : " & FirstError.Message, NotificationType.Error)
+                    );
+                    IfError(
+                      ClearCollect(colProjCount,
+                        ForAll(Sequence(CountRows(Projets)),
+                          With({p: Index(Projets, Value)},
+                            {
+                              k: Value,
+                              name: p.Title,
+                              n: CountRows(Filter(Workload, Projet.Id = p.ID, Statut.Value <> "Terminé"))
+                            }
+                          )
+                        )
+                      ),
+                      Notify("ClearCollect(colProjCount) : " & FirstError.Message, NotificationType.Error)
+                    );
+                    IfError(
+                      Set(varTotalOuv, Sum(colProjCount, n)),
+                      Notify("Set(varTotalOuv) : " & FirstError.Message, NotificationType.Error)
+                    );
+                    IfError(
+                      ClearCollect(colDonut,
+                        ForAll(colProjCount As c,
+                          {
+                            k: c.k,
+                            name: c.name,
+                            n: c.n,
+                            share: Round(100 * c.n / Max(varTotalOuv, 1), 0),
+                            start: Round(100 * Sum(Filter(colProjCount, k < c.k), n) / Max(varTotalOuv, 1), 0)
+                          }
+                        )
+                      ),
+                      Notify("ClearCollect(colDonut) : " & FirstError.Message, NotificationType.Error)
+                    );
+                    IfError(
+                      ClearCollect(colSem,
+                        ForAll(Sequence(8, 0),
+                          {
+                            i: Value,
+                            n: CountRows(Filter(Workload, Statut.Value = "Terminé",
+                                 TermineLe >= DateAdd(Today(), 1 - 7 * (8 - Value), TimeUnit.Days),
+                                 TermineLe < DateAdd(Today(), 1 - 7 * (7 - Value), TimeUnit.Days)))
+                          }
+                        )
+                      ),
+                      Notify("ClearCollect(colSem) : " & FirstError.Message, NotificationType.Error)
+                    );
+                    IfError(
+                      If(!IsBlank(varSel), Set(varSel, LookUp(Workload, ID = varSel.ID))),
+                      Notify("mise à jour de varSel : " & FirstError.Message, NotificationType.Error)
+                    )
       - cntDash:
           Control: GroupContainer@1.5.0
           Variant: ManualLayout
@@ -1785,6 +1863,13 @@ Screens:
                     Select(btnRefresh)
 ```
 
+## Si les chiffres restent à zéro
+
+1. Au lancement (F5) ou après un clic sur « Actualiser », un ou plusieurs **bandeaux rouges** apparaissent avec le nom de l'étape qui échoue, par exemple `ClearCollect(colPct) : ...`. Le message dit en général quelle colonne ou quelle source de données pose problème.
+2. Dans Studio, sélectionne `btnRefresh`, propriété `OnSelect` : les erreurs de formule sont soulignées en rouge, et le **Vérificateur d'application** (icône en haut à droite) les liste toutes.
+3. Si le clic sur « Actualiser » ne produit ni bandeau ni donnée, c'est qu'une erreur de syntaxe empêche toute la formule de s'exécuter : cherche le soulignement rouge.
+4. Envoie-moi le texte des bandeaux ou des erreurs, ou une nouvelle trace faite après le clic.
+
 ## Points à surveiller
 
 1. **Colonnes de choix** : les formules utilisent `Statut.Value`, `TypeTache.Value`, `Source.Value`, `StatutProjet.Value`. Si tes colonnes sont de type texte et non choix, retire `.Value` partout (rechercher-remplacer `.Value`).
@@ -1800,7 +1885,7 @@ Screens:
 
 | Élément | Rôle |
 |---|---|
-| `btnRefresh` | Recharge les listes et recalcule toutes les collections : `colEtapes`, `colPct` (avancement par tâche), `colTypes`, `colProjCount`, `colDonut`, `colSem`. Il est appelé par `Select(btnRefresh)` après chaque action. **Sa formule est copiée dans l'`OnVisible` de l'écran** : un `Select` lancé pendant le chargement de l'écran n'exécute pas le bouton (constaté sur la trace). Si tu modifies le chargement, modifie les deux. |
+| `btnRefresh` | Recharge les listes et recalcule toutes les collections : `colEtapes`, `colPct` (avancement par tâche), `colTypes`, `colProjCount`, `colDonut`, `colSem`. Il est appelé par `Select(btnRefresh)` après chaque action. Sa formule est aussi copiée dans l'`OnVisible` de l'écran, pour ne pas dépendre d'un `Select` lancé pendant le chargement. Si tu modifies le chargement, modifie les deux. Chaque étape est enveloppée dans `IfError` : en cas d'échec, l'application affiche un bandeau rouge avec le nom de l'étape et le message d'erreur. |
 | `cntSidebar`, `cntTopbar`, `cntDrawer` | Barre latérale, barre du haut, volet de détail (toujours présents ou liés à `varSel`) |
 | `varVue` | Vue active : `dash`, `tasks`, `cal`, `stats`, `trier` |
 | `varSel` | Tâche affichée dans le volet de détail |
