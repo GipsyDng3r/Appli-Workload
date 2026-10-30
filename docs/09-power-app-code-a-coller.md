@@ -52,6 +52,7 @@ Screens:
         =Set(varVue, "dash");
         Set(varType, Blank());
         Set(varSel, Blank());
+        Set(varEdit, false);
         Set(varAn, Year(Today()));
         Set(varMois, Month(Today()));
         ClearCollect(colTC,
@@ -76,6 +77,10 @@ Screens:
         IfError(
           ClearCollect(colWL, '[LME] Workload'),
           Notify("ClearCollect(colWL) : " & FirstError.Message, NotificationType.Error)
+        );
+        IfError(
+          ClearCollect(colProjChoix, {Value: "(sans projet)"}, ForAll(Filter('[LME] Projets', StatutProjet.Value = "Actif"), {Value: Title})),
+          Notify("ClearCollect(colProjChoix) : " & FirstError.Message, NotificationType.Error)
         );
         IfError(
           ClearCollect(colEtapes, '[LME] Etapes'),
@@ -199,7 +204,7 @@ Screens:
                   Fill: =If(Coalesce(varVue, "dash") = "dash", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(Coalesce(varVue, "dash") = "dash", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
-                  OnSelect: =Set(varVue, "dash"); Set(varSel, Blank())
+                  OnSelect: =Set(varVue, "dash"); Set(varSel, Blank()); Set(varEdit, false)
                   Size: =11
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
@@ -214,7 +219,7 @@ Screens:
                   Fill: =If(varVue = "tasks", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varVue = "tasks", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
-                  OnSelect: =Set(varVue, "tasks"); Set(varSel, Blank())
+                  OnSelect: =Set(varVue, "tasks"); Set(varSel, Blank()); Set(varEdit, false)
                   Size: =11
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
@@ -229,7 +234,7 @@ Screens:
                   Fill: =If(varVue = "cal", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varVue = "cal", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
-                  OnSelect: =Set(varVue, "cal"); Set(varSel, Blank())
+                  OnSelect: =Set(varVue, "cal"); Set(varSel, Blank()); Set(varEdit, false)
                   Size: =11
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
@@ -244,7 +249,7 @@ Screens:
                   Fill: =If(varVue = "stats", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varVue = "stats", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
-                  OnSelect: =Set(varVue, "stats"); Set(varSel, Blank())
+                  OnSelect: =Set(varVue, "stats"); Set(varSel, Blank()); Set(varEdit, false)
                   Size: =11
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
@@ -259,7 +264,7 @@ Screens:
                   Fill: =If(varVue = "trier", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varVue = "trier", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
-                  OnSelect: =Set(varVue, "trier"); Set(varSel, Blank())
+                  OnSelect: =Set(varVue, "trier"); Set(varSel, Blank()); Set(varEdit, false)
                   Size: =11
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
@@ -357,6 +362,10 @@ Screens:
                           IfError(
                             ClearCollect(colWL, '[LME] Workload'),
                             Notify("ClearCollect(colWL) : " & FirstError.Message, NotificationType.Error)
+                          );
+                          IfError(
+                            ClearCollect(colProjChoix, {Value: "(sans projet)"}, ForAll(Filter('[LME] Projets', StatutProjet.Value = "Actif"), {Value: Title})),
+                            Notify("ClearCollect(colProjChoix) : " & FirstError.Message, NotificationType.Error)
                           );
                           IfError(
                             ClearCollect(colEtapes, '[LME] Etapes'),
@@ -769,7 +778,7 @@ Screens:
                                     Fill: =RGBA(255, 255, 255, 1)
                                     Color: =RGBA(16, 26, 46, 1)
                                     Visible: =!IsBlank(varNext)
-                                    OnSelect: =Set(varSel, varNext)
+                                    OnSelect: =Set(varSel, varNext); Set(varEdit, false)
                                     Size: =10
                                     Font: =Font.'Segoe UI'
                         - cntDashListe:
@@ -805,7 +814,7 @@ Screens:
                                     Items: =FirstN(SortByColumns(Filter('[LME] Workload', Statut.Value <> "Terminé"), "Echeance", SortOrder.Ascending), 5)
                                     TemplateSize: =54
                                     TemplatePadding: =0
-                                    OnSelect: =Set(varSel, ThisItem)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
                                   Children:
                                     - lblATTitre:
                                         Control: Label@2.5.1
@@ -1129,7 +1138,7 @@ Screens:
                                 )
                               TemplateSize: =128
                               TemplatePadding: =0
-                              OnSelect: =Set(varSel, ThisItem)
+                              OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
                             Children:
                               - recCarte:
                                   Control: Rectangle@2.3.0
@@ -1438,7 +1447,7 @@ Screens:
                                     Items: =Filter('[LME] Workload', Echeance = Today(), Statut.Value <> "Terminé")
                                     TemplateSize: =52
                                     TemplatePadding: =0
-                                    OnSelect: =Set(varSel, ThisItem)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
                                   Children:
                                     - lblAujTitre:
                                         Control: Label@2.5.1
@@ -1496,7 +1505,7 @@ Screens:
                                     Items: =FirstN(SortByColumns(Filter('[LME] Workload', Echeance > Today(), Statut.Value <> "Terminé"), "Echeance", SortOrder.Ascending), 8)
                                     TemplateSize: =54
                                     TemplatePadding: =0
-                                    OnSelect: =Set(varSel, ThisItem)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
                                   Children:
                                     - lblAvTitre:
                                         Control: Label@2.5.1
@@ -1931,7 +1940,7 @@ Screens:
                   Text: ="✕"
                   Fill: =RGBA(255, 255, 255, 1)
                   Color: =RGBA(16, 26, 46, 1)
-                  OnSelect: =Set(varSel, Blank())
+                  OnSelect: =Set(varSel, Blank()); Set(varEdit, false)
                   Size: =10
                   Font: =Font.'Segoe UI'
             - lblDType:
@@ -1939,229 +1948,440 @@ Screens:
                 Properties:
                   X: =20
                   Y: =18
-                  Width: =320
+                  Width: =240
                   Height: =22
                   Text: =varSel.TypeTache.Value
                   Size: =9
                   FontWeight: =FontWeight.Semibold
                   Color: =Coalesce(LookUp(colTC, T = varSel.TypeTache.Value, C), RGBA(107, 119, 140, 1))
                   Font: =Font.'Segoe UI'
-            - lblDTitre:
-                Control: Label@2.5.1
+            - btnModifier:
+                Control: Classic/Button@2.2.0
                 Properties:
-                  X: =20
-                  Y: =44
-                  Width: =372
-                  Height: =66
-                  Text: =varSel.Title
-                  Size: =13
-                  FontWeight: =FontWeight.Semibold
-                  Color: =RGBA(16, 26, 46, 1)
-                  Font: =Font.'Segoe UI'
-            - lblDMeta:
-                Control: Label@2.5.1
-                Properties:
-                  X: =20
-                  Y: =114
-                  Width: =380
-                  Height: =44
-                  Text: =varSel.Statut.Value & " · " & varSel.Source.Value & " · " & Coalesce(varSel.Projet.Value, "sans projet") & Char(10) & "Échéance " & Text(varSel.Echeance, "dd/mm/yyyy")
-                  Size: =10
-                  Color: =RGBA(100, 114, 138, 1)
-                  Font: =Font.'Segoe UI'
-            - lblDPct:
-                Control: Label@2.5.1
-                Properties:
-                  X: =20
-                  Y: =162
-                  Width: =380
-                  Height: =26
-                  Text: =Coalesce(LookUp(colPct, ID = varSel.ID, pct), 0) & " %  ·  " & CountRows(Filter(colEtapes, Tache.Id = varSel.ID, Fait)) & " étape(s) sur " & CountRows(Filter(colEtapes, Tache.Id = varSel.ID))
-                  FontWeight: =FontWeight.Semibold
+                  X: =Parent.Width - 150
+                  Y: =12
+                  Width: =90
+                  Height: =30
+                  Text: ="Modifier"
+                  Fill: =RGBA(255, 255, 255, 1)
                   Color: =RGBA(31, 79, 216, 1)
-                  Size: =11
+                  Size: =10
                   Font: =Font.'Segoe UI'
-            - recDBack:
-                Control: Rectangle@2.3.0
+                  Visible: =!varEdit
+                  OnSelect: =Set(varEdit, true)
+            - cntDrawerVue:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
                 Properties:
-                  X: =20
-                  Y: =194
-                  Width: =380
-                  Height: =8
-                  Fill: =RGBA(238, 241, 247, 1)
-            - recDFill:
-                Control: Rectangle@2.3.0
-                Properties:
-                  X: =20
-                  Y: =194
-                  Width: =380 * Coalesce(LookUp(colPct, ID = varSel.ID, pct), 0) / 100
-                  Height: =8
-                  Fill: =RGBA(31, 79, 216, 1)
-            - galEtapes:
-                Control: Gallery@2.15.0
-                Variant: Vertical
-                Properties:
-                  X: =20
-                  Y: =212
-                  Width: =380
-                  Height: =Parent.Height - 212 - 250
-                  Items: =SortByColumns(Filter(colEtapes, Tache.Id = varSel.ID), "Ordre")
-                  TemplateSize: =38
-                  TemplatePadding: =0
+                  X: =0
+                  Y: =0
+                  Width: =Parent.Width
+                  Height: =Parent.Height
+                  Visible: =!varEdit
                 Children:
-                  - chkEtape:
-                      Control: Classic/CheckBox@2.1.0
+                  - lblDTitre:
+                      Control: Label@2.5.1
                       Properties:
-                        X: =0
-                        Y: =0
-                        Width: =Parent.TemplateWidth
-                        Height: =Parent.TemplateHeight
-                        Text: =ThisItem.Title
-                        Default: =ThisItem.Fait
-                        OnCheck: |-
-                          =Patch('[LME] Etapes', LookUp('[LME] Etapes', ID = ThisItem.ID), {Fait: true});
-                          If(varSel.Statut.Value = "À faire",
-                            Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "En cours"}}));
-                          Select(btnRefresh)
-                        OnUncheck: |-
-                          =Patch('[LME] Etapes', LookUp('[LME] Etapes', ID = ThisItem.ID), {Fait: false});
+                        X: =20
+                        Y: =44
+                        Width: =372
+                        Height: =66
+                        Text: =varSel.Title
+                        Size: =13
+                        FontWeight: =FontWeight.Semibold
+                        Color: =RGBA(16, 26, 46, 1)
+                        Font: =Font.'Segoe UI'
+                  - lblDMeta:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =20
+                        Y: =114
+                        Width: =380
+                        Height: =44
+                        Text: =varSel.Statut.Value & " · " & varSel.Source.Value & " · " & Coalesce(varSel.Projet.Value, "sans projet") & Char(10) & "Échéance " & Text(varSel.Echeance, "dd/mm/yyyy")
+                        Size: =10
+                        Color: =RGBA(100, 114, 138, 1)
+                        Font: =Font.'Segoe UI'
+                  - lblDPct:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =20
+                        Y: =162
+                        Width: =380
+                        Height: =26
+                        Text: =Coalesce(LookUp(colPct, ID = varSel.ID, pct), 0) & " %  ·  " & CountRows(Filter(colEtapes, Tache.Id = varSel.ID, Fait)) & " étape(s) sur " & CountRows(Filter(colEtapes, Tache.Id = varSel.ID))
+                        FontWeight: =FontWeight.Semibold
+                        Color: =RGBA(31, 79, 216, 1)
+                        Size: =11
+                        Font: =Font.'Segoe UI'
+                  - recDBack:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        X: =20
+                        Y: =194
+                        Width: =380
+                        Height: =8
+                        Fill: =RGBA(238, 241, 247, 1)
+                  - recDFill:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        X: =20
+                        Y: =194
+                        Width: =380 * Coalesce(LookUp(colPct, ID = varSel.ID, pct), 0) / 100
+                        Height: =8
+                        Fill: =RGBA(31, 79, 216, 1)
+                  - galEtapes:
+                      Control: Gallery@2.15.0
+                      Variant: Vertical
+                      Properties:
+                        X: =20
+                        Y: =212
+                        Width: =380
+                        Height: =Parent.Height - 212 - 250
+                        Items: =SortByColumns(Filter(colEtapes, Tache.Id = varSel.ID), "Ordre")
+                        TemplateSize: =38
+                        TemplatePadding: =0
+                      Children:
+                        - chkEtape:
+                            Control: Classic/CheckBox@2.1.0
+                            Properties:
+                              X: =0
+                              Y: =0
+                              Width: =Parent.TemplateWidth
+                              Height: =Parent.TemplateHeight
+                              Text: =ThisItem.Title
+                              Default: =ThisItem.Fait
+                              OnCheck: |-
+                                =Patch('[LME] Etapes', LookUp('[LME] Etapes', ID = ThisItem.ID), {Fait: true});
+                                If(varSel.Statut.Value = "À faire",
+                                  Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "En cours"}}));
+                                Select(btnRefresh)
+                              OnUncheck: |-
+                                =Patch('[LME] Etapes', LookUp('[LME] Etapes', ID = ThisItem.ID), {Fait: false});
+                                Select(btnRefresh)
+                              Size: =10
+                              Font: =Font.'Segoe UI'
+                  - txtEtape:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        X: =20
+                        Y: =Parent.Height - 232
+                        Width: =290
+                        Height: =30
+                        HintText: ="Ajouter une étape"
+                        Visible: =varSel.Statut.Value <> "Terminé"
+                        Size: =10
+                        Font: =Font.'Segoe UI'
+                        Default: =""
+                  - btnAjouterEtape:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        X: =320
+                        Y: =Parent.Height - 232
+                        Width: =80
+                        Height: =30
+                        Text: ="Ajouter"
+                        Visible: =varSel.Statut.Value <> "Terminé"
+                        DisplayMode: =If(IsBlank(txtEtape.Text), DisplayMode.Disabled, DisplayMode.Edit)
+                        OnSelect: |-
+                          =Patch('[LME] Etapes', Defaults('[LME] Etapes'),
+                            {
+                              Title: txtEtape.Text,
+                              Tache: {Id: varSel.ID, Value: varSel.Title},
+                              Fait: false,
+                              Ordre: CountRows(Filter(colEtapes, Tache.Id = varSel.ID)) + 1
+                            });
+                          Reset(txtEtape);
                           Select(btnRefresh)
                         Size: =10
                         Font: =Font.'Segoe UI'
-            - txtEtape:
-                Control: Classic/TextInput@2.3.2
+                  - btnStAFaire:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        X: =20
+                        Y: =Parent.Height - 188
+                        Width: =120
+                        Height: =30
+                        Text: ="À faire"
+                        Fill: =If(varSel.Statut.Value = "À faire", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+                        Color: =If(varSel.Statut.Value = "À faire", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+                        Visible: =varSel.Statut.Value <> "Terminé"
+                        OnSelect: |-
+                          =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "À faire"}});
+                          Select(btnRefresh)
+                        Size: =10
+                        Font: =Font.'Segoe UI'
+                  - btnStEnCours:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        X: =148
+                        Y: =Parent.Height - 188
+                        Width: =120
+                        Height: =30
+                        Text: ="En cours"
+                        Fill: =If(varSel.Statut.Value = "En cours", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+                        Color: =If(varSel.Statut.Value = "En cours", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+                        Visible: =varSel.Statut.Value <> "Terminé"
+                        OnSelect: |-
+                          =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "En cours"}});
+                          Select(btnRefresh)
+                        Size: =10
+                        Font: =Font.'Segoe UI'
+                  - btnStBloque:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        X: =276
+                        Y: =Parent.Height - 188
+                        Width: =120
+                        Height: =30
+                        Text: ="Bloqué"
+                        Fill: =If(varSel.Statut.Value = "Bloqué", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
+                        Color: =If(varSel.Statut.Value = "Bloqué", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
+                        Visible: =varSel.Statut.Value <> "Terminé"
+                        OnSelect: |-
+                          =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "Bloqué"}});
+                          Select(btnRefresh)
+                        Size: =10
+                        Font: =Font.'Segoe UI'
+                  - lblSync:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =20
+                        Y: =Parent.Height - 144
+                        Width: =380
+                        Height: =50
+                        Text: |-
+                          =If(varSel.Statut.Value = "Terminé", "Clôture propagée par le flux.",
+                            Switch(varSel.Source.Value,
+                              "Mail", "Terminer clôt la liste, le flag Outlook et To Do.",
+                              "Teams", "Terminer clôt la liste et la tâche To Do.",
+                              "Loop", "Terminer clôt la liste. À cocher aussi dans Loop si non synchronisé.",
+                              "Terminer clôt la liste."))
+                        Size: =9
+                        Color: =RGBA(100, 114, 138, 1)
+                        Font: =Font.'Segoe UI'
+                  - btnTerminer:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        X: =20
+                        Y: =Parent.Height - 84
+                        Width: =380
+                        Height: =40
+                        Text: ="Terminer partout"
+                        Fill: =RGBA(31, 79, 216, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Visible: =varSel.Statut.Value <> "Terminé"
+                        OnSelect: |-
+                          =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID),
+                            {Statut: {Value: "Terminé"}, TermineLe: Now()});
+                          Select(btnRefresh);
+                          Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success)
+                        Size: =10
+                        Font: =Font.'Segoe UI'
+                  - btnRouvrir:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        X: =20
+                        Y: =Parent.Height - 84
+                        Width: =380
+                        Height: =40
+                        Text: ="Rouvrir"
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Color: =RGBA(16, 26, 46, 1)
+                        Visible: =varSel.Statut.Value = "Terminé"
+                        OnSelect: |-
+                          =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID),
+                            {Statut: {Value: "En cours"}, TermineLe: Blank(), Propage: false});
+                          Select(btnRefresh)
+                        Size: =10
+                        Font: =Font.'Segoe UI'
+            - cntDrawerEdit:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
                 Properties:
-                  X: =20
-                  Y: =Parent.Height - 232
-                  Width: =290
-                  Height: =30
-                  HintText: ="Ajouter une étape"
-                  Visible: =varSel.Statut.Value <> "Terminé"
-                  Size: =10
-                  Font: =Font.'Segoe UI'
-                  Default: =""
-            - btnAjouterEtape:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  X: =320
-                  Y: =Parent.Height - 232
-                  Width: =80
-                  Height: =30
-                  Text: ="Ajouter"
-                  Visible: =varSel.Statut.Value <> "Terminé"
-                  DisplayMode: =If(IsBlank(txtEtape.Text), DisplayMode.Disabled, DisplayMode.Edit)
-                  OnSelect: |-
-                    =Patch('[LME] Etapes', Defaults('[LME] Etapes'),
-                      {
-                        Title: txtEtape.Text,
-                        Tache: {Id: varSel.ID, Value: varSel.Title},
-                        Fait: false,
-                        Ordre: CountRows(Filter(colEtapes, Tache.Id = varSel.ID)) + 1
-                      });
-                    Reset(txtEtape);
-                    Select(btnRefresh)
-                  Size: =10
-                  Font: =Font.'Segoe UI'
-            - btnStAFaire:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  X: =20
-                  Y: =Parent.Height - 188
-                  Width: =120
-                  Height: =30
-                  Text: ="À faire"
-                  Fill: =If(varSel.Statut.Value = "À faire", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
-                  Color: =If(varSel.Statut.Value = "À faire", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
-                  Visible: =varSel.Statut.Value <> "Terminé"
-                  OnSelect: |-
-                    =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "À faire"}});
-                    Select(btnRefresh)
-                  Size: =10
-                  Font: =Font.'Segoe UI'
-            - btnStEnCours:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  X: =148
-                  Y: =Parent.Height - 188
-                  Width: =120
-                  Height: =30
-                  Text: ="En cours"
-                  Fill: =If(varSel.Statut.Value = "En cours", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
-                  Color: =If(varSel.Statut.Value = "En cours", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
-                  Visible: =varSel.Statut.Value <> "Terminé"
-                  OnSelect: |-
-                    =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "En cours"}});
-                    Select(btnRefresh)
-                  Size: =10
-                  Font: =Font.'Segoe UI'
-            - btnStBloque:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  X: =276
-                  Y: =Parent.Height - 188
-                  Width: =120
-                  Height: =30
-                  Text: ="Bloqué"
-                  Fill: =If(varSel.Statut.Value = "Bloqué", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
-                  Color: =If(varSel.Statut.Value = "Bloqué", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
-                  Visible: =varSel.Statut.Value <> "Terminé"
-                  OnSelect: |-
-                    =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "Bloqué"}});
-                    Select(btnRefresh)
-                  Size: =10
-                  Font: =Font.'Segoe UI'
-            - lblSync:
-                Control: Label@2.5.1
-                Properties:
-                  X: =20
-                  Y: =Parent.Height - 144
-                  Width: =380
-                  Height: =50
-                  Text: |-
-                    =If(varSel.Statut.Value = "Terminé", "Clôture propagée par le flux.",
-                      Switch(varSel.Source.Value,
-                        "Mail", "Terminer clôt la liste, le flag Outlook et To Do.",
-                        "Teams", "Terminer clôt la liste et la tâche To Do.",
-                        "Loop", "Terminer clôt la liste. À cocher aussi dans Loop si non synchronisé.",
-                        "Terminer clôt la liste."))
-                  Size: =9
-                  Color: =RGBA(100, 114, 138, 1)
-                  Font: =Font.'Segoe UI'
-            - btnTerminer:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  X: =20
-                  Y: =Parent.Height - 84
-                  Width: =380
-                  Height: =40
-                  Text: ="Terminer partout"
-                  Fill: =RGBA(31, 79, 216, 1)
-                  Color: =RGBA(255, 255, 255, 1)
-                  Visible: =varSel.Statut.Value <> "Terminé"
-                  OnSelect: |-
-                    =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID),
-                      {Statut: {Value: "Terminé"}, TermineLe: Now()});
-                    Select(btnRefresh);
-                    Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success)
-                  Size: =10
-                  Font: =Font.'Segoe UI'
-            - btnRouvrir:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  X: =20
-                  Y: =Parent.Height - 84
-                  Width: =380
-                  Height: =40
-                  Text: ="Rouvrir"
-                  Fill: =RGBA(255, 255, 255, 1)
-                  Color: =RGBA(16, 26, 46, 1)
-                  Visible: =varSel.Statut.Value = "Terminé"
-                  OnSelect: |-
-                    =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID),
-                      {Statut: {Value: "En cours"}, TermineLe: Blank(), Propage: false});
-                    Select(btnRefresh)
-                  Size: =10
-                  Font: =Font.'Segoe UI'
+                  X: =0
+                  Y: =0
+                  Width: =Parent.Width
+                  Height: =Parent.Height
+                  Visible: =varEdit
+                Children:
+                  - lblEditTitre:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =20
+                        Y: =48
+                        Width: =Parent.Width - 40
+                        Height: =26
+                        Text: ="Modifier la tâche"
+                        Size: =13
+                        Color: =RGBA(16, 26, 46, 1)
+                        Font: =Font.'Segoe UI'
+                        FontWeight: =FontWeight.Semibold
+                  - lblEditLTitre:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =20
+                        Y: =86
+                        Width: =Parent.Width - 40
+                        Height: =18
+                        Text: ="Titre"
+                        Size: =9
+                        Color: =RGBA(100, 114, 138, 1)
+                        Font: =Font.'Segoe UI'
+                  - txtEditTitre:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        X: =20
+                        Y: =104
+                        Width: =Parent.Width - 40
+                        Height: =34
+                        Default: =varSel.Title
+                        Size: =11
+                        Font: =Font.'Segoe UI'
+                  - lblEditLEch:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =20
+                        Y: =148
+                        Width: =Parent.Width - 40
+                        Height: =18
+                        Text: ="Échéance"
+                        Size: =9
+                        Color: =RGBA(100, 114, 138, 1)
+                        Font: =Font.'Segoe UI'
+                  - dpEditEcheance:
+                      Control: Classic/DatePicker@2.6.0
+                      Properties:
+                        X: =20
+                        Y: =166
+                        Width: =Parent.Width - 40
+                        Height: =34
+                        DefaultDate: =varSel.Echeance
+                        StartYear: =Year(Today()) - 2
+                        EndYear: =Year(Today()) + 5
+                        Size: =11
+                        Font: =Font.'Segoe UI'
+                  - lblEditLType:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =20
+                        Y: =210
+                        Width: =Parent.Width - 40
+                        Height: =18
+                        Text: ="Type"
+                        Size: =9
+                        Color: =RGBA(100, 114, 138, 1)
+                        Font: =Font.'Segoe UI'
+                  - ddEditType:
+                      Control: Classic/DropDown@2.3.1
+                      Properties:
+                        X: =20
+                        Y: =228
+                        Width: =Parent.Width - 40
+                        Height: =34
+                        Items: =["Support", "Amélioration", "Monthly eng", "Projet", "À trier"]
+                        Default: =varSel.TypeTache.Value
+                        Size: =11
+                        Font: =Font.'Segoe UI'
+                  - lblEditLProjet:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =20
+                        Y: =272
+                        Width: =Parent.Width - 40
+                        Height: =18
+                        Text: ="Projet"
+                        Size: =9
+                        Color: =RGBA(100, 114, 138, 1)
+                        Font: =Font.'Segoe UI'
+                  - ddEditProjet:
+                      Control: Classic/DropDown@2.3.1
+                      Properties:
+                        X: =20
+                        Y: =290
+                        Width: =Parent.Width - 40
+                        Height: =34
+                        Items: =colProjChoix
+                        Default: =Coalesce(varSel.Projet.Value, "(sans projet)")
+                        Size: =11
+                        Font: =Font.'Segoe UI'
+                  - lblEditLStatut:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =20
+                        Y: =334
+                        Width: =Parent.Width - 40
+                        Height: =18
+                        Text: ="Statut"
+                        Size: =9
+                        Color: =RGBA(100, 114, 138, 1)
+                        Font: =Font.'Segoe UI'
+                  - ddEditStatut:
+                      Control: Classic/DropDown@2.3.1
+                      Properties:
+                        X: =20
+                        Y: =352
+                        Width: =Parent.Width - 40
+                        Height: =34
+                        Items: =["À faire", "En cours", "Bloqué", "Terminé"]
+                        Default: =varSel.Statut.Value
+                        Size: =11
+                        Font: =Font.'Segoe UI'
+                  - lblEditSource:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =20
+                        Y: =396
+                        Width: =Parent.Width - 40
+                        Height: =18
+                        Text: |-
+                          ="Source : " & varSel.Source.Value & " · " & varSel.Title
+                        Size: =9
+                        Color: =RGBA(100, 114, 138, 1)
+                        Font: =Font.'Segoe UI'
+                  - btnEnregistrer:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        X: =20
+                        Y: =Parent.Height - 84
+                        Width: =(Parent.Width - 52) / 2
+                        Height: =40
+                        Text: ="Enregistrer"
+                        Fill: =RGBA(31, 79, 216, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Size: =11
+                        Font: =Font.'Segoe UI'
+                        DisplayMode: =If(IsBlank(txtEditTitre.Text), DisplayMode.Disabled, DisplayMode.Edit)
+                        OnSelect: |-
+                          =With({np: If(ddEditProjet.Selected.Value = "(sans projet)", Blank(), LookUp('[LME] Projets', Title = ddEditProjet.Selected.Value))},
+                            Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID),
+                              {
+                                Title: txtEditTitre.Text,
+                                Echeance: dpEditEcheance.SelectedDate,
+                                TypeTache: {Value: ddEditType.Selected.Value},
+                                Statut: {Value: ddEditStatut.Selected.Value},
+                                Projet: If(IsBlank(np), Blank(), {Id: np.ID, Value: np.Title}),
+                                TermineLe: If(ddEditStatut.Selected.Value = "Terminé", Coalesce(varSel.TermineLe, Now()), Blank()),
+                                Propage: If(ddEditStatut.Selected.Value = "Terminé", varSel.Propage, false)
+                              })
+                          );
+                          Set(varSel, LookUp('[LME] Workload', ID = varSel.ID));
+                          Set(varEdit, false);
+                          Select(btnRefresh);
+                          Notify("Tâche enregistrée.", NotificationType.Success)
+                  - btnAnnuler:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        X: =(Parent.Width - 52) / 2 + 32
+                        Y: =Parent.Height - 84
+                        Width: =(Parent.Width - 52) / 2
+                        Height: =40
+                        Text: ="Annuler"
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Color: =RGBA(16, 26, 46, 1)
+                        Size: =11
+                        Font: =Font.'Segoe UI'
+                        OnSelect: =Set(varEdit, false)
 ```
 
 ## Après chaque collage : exécuter `OnVisible`
@@ -2180,6 +2400,22 @@ L'application affiche uniquement ce qui est dans tes listes. Si `[LME] Workload`
 2. Dans Studio, sélectionne `btnRefresh`, propriété `OnSelect` : les erreurs de formule sont soulignées en rouge, et le **Vérificateur d'application** (icône en haut à droite) les liste toutes.
 3. Si le clic sur « Actualiser » ne produit ni bandeau ni donnée, c'est qu'une erreur de syntaxe empêche toute la formule de s'exécuter : cherche le soulignement rouge.
 4. Envoie-moi le texte des bandeaux ou des erreurs, ou une nouvelle trace faite après le clic.
+
+## Modifier une tâche depuis le Kanban
+
+Un clic sur une carte (Kanban, tableau de bord, calendrier) ouvre le volet de détail à droite. Le bouton **Modifier**, en haut du volet, bascule sur un formulaire :
+
+| Champ | Contrôle |
+|---|---|
+| Titre | Champ de saisie |
+| Échéance | Sélecteur de date |
+| Type | Liste déroulante (Support, Amélioration, Monthly eng, Projet, À trier) |
+| Projet | Liste déroulante alimentée par `[LME] Projets` (projets actifs), avec « (sans projet) » |
+| Statut | Liste déroulante (À faire, En cours, Bloqué, Terminé) |
+
+**Enregistrer** écrit les changements dans `[LME] Workload`. Passer le statut à Terminé renseigne `TermineLe` : le flux de clôture ([05](05-flux-cloture.md)) se déclenche comme avec le bouton « Terminer partout ». Quitter le statut Terminé efface `TermineLe` et remet `Propage` à Non. **Annuler** referme le formulaire sans rien écrire. Les étapes se cochent et s'ajoutent toujours dans la vue de détail, hors formulaire.
+
+Le sélecteur de date est le contrôle le moins sûr du fichier : son numéro de version (`Classic/DatePicker@2.6.0`) peut différer chez toi. Si Studio le refuse, insère un sélecteur de date à la main, fais clic droit puis **Afficher le code**, et recopie la ligne `Control:` dans `dpEditEcheance`.
 
 ## Pastilles de filtre de la vue Tâches
 
