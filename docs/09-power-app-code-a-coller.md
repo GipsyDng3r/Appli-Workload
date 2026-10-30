@@ -28,7 +28,7 @@ La structure du YAML a été vérifiée avec un analyseur YAML : indentation cor
 
 1. Les quatre listes SharePoint existent avec les noms internes de colonnes de [02](02-listes-sharepoint.md) : `Workload` (`TypeTache`, `Source`, `Statut`, `Echeance`, `Projet`, `TermineLe`, `Propage`, `EtapesCreees`), `Projets` (`StatutProjet`), `Etapes` (`Tache`, `Fait`, `Ordre`).
 2. Crée une application canvas vide au format **Tablette**.
-3. Menu **Données** → ajoute `Workload`, `Projets` et `Etapes` (connecteur SharePoint). Les noms dans l'app doivent être exactement ceux-là.
+3. Menu **Données** → ajoute tes listes SharePoint (connecteur SharePoint). **Le nom d'une source de données dans l'app est le nom de la liste.** Le code utilise `'[LME] Workload'`, `'[LME] Projets'` et `'[LME] Etapes'` (les apostrophes sont obligatoires à cause des crochets et de l'espace). Si tes listes portent un autre nom, remplace partout `[LME] ` par ton préfixe, ou retire-le avec un rechercher-remplacer sur `'[LME] ` puis sur `'` après `Workload`, `Projets` et `Etapes`. Un nom de source incorrect provoque des centaines d'erreurs en cascade dans l'App checker.
 4. Paramètres → Général : porte la **limite de lignes de données** à 2000.
 5. Vérifie que la **barre de formule Power Fx** est active : le collage de code en dépend.
 6. Paramètres → Affichage : décoche « Adapter à l'écran » et « Verrouiller le format » si tu veux garder les coordonnées exactes.
@@ -60,24 +60,24 @@ Screens:
           {T: "À trier", C: RGBA(107, 119, 140, 1)}
         );
         IfError(
-          Refresh(Workload),
+          Refresh('[LME] Workload'),
           Notify("Refresh(Workload) : " & FirstError.Message, NotificationType.Error)
         );
         IfError(
-          Refresh(Etapes),
+          Refresh('[LME] Etapes'),
           Notify("Refresh(Etapes) : " & FirstError.Message, NotificationType.Error)
         );
         IfError(
-          Refresh(Projets),
+          Refresh('[LME] Projets'),
           Notify("Refresh(Projets) : " & FirstError.Message, NotificationType.Error)
         );
         IfError(
-          ClearCollect(colEtapes, Etapes),
+          ClearCollect(colEtapes, '[LME] Etapes'),
           Notify("ClearCollect(colEtapes) : " & FirstError.Message, NotificationType.Error)
         );
         IfError(
           ClearCollect(colPct,
-            ForAll(Workload As w,
+            ForAll('[LME] Workload' As w,
               {
                 ID: w.ID,
                 ProjetId: w.Projet.Id,
@@ -95,7 +95,7 @@ Screens:
           Notify("Set(varGlobal) : " & FirstError.Message, NotificationType.Error)
         );
         IfError(
-          Set(varNext, First(SortByColumns(Filter(Workload, Statut.Value <> "Terminé", TypeTache.Value <> "À trier"), "Echeance", SortOrder.Ascending))),
+          Set(varNext, First(SortByColumns(Filter('[LME] Workload', Statut.Value <> "Terminé", TypeTache.Value <> "À trier"), "Echeance", SortOrder.Ascending))),
           Notify("Set(varNext) : " & FirstError.Message, NotificationType.Error)
         );
         IfError(
@@ -103,7 +103,7 @@ Screens:
             ForAll(["Support", "Amélioration", "Monthly eng", "Projet"] As t,
               {
                 T: t.Value,
-                n: CountRows(Filter(Workload, TypeTache.Value = t.Value)),
+                n: CountRows(Filter('[LME] Workload', TypeTache.Value = t.Value)),
                 pct: Round(Coalesce(Average(Filter(colPct, TypeT = t.Value), pct), 0), 0)
               }
             )
@@ -112,12 +112,12 @@ Screens:
         );
         IfError(
           ClearCollect(colProjCount,
-            ForAll(Sequence(CountRows(Projets)),
-              With({p: Index(Projets, Value)},
+            ForAll(Sequence(CountRows('[LME] Projets')),
+              With({p: Index('[LME] Projets', Value)},
                 {
                   k: Value,
                   name: p.Title,
-                  n: CountRows(Filter(Workload, Projet.Id = p.ID, Statut.Value <> "Terminé"))
+                  n: CountRows(Filter('[LME] Workload', Projet.Id = p.ID, Statut.Value <> "Terminé"))
                 }
               )
             )
@@ -147,7 +147,7 @@ Screens:
             ForAll(Sequence(8, 0),
               {
                 i: Value,
-                n: CountRows(Filter(Workload, Statut.Value = "Terminé",
+                n: CountRows(Filter('[LME] Workload', Statut.Value = "Terminé",
                      TermineLe >= DateAdd(Today(), 1 - 7 * (8 - Value), TimeUnit.Days),
                      TermineLe < DateAdd(Today(), 1 - 7 * (7 - Value), TimeUnit.Days)))
               }
@@ -156,7 +156,7 @@ Screens:
           Notify("ClearCollect(colSem) : " & FirstError.Message, NotificationType.Error)
         );
         IfError(
-          If(!IsBlank(varSel), Set(varSel, LookUp(Workload, ID = varSel.ID))),
+          If(!IsBlank(varSel), Set(varSel, LookUp('[LME] Workload', ID = varSel.ID))),
           Notify("mise à jour de varSel : " & FirstError.Message, NotificationType.Error)
         )
     Children:
@@ -239,7 +239,7 @@ Screens:
             - navTrier:
                 Control: Classic/Button@2.2.0
                 Properties:
-                  Text: ="À trier (" & CountRows(Filter(Workload, TypeTache.Value = "À trier", Statut.Value <> "Terminé")) & ")"
+                  Text: ="À trier (" & CountRows(Filter('[LME] Workload', TypeTache.Value = "À trier", Statut.Value <> "Terminé")) & ")"
                   Fill: =If(varVue = "trier", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varVue = "trier", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
@@ -285,7 +285,7 @@ Screens:
                   Height: =40
                   DisplayMode: =If(IsBlank(txtNouvelle.Text), DisplayMode.Disabled, DisplayMode.Edit)
                   OnSelect: |-
-                    =Patch(Workload, Defaults(Workload),
+                    =Patch('[LME] Workload', Defaults('[LME] Workload'),
                       {
                         Title: txtNouvelle.Text,
                         TypeTache: {Value: "À trier"},
@@ -311,24 +311,24 @@ Screens:
                   Height: =40
                   OnSelect: |-
                     =IfError(
-                      Refresh(Workload),
+                      Refresh('[LME] Workload'),
                       Notify("Refresh(Workload) : " & FirstError.Message, NotificationType.Error)
                     );
                     IfError(
-                      Refresh(Etapes),
+                      Refresh('[LME] Etapes'),
                       Notify("Refresh(Etapes) : " & FirstError.Message, NotificationType.Error)
                     );
                     IfError(
-                      Refresh(Projets),
+                      Refresh('[LME] Projets'),
                       Notify("Refresh(Projets) : " & FirstError.Message, NotificationType.Error)
                     );
                     IfError(
-                      ClearCollect(colEtapes, Etapes),
+                      ClearCollect(colEtapes, '[LME] Etapes'),
                       Notify("ClearCollect(colEtapes) : " & FirstError.Message, NotificationType.Error)
                     );
                     IfError(
                       ClearCollect(colPct,
-                        ForAll(Workload As w,
+                        ForAll('[LME] Workload' As w,
                           {
                             ID: w.ID,
                             ProjetId: w.Projet.Id,
@@ -346,7 +346,7 @@ Screens:
                       Notify("Set(varGlobal) : " & FirstError.Message, NotificationType.Error)
                     );
                     IfError(
-                      Set(varNext, First(SortByColumns(Filter(Workload, Statut.Value <> "Terminé", TypeTache.Value <> "À trier"), "Echeance", SortOrder.Ascending))),
+                      Set(varNext, First(SortByColumns(Filter('[LME] Workload', Statut.Value <> "Terminé", TypeTache.Value <> "À trier"), "Echeance", SortOrder.Ascending))),
                       Notify("Set(varNext) : " & FirstError.Message, NotificationType.Error)
                     );
                     IfError(
@@ -354,7 +354,7 @@ Screens:
                         ForAll(["Support", "Amélioration", "Monthly eng", "Projet"] As t,
                           {
                             T: t.Value,
-                            n: CountRows(Filter(Workload, TypeTache.Value = t.Value)),
+                            n: CountRows(Filter('[LME] Workload', TypeTache.Value = t.Value)),
                             pct: Round(Coalesce(Average(Filter(colPct, TypeT = t.Value), pct), 0), 0)
                           }
                         )
@@ -363,12 +363,12 @@ Screens:
                     );
                     IfError(
                       ClearCollect(colProjCount,
-                        ForAll(Sequence(CountRows(Projets)),
-                          With({p: Index(Projets, Value)},
+                        ForAll(Sequence(CountRows('[LME] Projets')),
+                          With({p: Index('[LME] Projets', Value)},
                             {
                               k: Value,
                               name: p.Title,
-                              n: CountRows(Filter(Workload, Projet.Id = p.ID, Statut.Value <> "Terminé"))
+                              n: CountRows(Filter('[LME] Workload', Projet.Id = p.ID, Statut.Value <> "Terminé"))
                             }
                           )
                         )
@@ -398,7 +398,7 @@ Screens:
                         ForAll(Sequence(8, 0),
                           {
                             i: Value,
-                            n: CountRows(Filter(Workload, Statut.Value = "Terminé",
+                            n: CountRows(Filter('[LME] Workload', Statut.Value = "Terminé",
                                  TermineLe >= DateAdd(Today(), 1 - 7 * (8 - Value), TimeUnit.Days),
                                  TermineLe < DateAdd(Today(), 1 - 7 * (7 - Value), TimeUnit.Days)))
                           }
@@ -407,7 +407,7 @@ Screens:
                       Notify("ClearCollect(colSem) : " & FirstError.Message, NotificationType.Error)
                     );
                     IfError(
-                      If(!IsBlank(varSel), Set(varSel, LookUp(Workload, ID = varSel.ID))),
+                      If(!IsBlank(varSel), Set(varSel, LookUp('[LME] Workload', ID = varSel.ID))),
                       Notify("mise à jour de varSel : " & FirstError.Message, NotificationType.Error)
                     )
       - cntDash:
@@ -443,7 +443,7 @@ Screens:
                   - lblKpiOuvertes:
                       Control: Label@2.5.1
                       Properties:
-                        Text: =CountRows(Filter(Workload, Statut.Value <> "Terminé")) & Char(10) & "Tâches ouvertes"
+                        Text: =CountRows(Filter('[LME] Workload', Statut.Value <> "Terminé")) & Char(10) & "Tâches ouvertes"
                         Size: =18
                         FontWeight: =FontWeight.Bold
                         Fill: =RGBA(21, 62, 170, 1)
@@ -456,7 +456,7 @@ Screens:
                   - lblKpiRetard:
                       Control: Label@2.5.1
                       Properties:
-                        Text: =CountRows(Filter(Workload, Statut.Value <> "Terminé", Echeance < Today())) & Char(10) & "En retard"
+                        Text: =CountRows(Filter('[LME] Workload', Statut.Value <> "Terminé", Echeance < Today())) & Char(10) & "En retard"
                         Size: =18
                         FontWeight: =FontWeight.Bold
                         Fill: =RGBA(255, 255, 255, 1)
@@ -469,7 +469,7 @@ Screens:
                   - lblKpiSemaine:
                       Control: Label@2.5.1
                       Properties:
-                        Text: =CountRows(Filter(Workload, Statut.Value = "Terminé", TermineLe >= DateAdd(Today(), -6, TimeUnit.Days))) & Char(10) & "Terminées sur 7 jours"
+                        Text: =CountRows(Filter('[LME] Workload', Statut.Value = "Terminé", TermineLe >= DateAdd(Today(), -6, TimeUnit.Days))) & Char(10) & "Terminées sur 7 jours"
                         Size: =18
                         FontWeight: =FontWeight.Bold
                         Fill: =RGBA(255, 255, 255, 1)
@@ -482,7 +482,7 @@ Screens:
                   - lblKpiTrier:
                       Control: Label@2.5.1
                       Properties:
-                        Text: =CountRows(Filter(Workload, TypeTache.Value = "À trier", Statut.Value <> "Terminé")) & Char(10) & "À trier"
+                        Text: =CountRows(Filter('[LME] Workload', TypeTache.Value = "À trier", Statut.Value <> "Terminé")) & Char(10) & "À trier"
                         Size: =18
                         FontWeight: =FontWeight.Bold
                         Fill: =RGBA(255, 255, 255, 1)
@@ -523,7 +523,7 @@ Screens:
                       Control: Gallery@2.15.0
                       Variant: Horizontal
                       Properties:
-                        Items: =Filter(Projets, StatutProjet.Value = "Actif")
+                        Items: =Filter('[LME] Projets', StatutProjet.Value = "Actif")
                         X: =8
                         Y: =36
                         Width: =444
@@ -629,7 +629,7 @@ Screens:
                         Width: =268
                         Height: =40
                         OnSelect: |-
-                          =Patch(Workload, LookUp(Workload, ID = varNext.ID),
+                          =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varNext.ID),
                             {Statut: {Value: "Terminé"}, TermineLe: Now()});
                           Select(btnRefresh);
                           Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success)
@@ -676,7 +676,7 @@ Screens:
                       Control: Gallery@2.15.0
                       Variant: Vertical
                       Properties:
-                        Items: =FirstN(SortByColumns(Filter(Workload, Statut.Value <> "Terminé"), "Echeance", SortOrder.Ascending), 5)
+                        Items: =FirstN(SortByColumns(Filter('[LME] Workload', Statut.Value <> "Terminé"), "Echeance", SortOrder.Ascending), 5)
                         X: =8
                         Y: =36
                         Width: =280
@@ -848,7 +848,7 @@ Screens:
                   - lblDark:
                       Control: Label@2.5.1
                       Properties:
-                        Text: =CountRows(Filter(Workload, Statut.Value = "Terminé")) & " / " & CountRows(Workload) & Char(10) & "tâches clôturées partout"
+                        Text: =CountRows(Filter('[LME] Workload', Statut.Value = "Terminé")) & " / " & CountRows('[LME] Workload') & Char(10) & "tâches clôturées partout"
                         Size: =20
                         FontWeight: =FontWeight.Bold
                         Color: =RGBA(255, 255, 255, 1)
@@ -965,7 +965,7 @@ Screens:
                   - lblColHead:
                       Control: Label@2.5.1
                       Properties:
-                        Text: =ThisItem.S & " (" & CountRows(Filter(Workload, Statut.Value = ThisItem.S, TypeTache.Value <> "À trier")) & ")"
+                        Text: =ThisItem.S & " (" & CountRows(Filter('[LME] Workload', Statut.Value = ThisItem.S, TypeTache.Value <> "À trier")) & ")"
                         FontWeight: =FontWeight.Semibold
                         Color: =Switch(ThisItem.S, "En cours", RGBA(31, 79, 216, 1), "Bloqué", RGBA(192, 51, 43, 1), "Terminé", RGBA(19, 122, 74, 1), RGBA(100, 114, 138, 1))
                         X: =12
@@ -978,7 +978,7 @@ Screens:
                       Properties:
                         Items: |-
                           =SortByColumns(
-                            Filter(Workload,
+                            Filter('[LME] Workload',
                               Statut.Value = ThisItem.S,
                               TypeTache.Value <> "À trier",
                               IsBlank(varType) || TypeTache.Value = varType,
@@ -1062,10 +1062,10 @@ Screens:
                               Width: =34
                               Height: =26
                               OnSelect: |-
-                                =Patch(Workload, LookUp(Workload, ID = ThisItem.ID),
+                                =Patch('[LME] Workload', LookUp('[LME] Workload', ID = ThisItem.ID),
                                   {Statut: {Value: Switch(ThisItem.Statut.Value, "En cours", "À faire", "Bloqué", "En cours", "Terminé", "Bloqué", "À faire")}});
                                 If(ThisItem.Statut.Value = "Terminé",
-                                  Patch(Workload, LookUp(Workload, ID = ThisItem.ID), {TermineLe: Blank(), Propage: false}));
+                                  Patch('[LME] Workload', LookUp('[LME] Workload', ID = ThisItem.ID), {TermineLe: Blank(), Propage: false}));
                                 Select(btnRefresh)
                         - btnNext:
                             Control: Classic/Button@2.2.0
@@ -1080,9 +1080,9 @@ Screens:
                               Height: =26
                               OnSelect: |-
                                 =With({nv: Switch(ThisItem.Statut.Value, "À faire", "En cours", "En cours", "Bloqué", "Bloqué", "Terminé", "À faire")},
-                                  Patch(Workload, LookUp(Workload, ID = ThisItem.ID), {Statut: {Value: nv}});
+                                  Patch('[LME] Workload', LookUp('[LME] Workload', ID = ThisItem.ID), {Statut: {Value: nv}});
                                   If(nv = "Terminé",
-                                    Patch(Workload, LookUp(Workload, ID = ThisItem.ID), {TermineLe: Now()});
+                                    Patch('[LME] Workload', LookUp('[LME] Workload', ID = ThisItem.ID), {TermineLe: Now()});
                                     Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success))
                                 );
                                 Select(btnRefresh)
@@ -1211,7 +1211,7 @@ Screens:
                         - lblEv1:
                             Control: Label@2.5.1
                             Properties:
-                              Text: =Coalesce(Last(FirstN(Filter(Workload, Echeance = ThisItem.d), 1)).Title, "")
+                              Text: =Coalesce(Last(FirstN(Filter('[LME] Workload', Echeance = ThisItem.d), 1)).Title, "")
                               Size: =9
                               Fill: =If(IsBlank(Self.Text), RGBA(0, 0, 0, 0), RGBA(227, 235, 255, 1))
                               Color: =RGBA(31, 79, 216, 1)
@@ -1222,7 +1222,7 @@ Screens:
                         - lblEv2:
                             Control: Label@2.5.1
                             Properties:
-                              Text: =If(CountRows(Filter(Workload, Echeance = ThisItem.d)) >= 2, Last(FirstN(Filter(Workload, Echeance = ThisItem.d), 2)).Title, "")
+                              Text: =If(CountRows(Filter('[LME] Workload', Echeance = ThisItem.d)) >= 2, Last(FirstN(Filter('[LME] Workload', Echeance = ThisItem.d), 2)).Title, "")
                               Size: =9
                               Fill: =If(IsBlank(Self.Text), RGBA(0, 0, 0, 0), RGBA(227, 235, 255, 1))
                               Color: =RGBA(31, 79, 216, 1)
@@ -1233,7 +1233,7 @@ Screens:
                         - lblEvPlus:
                             Control: Label@2.5.1
                             Properties:
-                              Text: =If(CountRows(Filter(Workload, Echeance = ThisItem.d)) > 2, "+" & (CountRows(Filter(Workload, Echeance = ThisItem.d)) - 2), "")
+                              Text: =If(CountRows(Filter('[LME] Workload', Echeance = ThisItem.d)) > 2, "+" & (CountRows(Filter('[LME] Workload', Echeance = ThisItem.d)) - 2), "")
                               Size: =9
                               Color: =RGBA(100, 114, 138, 1)
                               X: =4
@@ -1263,7 +1263,7 @@ Screens:
                       Control: Gallery@2.15.0
                       Variant: Vertical
                       Properties:
-                        Items: =Filter(Workload, Echeance = Today(), Statut.Value <> "Terminé")
+                        Items: =Filter('[LME] Workload', Echeance = Today(), Statut.Value <> "Terminé")
                         X: =0
                         Y: =28
                         Width: =368
@@ -1306,7 +1306,7 @@ Screens:
                       Control: Gallery@2.15.0
                       Variant: Vertical
                       Properties:
-                        Items: =FirstN(SortByColumns(Filter(Workload, Echeance > Today(), Statut.Value <> "Terminé"), "Echeance", SortOrder.Ascending), 8)
+                        Items: =FirstN(SortByColumns(Filter('[LME] Workload', Echeance > Today(), Statut.Value <> "Terminé"), "Echeance", SortOrder.Ascending), 8)
                         X: =0
                         Y: =222
                         Width: =368
@@ -1379,7 +1379,7 @@ Screens:
                   - lblSt1:
                       Control: Label@2.5.1
                       Properties:
-                        Text: =CountRows(Filter(Workload, Statut.Value = "Terminé")) & Char(10) & "Tâches terminées"
+                        Text: =CountRows(Filter('[LME] Workload', Statut.Value = "Terminé")) & Char(10) & "Tâches terminées"
                         Size: =18
                         FontWeight: =FontWeight.Bold
                         Fill: =RGBA(255, 255, 255, 1)
@@ -1406,7 +1406,7 @@ Screens:
                       Control: Label@2.5.1
                       Properties:
                         Text: |-
-                          =With({fin: Filter(Workload, Statut.Value = "Terminé")},
+                          =With({fin: Filter('[LME] Workload', Statut.Value = "Terminé")},
                             If(CountRows(fin) = 0, "0", Round(100 * CountRows(Filter(fin, Date(Year(TermineLe), Month(TermineLe), Day(TermineLe)) <= Echeance)) / CountRows(fin), 0)) & " %"
                           ) & Char(10) & "Clôturées dans les temps"
                         Size: =18
@@ -1421,7 +1421,7 @@ Screens:
                   - lblSt4:
                       Control: Label@2.5.1
                       Properties:
-                        Text: =CountRows(Filter(Workload, Statut.Value <> "Terminé", Echeance < Today())) & Char(10) & "En retard"
+                        Text: =CountRows(Filter('[LME] Workload', Statut.Value <> "Terminé", Echeance < Today())) & Char(10) & "En retard"
                         Size: =18
                         FontWeight: =FontWeight.Bold
                         Fill: =RGBA(255, 255, 255, 1)
@@ -1558,7 +1558,7 @@ Screens:
                 Control: Gallery@2.15.0
                 Variant: Vertical
                 Properties:
-                  Items: =Filter(Workload, TypeTache.Value = "À trier", Statut.Value <> "Terminé")
+                  Items: =Filter('[LME] Workload', TypeTache.Value = "À trier", Statut.Value <> "Terminé")
                   X: =0
                   Y: =80
                   Width: =1088
@@ -1606,7 +1606,7 @@ Screens:
                       Control: Classic/DropDown@2.3.1
                       Properties:
                         Items: |-
-                          =ForAll(Filter(Projets, StatutProjet.Value = "Actif"), {Value: Title, ID: ID})
+                          =ForAll(Filter('[LME] Projets', StatutProjet.Value = "Actif"), {Value: Title, ID: ID})
                         X: =266
                         Y: =54
                         Width: =260
@@ -1622,7 +1622,7 @@ Screens:
                         Width: =120
                         Height: =28
                         OnSelect: |-
-                          =Patch(Workload, LookUp(Workload, ID = ThisItem.ID),
+                          =Patch('[LME] Workload', LookUp('[LME] Workload', ID = ThisItem.ID),
                             {
                               TypeTache: {Value: ddTrierType.Selected.Value},
                               Projet: {Id: ddTrierProjet.Selected.ID, Value: ddTrierProjet.Selected.Value}
@@ -1736,12 +1736,12 @@ Screens:
                         Text: =ThisItem.Title
                         Default: =ThisItem.Fait
                         OnCheck: |-
-                          =Patch(Etapes, LookUp(Etapes, ID = ThisItem.ID), {Fait: true});
+                          =Patch('[LME] Etapes', LookUp('[LME] Etapes', ID = ThisItem.ID), {Fait: true});
                           If(varSel.Statut.Value = "À faire",
-                            Patch(Workload, LookUp(Workload, ID = varSel.ID), {Statut: {Value: "En cours"}}));
+                            Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "En cours"}}));
                           Select(btnRefresh)
                         OnUncheck: |-
-                          =Patch(Etapes, LookUp(Etapes, ID = ThisItem.ID), {Fait: false});
+                          =Patch('[LME] Etapes', LookUp('[LME] Etapes', ID = ThisItem.ID), {Fait: false});
                           Select(btnRefresh)
                         X: =0
                         Y: =0
@@ -1767,7 +1767,7 @@ Screens:
                   Height: =34
                   DisplayMode: =If(IsBlank(txtEtape.Text), DisplayMode.Disabled, DisplayMode.Edit)
                   OnSelect: |-
-                    =Patch(Etapes, Defaults(Etapes),
+                    =Patch('[LME] Etapes', Defaults('[LME] Etapes'),
                       {
                         Title: txtEtape.Text,
                         Tache: {Id: varSel.ID, Value: varSel.Title},
@@ -1788,7 +1788,7 @@ Screens:
                   Width: =118
                   Height: =34
                   OnSelect: |-
-                    =Patch(Workload, LookUp(Workload, ID = varSel.ID), {Statut: {Value: "À faire"}});
+                    =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "À faire"}});
                     Select(btnRefresh)
             - btnStEnCours:
                 Control: Classic/Button@2.2.0
@@ -1802,7 +1802,7 @@ Screens:
                   Width: =118
                   Height: =34
                   OnSelect: |-
-                    =Patch(Workload, LookUp(Workload, ID = varSel.ID), {Statut: {Value: "En cours"}});
+                    =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "En cours"}});
                     Select(btnRefresh)
             - btnStBloque:
                 Control: Classic/Button@2.2.0
@@ -1816,7 +1816,7 @@ Screens:
                   Width: =118
                   Height: =34
                   OnSelect: |-
-                    =Patch(Workload, LookUp(Workload, ID = varSel.ID), {Statut: {Value: "Bloqué"}});
+                    =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "Bloqué"}});
                     Select(btnRefresh)
             - lblSync:
                 Control: Label@2.5.1
@@ -1846,7 +1846,7 @@ Screens:
                   Width: =368
                   Height: =44
                   OnSelect: |-
-                    =Patch(Workload, LookUp(Workload, ID = varSel.ID),
+                    =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID),
                       {Statut: {Value: "Terminé"}, TermineLe: Now()});
                     Select(btnRefresh);
                     Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success)
@@ -1862,7 +1862,7 @@ Screens:
                   Width: =368
                   Height: =44
                   OnSelect: |-
-                    =Patch(Workload, LookUp(Workload, ID = varSel.ID),
+                    =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID),
                       {Statut: {Value: "En cours"}, TermineLe: Blank(), Propage: false});
                     Select(btnRefresh)
 ```
