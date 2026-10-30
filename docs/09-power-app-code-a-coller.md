@@ -18,7 +18,7 @@ La structure du YAML a été vérifiée avec un analyseur YAML : indentation cor
 |---|---|
 | Glisser-déposer des cartes du Kanban | Boutons ◀ ▶ sur chaque carte : Power Apps n'a pas de glisser-déposer natif |
 | Courbes et anneau dessinés en JavaScript | Images SVG générées par formule (`data:image/svg+xml`) |
-| Barres en pilule hachurée | Barres pleines arrondies |
+| Barres en pilule hachurée | Barres pleines à angles droits (le contrôle Rectangle n'a pas de rayon d'arrondi) |
 | Tiroir de détail animé | Volet fixe à droite, affiché quand une tâche est sélectionnée |
 | Bouton « Simuler un mail flaggé » | Absent : ce sont les vrais flux qui créent les tâches. Un champ « Nouvelle tâche manuelle » le remplace |
 | Données d'exemple | Données de tes listes SharePoint |
@@ -370,10 +370,6 @@ Screens:
                 Control: Rectangle@2.3.0
                 Properties:
                   Fill: =RGBA(238, 241, 247, 1)
-                  RadiusTopLeft: =22
-                  RadiusTopRight: =22
-                  RadiusBottomLeft: =22
-                  RadiusBottomRight: =22
                   X: =Parent.TemplateWidth / 2 - 22
                   Y: =26
                   Width: =44
@@ -382,10 +378,6 @@ Screens:
                 Control: Rectangle@2.3.0
                 Properties:
                   Fill: =RGBA(31, 79, 216, 1)
-                  RadiusTopLeft: =22
-                  RadiusTopRight: =22
-                  RadiusBottomLeft: =22
-                  RadiusBottomRight: =22
                   X: =Parent.TemplateWidth / 2 - 22
                   Y: =26 + 116 - Self.Height
                   Width: =44
@@ -1340,8 +1332,8 @@ Screens:
             - ddTrierProjet:
                 Control: Classic/DropDown@2.3.1
                 Properties:
-                  Items: =Filter(Projets, StatutProjet.Value = "Actif")
-                  Value: ="Title"
+                  Items: |-
+                    =ForAll(Filter(Projets, StatutProjet.Value = "Actif"), {Value: Title, ID: ID})
                   X: =266
                   Y: =54
                   Width: =260
@@ -1360,7 +1352,7 @@ Screens:
                     =Patch(Workload, LookUp(Workload, ID = ThisItem.ID),
                       {
                         TypeTache: {Value: ddTrierType.Selected.Value},
-                        Projet: {Id: ddTrierProjet.Selected.ID, Value: ddTrierProjet.Selected.Title}
+                        Projet: {Id: ddTrierProjet.Selected.ID, Value: ddTrierProjet.Selected.Value}
                       });
                     Select(btnRefresh);
                     Notify("Classée : les étapes du modèle vont être créées par le flux.", NotificationType.Success)
@@ -1606,7 +1598,7 @@ Screens:
 
 1. **Colonnes de choix** : les formules utilisent `Statut.Value`, `TypeTache.Value`, `Source.Value`, `StatutProjet.Value`. Si tes colonnes sont de type texte et non choix, retire `.Value` partout (rechercher-remplacer `.Value`).
 2. **Colonnes de recherche** : `Projet.Id`, `Tache.Id`, `Projet.Value` supposent des colonnes de type recherche (lookup). Si Power Apps affiche une erreur, regarde la forme réelle avec une galerie temporaire sur `Workload`.
-3. **Valeurs `Value` des listes déroulantes** : dans `ddTrierProjet`, la propriété `Value` indique la colonne affichée. Si Studio la rejette, règle-la dans le panneau de droite, rubrique « Valeur ».
+3. **Liste déroulante des projets** : `ddTrierProjet` affiche une colonne nommée `Value`, fabriquée par `ForAll` à partir de `Projets` (la propriété `Value` n'existe pas sur ce contrôle).
 4. **Calendrier** : la galerie `galJours` utilise `WrapCount: 7`. Si ta version ne la propose pas, remplace-la par une galerie horizontale de 7 colonnes sur 6 lignes, ou garde la vue « À venir » et supprime la grille.
 5. **Images SVG** : `imgGauge`, `imgCourbe` et `imgDonut` construisent une image par formule. Les nombres sont arrondis en entiers pour éviter la virgule décimale des paramètres régionaux français. Si une image reste vide, vérifie que le contrôle est de type *Image* (et non Image moderne).
 6. **Nombre de projets** : le graphique en anneau prévoit 4 couleurs. Au-delà, les projets suivants prennent la même teinte grise.

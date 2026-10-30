@@ -326,10 +326,6 @@ Screens:
                 Control: Rectangle@2.3.0
                 Properties:
                   Fill: =RGBA(238, 241, 247, 1)
-                  RadiusTopLeft: =22
-                  RadiusTopRight: =22
-                  RadiusBottomLeft: =22
-                  RadiusBottomRight: =22
                   X: =Parent.TemplateWidth / 2 - 22
                   Y: =26
                   Width: =44
@@ -338,10 +334,6 @@ Screens:
                 Control: Rectangle@2.3.0
                 Properties:
                   Fill: =RGBA(31, 79, 216, 1)
-                  RadiusTopLeft: =22
-                  RadiusTopRight: =22
-                  RadiusBottomLeft: =22
-                  RadiusBottomRight: =22
                   X: =Parent.TemplateWidth / 2 - 22
                   Y: =26 + 116 - Self.Height
                   Width: =44
@@ -1296,8 +1288,8 @@ Screens:
             - ddTrierProjet:
                 Control: Classic/DropDown@2.3.1
                 Properties:
-                  Items: =Filter(Projets, StatutProjet.Value = "Actif")
-                  Value: ="Title"
+                  Items: |-
+                    =ForAll(Filter(Projets, StatutProjet.Value = "Actif"), {Value: Title, ID: ID})
                   X: =266
                   Y: =54
                   Width: =260
@@ -1316,7 +1308,7 @@ Screens:
                     =Patch(Workload, LookUp(Workload, ID = ThisItem.ID),
                       {
                         TypeTache: {Value: ddTrierType.Selected.Value},
-                        Projet: {Id: ddTrierProjet.Selected.ID, Value: ddTrierProjet.Selected.Title}
+                        Projet: {Id: ddTrierProjet.Selected.ID, Value: ddTrierProjet.Selected.Value}
                       });
                     Select(btnRefresh);
                     Notify("Classée : les étapes du modèle vont être créées par le flux.", NotificationType.Success)
