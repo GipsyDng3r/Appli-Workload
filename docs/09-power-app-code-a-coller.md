@@ -208,6 +208,10 @@ Screens:
                   Size: =11
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
+                  HoverFill: =RGBA(238, 241, 247, 1)
+                  PressedFill: =RGBA(227, 235, 255, 1)
+                  FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                  FocusedBorderThickness: =1
             - navTasks:
                 Control: Classic/Button@2.2.0
                 Properties:
@@ -223,6 +227,10 @@ Screens:
                   Size: =11
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
+                  HoverFill: =RGBA(238, 241, 247, 1)
+                  PressedFill: =RGBA(227, 235, 255, 1)
+                  FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                  FocusedBorderThickness: =1
             - navCal:
                 Control: Classic/Button@2.2.0
                 Properties:
@@ -238,6 +246,10 @@ Screens:
                   Size: =11
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
+                  HoverFill: =RGBA(238, 241, 247, 1)
+                  PressedFill: =RGBA(227, 235, 255, 1)
+                  FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                  FocusedBorderThickness: =1
             - navStats:
                 Control: Classic/Button@2.2.0
                 Properties:
@@ -253,6 +265,10 @@ Screens:
                   Size: =11
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
+                  HoverFill: =RGBA(238, 241, 247, 1)
+                  PressedFill: =RGBA(227, 235, 255, 1)
+                  FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                  FocusedBorderThickness: =1
             - navTrier:
                 Control: Classic/Button@2.2.0
                 Properties:
@@ -268,6 +284,10 @@ Screens:
                   Size: =11
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
+                  HoverFill: =RGBA(238, 241, 247, 1)
+                  PressedFill: =RGBA(227, 235, 255, 1)
+                  FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                  FocusedBorderThickness: =1
       - cntMain:
           Control: GroupContainer@1.5.0
           Variant: ManualLayout
@@ -297,6 +317,12 @@ Screens:
                         Size: =10
                         Font: =Font.'Segoe UI'
                         Default: =""
+                        Fill: =RGBA(244, 246, 250, 1)
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
+                        Color: =RGBA(16, 26, 46, 1)
                   - txtNouvelle:
                       Control: Classic/TextInput@2.3.2
                       Properties:
@@ -308,6 +334,12 @@ Screens:
                         Size: =10
                         Font: =Font.'Segoe UI'
                         Default: =""
+                        Fill: =RGBA(244, 246, 250, 1)
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
+                        Color: =RGBA(16, 26, 46, 1)
                   - btnAjouter:
                       Control: Classic/Button@2.2.0
                       Properties:
@@ -336,6 +368,12 @@ Screens:
                           Notify("Tâche créée dans À trier : choisis son type et son projet.", NotificationType.Success)
                         Size: =10
                         Font: =Font.'Segoe UI'
+                        BorderColor: =Self.Fill
+                        BorderThickness: =1
+                        HoverFill: =RGBA(21, 62, 170, 1)
+                        PressedFill: =RGBA(14, 45, 125, 1)
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
                   - btnRefresh:
                       Control: Classic/Button@2.2.0
                       Properties:
@@ -457,6 +495,12 @@ Screens:
                           )
                         Size: =10
                         Font: =Font.'Segoe UI'
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        HoverFill: =RGBA(238, 241, 247, 1)
+                        PressedFill: =RGBA(227, 235, 255, 1)
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
             - cntDash:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
@@ -767,6 +811,12 @@ Screens:
                                       Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success)
                                     Size: =10
                                     Font: =Font.'Segoe UI'
+                                    BorderColor: =Self.Fill
+                                    BorderThickness: =1
+                                    HoverFill: =RGBA(21, 62, 170, 1)
+                                    PressedFill: =RGBA(14, 45, 125, 1)
+                                    FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                                    FocusedBorderThickness: =1
                               - btnNextOuvrir:
                                   Control: Classic/Button@2.2.0
                                   Properties:
@@ -781,6 +831,12 @@ Screens:
                                     OnSelect: =Set(varSel, varNext); Set(varEdit, false)
                                     Size: =10
                                     Font: =Font.'Segoe UI'
+                                    BorderColor: =RGBA(221, 226, 232, 1)
+                                    BorderThickness: =1
+                                    HoverFill: =RGBA(238, 241, 247, 1)
+                                    PressedFill: =RGBA(227, 235, 255, 1)
+                                    FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                                    FocusedBorderThickness: =1
                         - cntDashListe:
                             Control: GroupContainer@1.5.0
                             Variant: ManualLayout
@@ -1231,6 +1287,12 @@ Screens:
                                     Size: =9
                                     Font: =Font.'Segoe UI'
                                     OnSelect: =Set(varSel, ThisItem); Set(varEdit, true)
+                                    BorderColor: =RGBA(221, 226, 232, 1)
+                                    BorderThickness: =1
+                                    HoverFill: =RGBA(238, 241, 247, 1)
+                                    PressedFill: =RGBA(227, 235, 255, 1)
+                                    FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                                    FocusedBorderThickness: =1
                               - btnPrev:
                                   Control: Classic/Button@2.2.0
                                   Properties:
@@ -1250,6 +1312,12 @@ Screens:
                                       Select(btnRefresh)
                                     Size: =10
                                     Font: =Font.'Segoe UI'
+                                    BorderColor: =RGBA(221, 226, 232, 1)
+                                    BorderThickness: =1
+                                    HoverFill: =RGBA(238, 241, 247, 1)
+                                    PressedFill: =RGBA(227, 235, 255, 1)
+                                    FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                                    FocusedBorderThickness: =1
                               - btnNext:
                                   Control: Classic/Button@2.2.0
                                   Properties:
@@ -1271,6 +1339,12 @@ Screens:
                                       Select(btnRefresh)
                                     Size: =10
                                     Font: =Font.'Segoe UI'
+                                    BorderColor: =RGBA(221, 226, 232, 1)
+                                    BorderThickness: =1
+                                    HoverFill: =RGBA(238, 241, 247, 1)
+                                    PressedFill: =RGBA(227, 235, 255, 1)
+                                    FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                                    FocusedBorderThickness: =1
             - cntCal:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
@@ -1311,6 +1385,12 @@ Screens:
                             Set(varMois, varMois - 1))
                         Size: =10
                         Font: =Font.'Segoe UI'
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        HoverFill: =RGBA(238, 241, 247, 1)
+                        PressedFill: =RGBA(227, 235, 255, 1)
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
                   - btnMoisSuiv:
                       Control: Classic/Button@2.2.0
                       Properties:
@@ -1329,6 +1409,12 @@ Screens:
                             Set(varMois, varMois + 1))
                         Size: =10
                         Font: =Font.'Segoe UI'
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        HoverFill: =RGBA(238, 241, 247, 1)
+                        PressedFill: =RGBA(227, 235, 255, 1)
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
                   - cntCalGrille:
                       Control: GroupContainer@1.5.0
                       Variant: ManualLayout
@@ -1920,6 +2006,21 @@ Screens:
                               Items: =["Support", "Amélioration", "Monthly eng", "Projet"]
                               Size: =10
                               Font: =Font.'Segoe UI'
+                              Fill: =RGBA(244, 246, 250, 1)
+                              BorderColor: =RGBA(221, 226, 232, 1)
+                              BorderThickness: =1
+                              FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                              FocusedBorderThickness: =1
+                              Color: =RGBA(16, 26, 46, 1)
+                              ChevronBackground: =RGBA(238, 241, 247, 1)
+                              ChevronFill: =RGBA(100, 114, 138, 1)
+                              ChevronHoverBackground: =RGBA(227, 235, 255, 1)
+                              ChevronHoverFill: =RGBA(31, 79, 216, 1)
+                              HoverFill: =RGBA(238, 241, 247, 1)
+                              SelectionFill: =RGBA(227, 235, 255, 1)
+                              SelectionColor: =RGBA(16, 26, 46, 1)
+                              PressedFill: =RGBA(227, 235, 255, 1)
+                              PressedColor: =RGBA(16, 26, 46, 1)
                         - ddTrierProjet:
                             Control: Classic/DropDown@2.3.1
                             Properties:
@@ -1931,6 +2032,21 @@ Screens:
                                 =ForAll(Filter('[LME] Projets', StatutProjet.Value = "Actif"), {Value: Title, ID: ID})
                               Size: =10
                               Font: =Font.'Segoe UI'
+                              Fill: =RGBA(244, 246, 250, 1)
+                              BorderColor: =RGBA(221, 226, 232, 1)
+                              BorderThickness: =1
+                              FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                              FocusedBorderThickness: =1
+                              Color: =RGBA(16, 26, 46, 1)
+                              ChevronBackground: =RGBA(238, 241, 247, 1)
+                              ChevronFill: =RGBA(100, 114, 138, 1)
+                              ChevronHoverBackground: =RGBA(227, 235, 255, 1)
+                              ChevronHoverFill: =RGBA(31, 79, 216, 1)
+                              HoverFill: =RGBA(238, 241, 247, 1)
+                              SelectionFill: =RGBA(227, 235, 255, 1)
+                              SelectionColor: =RGBA(16, 26, 46, 1)
+                              PressedFill: =RGBA(227, 235, 255, 1)
+                              PressedColor: =RGBA(16, 26, 46, 1)
                         - btnClasser:
                             Control: Classic/Button@2.2.0
                             Properties:
@@ -1951,6 +2067,12 @@ Screens:
                                 Notify("Classée : les étapes du modèle vont être créées par le flux.", NotificationType.Success)
                               Size: =10
                               Font: =Font.'Segoe UI'
+                              BorderColor: =Self.Fill
+                              BorderThickness: =1
+                              HoverFill: =RGBA(21, 62, 170, 1)
+                              PressedFill: =RGBA(14, 45, 125, 1)
+                              FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                              FocusedBorderThickness: =1
       - cntDrawer:
           Control: GroupContainer@1.5.0
           Variant: ManualLayout
@@ -2066,6 +2188,12 @@ Screens:
                         Size: =10
                         Font: =Font.'Segoe UI'
                         Default: =""
+                        Fill: =RGBA(244, 246, 250, 1)
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
+                        Color: =RGBA(16, 26, 46, 1)
                   - btnAjouterEtape:
                       Control: Classic/Button@2.2.0
                       Properties:
@@ -2088,6 +2216,13 @@ Screens:
                           Select(btnRefresh)
                         Size: =10
                         Font: =Font.'Segoe UI'
+                        Fill: =RGBA(255, 255, 255, 1)
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        HoverFill: =RGBA(238, 241, 247, 1)
+                        PressedFill: =RGBA(227, 235, 255, 1)
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
                   - btnStAFaire:
                       Control: Classic/Button@2.2.0
                       Properties:
@@ -2104,6 +2239,12 @@ Screens:
                           Select(btnRefresh)
                         Size: =10
                         Font: =Font.'Segoe UI'
+                        BorderColor: =If(varSel.Statut.Value = "À faire", RGBA(31, 79, 216, 1), RGBA(221, 226, 232, 1))
+                        BorderThickness: =1
+                        HoverFill: =If(varSel.Statut.Value = "À faire", RGBA(21, 62, 170, 1), RGBA(238, 241, 247, 1))
+                        PressedFill: =RGBA(227, 235, 255, 1)
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
                   - btnStEnCours:
                       Control: Classic/Button@2.2.0
                       Properties:
@@ -2120,6 +2261,12 @@ Screens:
                           Select(btnRefresh)
                         Size: =10
                         Font: =Font.'Segoe UI'
+                        BorderColor: =If(varSel.Statut.Value = "En cours", RGBA(31, 79, 216, 1), RGBA(221, 226, 232, 1))
+                        BorderThickness: =1
+                        HoverFill: =If(varSel.Statut.Value = "En cours", RGBA(21, 62, 170, 1), RGBA(238, 241, 247, 1))
+                        PressedFill: =RGBA(227, 235, 255, 1)
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
                   - btnStBloque:
                       Control: Classic/Button@2.2.0
                       Properties:
@@ -2136,6 +2283,12 @@ Screens:
                           Select(btnRefresh)
                         Size: =10
                         Font: =Font.'Segoe UI'
+                        BorderColor: =If(varSel.Statut.Value = "Bloqué", RGBA(31, 79, 216, 1), RGBA(221, 226, 232, 1))
+                        BorderThickness: =1
+                        HoverFill: =If(varSel.Statut.Value = "Bloqué", RGBA(21, 62, 170, 1), RGBA(238, 241, 247, 1))
+                        PressedFill: =RGBA(227, 235, 255, 1)
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
                   - lblSync:
                       Control: Label@2.5.1
                       Properties:
@@ -2171,6 +2324,12 @@ Screens:
                           Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success)
                         Size: =10
                         Font: =Font.'Segoe UI'
+                        BorderColor: =Self.Fill
+                        BorderThickness: =1
+                        HoverFill: =RGBA(21, 62, 170, 1)
+                        PressedFill: =RGBA(14, 45, 125, 1)
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
                   - btnRouvrir:
                       Control: Classic/Button@2.2.0
                       Properties:
@@ -2188,6 +2347,12 @@ Screens:
                           Select(btnRefresh)
                         Size: =10
                         Font: =Font.'Segoe UI'
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        HoverFill: =RGBA(238, 241, 247, 1)
+                        PressedFill: =RGBA(227, 235, 255, 1)
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
             - cntDrawerEdit:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
@@ -2231,6 +2396,12 @@ Screens:
                         Default: =varSel.Title
                         Size: =11
                         Font: =Font.'Segoe UI'
+                        Fill: =RGBA(244, 246, 250, 1)
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
+                        Color: =RGBA(16, 26, 46, 1)
                   - lblEditLEch:
                       Control: Label@2.5.1
                       Properties:
@@ -2254,6 +2425,14 @@ Screens:
                         EndYear: =Year(Today()) + 5
                         Size: =11
                         Font: =Font.'Segoe UI'
+                        Fill: =RGBA(244, 246, 250, 1)
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
+                        Color: =RGBA(16, 26, 46, 1)
+                        IconBackground: =RGBA(238, 241, 247, 1)
+                        IconFill: =RGBA(100, 114, 138, 1)
                   - lblEditLType:
                       Control: Label@2.5.1
                       Properties:
@@ -2276,6 +2455,21 @@ Screens:
                         Default: =varSel.TypeTache.Value
                         Size: =11
                         Font: =Font.'Segoe UI'
+                        Fill: =RGBA(244, 246, 250, 1)
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
+                        Color: =RGBA(16, 26, 46, 1)
+                        ChevronBackground: =RGBA(238, 241, 247, 1)
+                        ChevronFill: =RGBA(100, 114, 138, 1)
+                        ChevronHoverBackground: =RGBA(227, 235, 255, 1)
+                        ChevronHoverFill: =RGBA(31, 79, 216, 1)
+                        HoverFill: =RGBA(238, 241, 247, 1)
+                        SelectionFill: =RGBA(227, 235, 255, 1)
+                        SelectionColor: =RGBA(16, 26, 46, 1)
+                        PressedFill: =RGBA(227, 235, 255, 1)
+                        PressedColor: =RGBA(16, 26, 46, 1)
                   - lblEditLProjet:
                       Control: Label@2.5.1
                       Properties:
@@ -2298,6 +2492,21 @@ Screens:
                         Default: =Coalesce(varSel.Projet.Value, "(sans projet)")
                         Size: =11
                         Font: =Font.'Segoe UI'
+                        Fill: =RGBA(244, 246, 250, 1)
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
+                        Color: =RGBA(16, 26, 46, 1)
+                        ChevronBackground: =RGBA(238, 241, 247, 1)
+                        ChevronFill: =RGBA(100, 114, 138, 1)
+                        ChevronHoverBackground: =RGBA(227, 235, 255, 1)
+                        ChevronHoverFill: =RGBA(31, 79, 216, 1)
+                        HoverFill: =RGBA(238, 241, 247, 1)
+                        SelectionFill: =RGBA(227, 235, 255, 1)
+                        SelectionColor: =RGBA(16, 26, 46, 1)
+                        PressedFill: =RGBA(227, 235, 255, 1)
+                        PressedColor: =RGBA(16, 26, 46, 1)
                   - lblEditLStatut:
                       Control: Label@2.5.1
                       Properties:
@@ -2320,6 +2529,21 @@ Screens:
                         Default: =varSel.Statut.Value
                         Size: =11
                         Font: =Font.'Segoe UI'
+                        Fill: =RGBA(244, 246, 250, 1)
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
+                        Color: =RGBA(16, 26, 46, 1)
+                        ChevronBackground: =RGBA(238, 241, 247, 1)
+                        ChevronFill: =RGBA(100, 114, 138, 1)
+                        ChevronHoverBackground: =RGBA(227, 235, 255, 1)
+                        ChevronHoverFill: =RGBA(31, 79, 216, 1)
+                        HoverFill: =RGBA(238, 241, 247, 1)
+                        SelectionFill: =RGBA(227, 235, 255, 1)
+                        SelectionColor: =RGBA(16, 26, 46, 1)
+                        PressedFill: =RGBA(227, 235, 255, 1)
+                        PressedColor: =RGBA(16, 26, 46, 1)
                   - lblEditSource:
                       Control: Label@2.5.1
                       Properties:
@@ -2362,6 +2586,12 @@ Screens:
                           Set(varEdit, false);
                           Select(btnRefresh);
                           Notify("Tâche enregistrée.", NotificationType.Success)
+                        BorderColor: =Self.Fill
+                        BorderThickness: =1
+                        HoverFill: =RGBA(21, 62, 170, 1)
+                        PressedFill: =RGBA(14, 45, 125, 1)
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
                   - btnAnnuler:
                       Control: Classic/Button@2.2.0
                       Properties:
@@ -2375,6 +2605,12 @@ Screens:
                         Size: =11
                         Font: =Font.'Segoe UI'
                         OnSelect: =Set(varEdit, false)
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        HoverFill: =RGBA(238, 241, 247, 1)
+                        PressedFill: =RGBA(227, 235, 255, 1)
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
             - lblDType:
                 Control: Label@2.5.1
                 Properties:
@@ -2401,6 +2637,12 @@ Screens:
                   Font: =Font.'Segoe UI'
                   Visible: =!varEdit
                   OnSelect: =Set(varEdit, true)
+                  BorderColor: =RGBA(221, 226, 232, 1)
+                  BorderThickness: =1
+                  HoverFill: =RGBA(238, 241, 247, 1)
+                  PressedFill: =RGBA(227, 235, 255, 1)
+                  FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                  FocusedBorderThickness: =1
             - btnFermer:
                 Control: Classic/Button@2.2.0
                 Properties:
@@ -2414,6 +2656,12 @@ Screens:
                   OnSelect: =Set(varEdit, false); Set(varSel, Blank())
                   Size: =10
                   Font: =Font.'Segoe UI'
+                  BorderColor: =RGBA(221, 226, 232, 1)
+                  BorderThickness: =1
+                  HoverFill: =RGBA(238, 241, 247, 1)
+                  PressedFill: =RGBA(227, 235, 255, 1)
+                  FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                  FocusedBorderThickness: =1
 ```
 
 ## Après chaque collage : exécuter `OnVisible`
@@ -2460,6 +2708,17 @@ Ces propriétés n'étaient pas dans la version précédente. Si Studio en refus
 - `Font: =Font.'Segoe UI'` sur les labels, boutons, champs, listes déroulantes et cases à cocher.
 - `Default: =""` sur les champs de saisie : sans elle, un champ affiche « Text input » au lieu de son texte d'aide.
 - `Align: =Align.Left` sur les boutons du menu.
+
+## Style des champs et des boutons
+
+Tous les champs de saisie, listes déroulantes, sélecteurs de date et boutons partagent le même style, pour remplacer les bordures sombres et épaisses par défaut :
+
+- **Champs, listes, sélecteur de date** : fond gris très clair (comme les cartes du Kanban), bordure fine grise, bordure bleue fine au focus, chevron et icône gris sur fond clair.
+- **Boutons principaux** (Ajouter, Terminer partout, Enregistrer, Classer) : fond bleu, un bleu plus foncé au survol et à l'appui.
+- **Boutons secondaires** (Actualiser, Modifier, Annuler, ✕, ◀ ▶, Ouvrir le détail) : fond blanc, bordure fine grise, fond gris clair au survol.
+- **Menu** : fond clair au survol, fond bleu pâle à l'appui.
+
+Ces propriétés (`FocusedBorderColor`, `ChevronBackground`, `IconBackground`, `HoverFill`, `PressedFill`, `SelectionFill`, etc.) n'étaient pas dans la version précédente. Si Studio en refuse une (« Unknown property »), supprime la ligne : le reste du style s'applique quand même. Pour changer une couleur partout, fais un rechercher-remplacer sur sa valeur `RGBA(...)`.
 
 ## Ordre d'empilement (important)
 
