@@ -2,7 +2,7 @@
 
 Application canvas dont la mise en page **s'adapte à la taille de l'écran** : les containers se dimensionnent à partir de `Parent.Width` et `Parent.Height`, sans coordonnées fixes. Elle a été contrôlée numériquement à 1366 x 768, 1280 x 720 et 1920 x 907 : aucun contrôle ne déborde de son container. Style de la maquette [maquette/workload.html](../maquette/workload.html) : tableau de bord, Kanban, calendrier, analyse, vue « À trier » et volet de détail. Un seul écran `scrMain` : les vues sont des **containers** (`cntDash`, `cntTasks`, `cntCal`, `cntStats`, `cntTrier`) dont la propriété `Visible` dépend de la variable `varVue`. Chaque zone (cartes, compteurs, filtres, volet de détail) est un sous-container.
 
-Typographie : police Segoe UI partout, échelle de tailles fixe (26 titre de page, 15 titre de carte, 13 texte, 11 à 12 légendes, 32 chiffres des compteurs).
+Typographie : police Segoe UI partout, échelle de tailles fixe : 22 pour le titre de page, 26 pour les chiffres des compteurs, 14 pour les titres de carte, 12 pour le texte courant, 10 à 11 pour les légendes. Pour grossir ou réduire toute l'échelle, fais un rechercher-remplacer sur les lignes `Size: =` du fichier. Les titres trop longs des listes et du calendrier sont tronqués avec « … » selon la largeur disponible.
 
 Le même code est dans [power-app/scrMain.pa.yaml](../power-app/scrMain.pa.yaml), plus pratique à copier depuis GitHub (bouton « Copy raw file »).
 
@@ -184,7 +184,7 @@ Screens:
                   Width: =190
                   Height: =36
                   Text: ="Workload"
-                  Size: =20
+                  Size: =18
                   FontWeight: =FontWeight.Bold
                   Color: =RGBA(16, 26, 46, 1)
                   Font: =Font.'Segoe UI'
@@ -200,7 +200,7 @@ Screens:
                   Color: =If(Coalesce(varVue, "dash") = "dash", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
                   OnSelect: =Set(varVue, "dash"); Set(varSel, Blank())
-                  Size: =14
+                  Size: =13
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
             - navTasks:
@@ -215,7 +215,7 @@ Screens:
                   Color: =If(varVue = "tasks", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
                   OnSelect: =Set(varVue, "tasks"); Set(varSel, Blank())
-                  Size: =14
+                  Size: =13
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
             - navCal:
@@ -230,7 +230,7 @@ Screens:
                   Color: =If(varVue = "cal", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
                   OnSelect: =Set(varVue, "cal"); Set(varSel, Blank())
-                  Size: =14
+                  Size: =13
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
             - navStats:
@@ -245,7 +245,7 @@ Screens:
                   Color: =If(varVue = "stats", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
                   OnSelect: =Set(varVue, "stats"); Set(varSel, Blank())
-                  Size: =14
+                  Size: =13
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
             - navTrier:
@@ -260,7 +260,7 @@ Screens:
                   Color: =If(varVue = "trier", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
                   OnSelect: =Set(varVue, "trier"); Set(varSel, Blank())
-                  Size: =14
+                  Size: =13
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
       - cntMain:
@@ -289,7 +289,7 @@ Screens:
                         Width: =Parent.Width * 0.30
                         Height: =40
                         HintText: ="Rechercher une tâche"
-                        Size: =13
+                        Size: =12
                         Font: =Font.'Segoe UI'
                         Default: =""
                   - txtNouvelle:
@@ -300,7 +300,7 @@ Screens:
                         Width: =Parent.Width * 0.26
                         Height: =40
                         HintText: ="Nouvelle tâche manuelle"
-                        Size: =13
+                        Size: =12
                         Font: =Font.'Segoe UI'
                         Default: =""
                   - btnAjouter:
@@ -329,7 +329,7 @@ Screens:
                           Select(btnRefresh);
                           Set(varVue, "trier");
                           Notify("Tâche créée dans À trier : choisis son type et son projet.", NotificationType.Success)
-                        Size: =13
+                        Size: =12
                         Font: =Font.'Segoe UI'
                   - btnRefresh:
                       Control: Classic/Button@2.2.0
@@ -446,7 +446,7 @@ Screens:
                             If(!IsBlank(varSel), Set(varSel, LookUp('[LME] Workload', ID = varSel.ID))),
                             Notify("mise à jour de varSel : " & FirstError.Message, NotificationType.Error)
                           )
-                        Size: =13
+                        Size: =12
                         Font: =Font.'Segoe UI'
             - cntDash:
                 Control: GroupContainer@1.5.0
@@ -466,7 +466,7 @@ Screens:
                         Width: =Parent.Width
                         Height: =40
                         Text: ="Tableau de bord"
-                        Size: =26
+                        Size: =22
                         FontWeight: =FontWeight.Bold
                         Color: =RGBA(16, 26, 46, 1)
                         Font: =Font.'Segoe UI'
@@ -493,7 +493,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     Text: =CountRows(Filter('[LME] Workload', Statut.Value <> "Terminé"))
-                                    Size: =32
+                                    Size: =26
                                     Color: =RGBA(255, 255, 255, 1)
                                     X: =16
                                     Y: =10
@@ -505,7 +505,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     Text: ="Tâches ouvertes"
-                                    Size: =13
+                                    Size: =12
                                     Color: =RGBA(255, 255, 255, 0.85)
                                     X: =16
                                     Y: =58
@@ -526,7 +526,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     Text: =CountRows(Filter('[LME] Workload', Statut.Value <> "Terminé", Echeance < Today()))
-                                    Size: =32
+                                    Size: =26
                                     Color: =RGBA(192, 51, 43, 1)
                                     X: =16
                                     Y: =10
@@ -538,7 +538,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     Text: ="En retard"
-                                    Size: =13
+                                    Size: =12
                                     Color: =RGBA(100, 114, 138, 1)
                                     X: =16
                                     Y: =58
@@ -559,7 +559,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     Text: =CountRows(Filter('[LME] Workload', Statut.Value = "Terminé", TermineLe >= DateAdd(Today(), -6, TimeUnit.Days)))
-                                    Size: =32
+                                    Size: =26
                                     Color: =RGBA(19, 122, 74, 1)
                                     X: =16
                                     Y: =10
@@ -571,7 +571,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     Text: ="Terminées sur 7 jours"
-                                    Size: =13
+                                    Size: =12
                                     Color: =RGBA(100, 114, 138, 1)
                                     X: =16
                                     Y: =58
@@ -592,7 +592,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     Text: =CountRows(Filter('[LME] Workload', TypeTache.Value = "À trier", Statut.Value <> "Terminé"))
-                                    Size: =32
+                                    Size: =26
                                     Color: =RGBA(16, 26, 46, 1)
                                     X: =16
                                     Y: =10
@@ -604,7 +604,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     Text: ="À trier"
-                                    Size: =13
+                                    Size: =12
                                     Color: =RGBA(100, 114, 138, 1)
                                     X: =16
                                     Y: =58
@@ -640,7 +640,7 @@ Screens:
                                     Text: ="Avancement par projet"
                                     FontWeight: =FontWeight.Semibold
                                     Color: =RGBA(16, 26, 46, 1)
-                                    Size: =15
+                                    Size: =14
                                     Font: =Font.'Segoe UI'
                               - galProjets:
                                   Control: Gallery@2.15.0
@@ -665,7 +665,7 @@ Screens:
                                           Align: =Align.Center
                                           FontWeight: =FontWeight.Semibold
                                           Color: =RGBA(16, 26, 46, 1)
-                                          Size: =14
+                                          Size: =13
                                           Font: =Font.'Segoe UI'
                                     - recTube:
                                         Control: Rectangle@2.3.0
@@ -692,7 +692,7 @@ Screens:
                                           Height: =42
                                           Text: =ThisItem.Title
                                           Align: =Align.Center
-                                          Size: =12
+                                          Size: =11
                                           Color: =RGBA(100, 114, 138, 1)
                                           Font: =Font.'Segoe UI'
                         - cntDashNext:
@@ -715,7 +715,7 @@ Screens:
                                     Text: ="Prochaine échéance"
                                     FontWeight: =FontWeight.Semibold
                                     Color: =RGBA(16, 26, 46, 1)
-                                    Size: =15
+                                    Size: =14
                                     Font: =Font.'Segoe UI'
                               - lblNextTitre:
                                   Control: Label@2.5.1
@@ -725,7 +725,7 @@ Screens:
                                     Width: =Parent.Width - 32
                                     Height: =66
                                     Text: =Coalesce(varNext.Title, "Rien à échéance")
-                                    Size: =16
+                                    Size: =14
                                     FontWeight: =FontWeight.Semibold
                                     Color: =RGBA(31, 79, 216, 1)
                                     Font: =Font.'Segoe UI'
@@ -737,7 +737,7 @@ Screens:
                                     Width: =Parent.Width - 32
                                     Height: =24
                                     Text: =If(IsBlank(varNext), "", varNext.TypeTache.Value & " · " & varNext.Source.Value & " · " & Text(varNext.Echeance, "dd/mm"))
-                                    Size: =12
+                                    Size: =11
                                     Color: =RGBA(100, 114, 138, 1)
                                     Font: =Font.'Segoe UI'
                               - btnNextTerminer:
@@ -756,7 +756,7 @@ Screens:
                                         {Statut: {Value: "Terminé"}, TermineLe: Now()});
                                       Select(btnRefresh);
                                       Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success)
-                                    Size: =13
+                                    Size: =12
                                     Font: =Font.'Segoe UI'
                               - btnNextOuvrir:
                                   Control: Classic/Button@2.2.0
@@ -770,7 +770,7 @@ Screens:
                                     Color: =RGBA(16, 26, 46, 1)
                                     Visible: =!IsBlank(varNext)
                                     OnSelect: =Set(varSel, varNext)
-                                    Size: =13
+                                    Size: =12
                                     Font: =Font.'Segoe UI'
                         - cntDashListe:
                             Control: GroupContainer@1.5.0
@@ -792,7 +792,7 @@ Screens:
                                     Text: ="À traiter"
                                     FontWeight: =FontWeight.Semibold
                                     Color: =RGBA(16, 26, 46, 1)
-                                    Size: =15
+                                    Size: =14
                                     Font: =Font.'Segoe UI'
                               - galATraiter:
                                   Control: Gallery@2.15.0
@@ -814,8 +814,9 @@ Screens:
                                           Y: =4
                                           Width: =Parent.TemplateWidth - 76
                                           Height: =24
-                                          Text: =ThisItem.Title
-                                          Size: =13
+                                          Text: |-
+                                            =With({t: ThisItem.Title}, Left(t, RoundDown((Parent.TemplateWidth - 76) / 6, 0)) & If(Len(t) > RoundDown((Parent.TemplateWidth - 76) / 6, 0), "…", ""))
+                                          Size: =12
                                           Color: =RGBA(16, 26, 46, 1)
                                           Font: =Font.'Segoe UI'
                                     - lblATMeta:
@@ -826,7 +827,7 @@ Screens:
                                           Width: =Parent.TemplateWidth - 76
                                           Height: =20
                                           Text: =ThisItem.TypeTache.Value
-                                          Size: =11
+                                          Size: =10
                                           Color: =Coalesce(LookUp(colTC, T = ThisItem.TypeTache.Value, C), RGBA(107, 119, 140, 1))
                                           Font: =Font.'Segoe UI'
                                     - lblATDue:
@@ -838,7 +839,7 @@ Screens:
                                           Height: =24
                                           Text: =Text(ThisItem.Echeance, "dd/mm")
                                           Align: =Align.Right
-                                          Size: =12
+                                          Size: =11
                                           Color: =If(ThisItem.Echeance < Today(), RGBA(192, 51, 43, 1), RGBA(16, 26, 46, 1))
                                           Font: =Font.'Segoe UI'
                   - cntDashRow3:
@@ -870,7 +871,7 @@ Screens:
                                     Text: ="Avancement par type"
                                     FontWeight: =FontWeight.Semibold
                                     Color: =RGBA(16, 26, 46, 1)
-                                    Size: =15
+                                    Size: =14
                                     Font: =Font.'Segoe UI'
                               - galParType:
                                   Control: Gallery@2.15.0
@@ -892,7 +893,7 @@ Screens:
                                           Width: =Parent.TemplateWidth - 100
                                           Height: =26
                                           Text: =ThisItem.T & " · " & ThisItem.n
-                                          Size: =13
+                                          Size: =12
                                           Color: =RGBA(16, 26, 46, 1)
                                           Font: =Font.'Segoe UI'
                                     - lblTypePct:
@@ -904,7 +905,7 @@ Screens:
                                           Height: =26
                                           Text: =ThisItem.pct & " %"
                                           Align: =Align.Right
-                                          Size: =13
+                                          Size: =12
                                           FontWeight: =FontWeight.Semibold
                                           Color: =RGBA(16, 26, 46, 1)
                                           Font: =Font.'Segoe UI'
@@ -944,7 +945,7 @@ Screens:
                                     Text: ="Avancement global"
                                     FontWeight: =FontWeight.Semibold
                                     Color: =RGBA(16, 26, 46, 1)
-                                    Size: =15
+                                    Size: =14
                                     Font: =Font.'Segoe UI'
                               - imgGauge:
                                   Control: Image@2.2.3
@@ -953,7 +954,7 @@ Screens:
                                     Y: =44
                                     Width: =Parent.Width - 32
                                     Height: =Parent.Height - 56
-                                    Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 74'><path d='M10 64 A50 50 0 0 1 110 64' fill='none' stroke='#eef1f7' stroke-width='12' stroke-linecap='round'/><path d='M10 64 A50 50 0 0 1 110 64' pathLength='100' fill='none' stroke='#1f4fd8' stroke-width='12' stroke-linecap='" & If(varGlobal > 0, "round", "butt") & "' stroke-dasharray='" & varGlobal & " 100'/><text x='60' y='58' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='22' font-weight='700' fill='#101a2e'>" & varGlobal & "%</text></svg>")
+                                    Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 74'><path d='M10 64 A50 50 0 0 1 110 64' fill='none' stroke='#eef1f7' stroke-width='12' stroke-linecap='round'/><path d='M10 64 A50 50 0 0 1 110 64' pathLength='100' fill='none' stroke='#1f4fd8' stroke-width='12' stroke-linecap='" & If(varGlobal > 0, "round", "butt") & "' stroke-dasharray='" & varGlobal & " 100'/><text x='60' y='58' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='15' font-weight='700' fill='#101a2e'>" & varGlobal & "%</text></svg>")
                         - cntDashDark:
                             Control: GroupContainer@1.5.0
                             Variant: ManualLayout
@@ -972,7 +973,7 @@ Screens:
                                     Width: =Parent.Width - 40
                                     Height: =Parent.Height - 40
                                     Text: =CountRows(Filter('[LME] Workload', Statut.Value = "Terminé")) & " / " & CountRows('[LME] Workload') & Char(10) & "tâches clôturées partout"
-                                    Size: =24
+                                    Size: =20
                                     FontWeight: =FontWeight.Bold
                                     Color: =RGBA(255, 255, 255, 1)
                                     Font: =Font.'Segoe UI'
@@ -994,7 +995,7 @@ Screens:
                         Width: =Parent.Width
                         Height: =40
                         Text: ="Tâches"
-                        Size: =26
+                        Size: =22
                         FontWeight: =FontWeight.Bold
                         Color: =RGBA(16, 26, 46, 1)
                         Font: =Font.'Segoe UI'
@@ -1018,7 +1019,7 @@ Screens:
                               Fill: =If(IsBlank(varType), RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
                               Color: =If(IsBlank(varType), RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
                               OnSelect: =Set(varType, Blank())
-                              Size: =13
+                              Size: =12
                               Font: =Font.'Segoe UI'
                         - btnChipSupport:
                             Control: Classic/Button@2.2.0
@@ -1031,7 +1032,7 @@ Screens:
                               Fill: =If(varType = "Support", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
                               Color: =If(varType = "Support", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
                               OnSelect: =Set(varType, If(varType = "Support", Blank(), "Support"))
-                              Size: =13
+                              Size: =12
                               Font: =Font.'Segoe UI'
                         - btnChipAmel:
                             Control: Classic/Button@2.2.0
@@ -1044,7 +1045,7 @@ Screens:
                               Fill: =If(varType = "Amélioration", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
                               Color: =If(varType = "Amélioration", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
                               OnSelect: =Set(varType, If(varType = "Amélioration", Blank(), "Amélioration"))
-                              Size: =13
+                              Size: =12
                               Font: =Font.'Segoe UI'
                         - btnChipMonthly:
                             Control: Classic/Button@2.2.0
@@ -1057,7 +1058,7 @@ Screens:
                               Fill: =If(varType = "Monthly eng", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
                               Color: =If(varType = "Monthly eng", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
                               OnSelect: =Set(varType, If(varType = "Monthly eng", Blank(), "Monthly eng"))
-                              Size: =13
+                              Size: =12
                               Font: =Font.'Segoe UI'
                         - btnChipProjet:
                             Control: Classic/Button@2.2.0
@@ -1070,7 +1071,7 @@ Screens:
                               Fill: =If(varType = "Projet", RGBA(31, 79, 216, 1), RGBA(255, 255, 255, 1))
                               Color: =If(varType = "Projet", RGBA(255, 255, 255, 1), RGBA(16, 26, 46, 1))
                               OnSelect: =Set(varType, If(varType = "Projet", Blank(), "Projet"))
-                              Size: =13
+                              Size: =12
                               Font: =Font.'Segoe UI'
                   - galCols:
                       Control: Gallery@2.15.0
@@ -1103,7 +1104,7 @@ Screens:
                               Text: =ThisItem.S & " (" & CountRows(Filter('[LME] Workload', Statut.Value = ThisItem.S, TypeTache.Value <> "À trier")) & ")"
                               FontWeight: =FontWeight.Semibold
                               Color: =Switch(ThisItem.S, "En cours", RGBA(31, 79, 216, 1), "Bloqué", RGBA(192, 51, 43, 1), "Terminé", RGBA(19, 122, 74, 1), RGBA(100, 114, 138, 1))
-                              Size: =15
+                              Size: =14
                               Font: =Font.'Segoe UI'
                         - galCartes:
                             Control: Gallery@2.15.0
@@ -1143,7 +1144,7 @@ Screens:
                                     Width: =Parent.TemplateWidth - 20
                                     Height: =18
                                     Text: =ThisItem.TypeTache.Value
-                                    Size: =11
+                                    Size: =10
                                     FontWeight: =FontWeight.Semibold
                                     Color: =Coalesce(LookUp(colTC, T = ThisItem.TypeTache.Value, C), RGBA(107, 119, 140, 1))
                                     Font: =Font.'Segoe UI'
@@ -1155,7 +1156,7 @@ Screens:
                                     Width: =Parent.TemplateWidth - 20
                                     Height: =48
                                     Text: =ThisItem.Title
-                                    Size: =13
+                                    Size: =12
                                     FontWeight: =FontWeight.Semibold
                                     Color: =If(ThisItem.Statut.Value = "Terminé", RGBA(100, 114, 138, 1), RGBA(16, 26, 46, 1))
                                     Font: =Font.'Segoe UI'
@@ -1183,7 +1184,7 @@ Screens:
                                     Width: =Parent.TemplateWidth - 100
                                     Height: =24
                                     Text: =Text(ThisItem.Echeance, "dd/mm") & " · " & Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) & " %"
-                                    Size: =12
+                                    Size: =11
                                     Color: =If(ThisItem.Statut.Value <> "Terminé" && ThisItem.Echeance < Today(), RGBA(192, 51, 43, 1), RGBA(100, 114, 138, 1))
                                     Font: =Font.'Segoe UI'
                               - btnPrev:
@@ -1203,7 +1204,7 @@ Screens:
                                       If(ThisItem.Statut.Value = "Terminé",
                                         Patch('[LME] Workload', LookUp('[LME] Workload', ID = ThisItem.ID), {TermineLe: Blank(), Propage: false}));
                                       Select(btnRefresh)
-                                    Size: =13
+                                    Size: =12
                                     Font: =Font.'Segoe UI'
                               - btnNext:
                                   Control: Classic/Button@2.2.0
@@ -1224,7 +1225,7 @@ Screens:
                                           Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success))
                                       );
                                       Select(btnRefresh)
-                                    Size: =13
+                                    Size: =12
                                     Font: =Font.'Segoe UI'
             - cntCal:
                 Control: GroupContainer@1.5.0
@@ -1244,7 +1245,7 @@ Screens:
                         Width: =330
                         Height: =40
                         Text: =Text(Date(Coalesce(varAn, Year(Today())), Coalesce(varMois, Month(Today())), 1), "mmmm yyyy")
-                        Size: =26
+                        Size: =22
                         FontWeight: =FontWeight.Bold
                         Color: =RGBA(16, 26, 46, 1)
                         Font: =Font.'Segoe UI'
@@ -1264,7 +1265,7 @@ Screens:
                           If(varMois = 1,
                             Set(varAn, varAn - 1); Set(varMois, 12),
                             Set(varMois, varMois - 1))
-                        Size: =13
+                        Size: =12
                         Font: =Font.'Segoe UI'
                   - btnMoisSuiv:
                       Control: Classic/Button@2.2.0
@@ -1282,7 +1283,7 @@ Screens:
                           If(varMois = 12,
                             Set(varAn, varAn + 1); Set(varMois, 1),
                             Set(varMois, varMois + 1))
-                        Size: =13
+                        Size: =12
                         Font: =Font.'Segoe UI'
                   - cntCalGrille:
                       Control: GroupContainer@1.5.0
@@ -1315,7 +1316,7 @@ Screens:
                                     Height: =Parent.TemplateHeight
                                     Text: =Upper(ThisItem.j)
                                     Align: =Align.Center
-                                    Size: =11
+                                    Size: =10
                                     Color: =RGBA(100, 114, 138, 1)
                                     Font: =Font.'Segoe UI'
                         - galJours:
@@ -1352,7 +1353,7 @@ Screens:
                                     Width: =40
                                     Height: =22
                                     Text: =Day(ThisItem.d)
-                                    Size: =12
+                                    Size: =11
                                     Color: =If(Month(ThisItem.d) = Coalesce(varMois, Month(Today())), RGBA(16, 26, 46, 1), RGBA(170, 180, 196, 1))
                                     Font: =Font.'Segoe UI'
                               - lblEv1:
@@ -1362,8 +1363,9 @@ Screens:
                                     Y: =28
                                     Width: =Parent.TemplateWidth - 8
                                     Height: =20
-                                    Text: =Coalesce(Last(FirstN(Filter(colWL, Echeance = ThisItem.d), 1)).Title, "")
-                                    Size: =11
+                                    Text: |-
+                                      =With({t: Coalesce(Last(FirstN(Filter(colWL, Echeance = ThisItem.d), 1)).Title, "")}, Left(t, RoundDown((Parent.TemplateWidth - 8) / 5.4, 0)) & If(Len(t) > RoundDown((Parent.TemplateWidth - 8) / 5.4, 0), "…", ""))
+                                    Size: =10
                                     Fill: =If(IsBlank(Self.Text), RGBA(0, 0, 0, 0), RGBA(227, 235, 255, 1))
                                     Color: =RGBA(31, 79, 216, 1)
                                     Font: =Font.'Segoe UI'
@@ -1374,8 +1376,9 @@ Screens:
                                     Y: =50
                                     Width: =Parent.TemplateWidth - 8
                                     Height: =20
-                                    Text: =If(CountRows(Filter(colWL, Echeance = ThisItem.d)) >= 2, Last(FirstN(Filter(colWL, Echeance = ThisItem.d), 2)).Title, "")
-                                    Size: =11
+                                    Text: |-
+                                      =With({t: If(CountRows(Filter(colWL, Echeance = ThisItem.d)) >= 2, Last(FirstN(Filter(colWL, Echeance = ThisItem.d), 2)).Title, "")}, Left(t, RoundDown((Parent.TemplateWidth - 8) / 5.4, 0)) & If(Len(t) > RoundDown((Parent.TemplateWidth - 8) / 5.4, 0), "…", ""))
+                                    Size: =10
                                     Fill: =If(IsBlank(Self.Text), RGBA(0, 0, 0, 0), RGBA(227, 235, 255, 1))
                                     Color: =RGBA(31, 79, 216, 1)
                                     Font: =Font.'Segoe UI'
@@ -1387,7 +1390,7 @@ Screens:
                                     Width: =60
                                     Height: =18
                                     Text: =If(CountRows(Filter(colWL, Echeance = ThisItem.d)) > 2, "+" & (CountRows(Filter(colWL, Echeance = ThisItem.d)) - 2), "")
-                                    Size: =11
+                                    Size: =10
                                     Color: =RGBA(100, 114, 138, 1)
                                     Font: =Font.'Segoe UI'
                   - cntCalCote:
@@ -1419,7 +1422,7 @@ Screens:
                                     Text: ="Aujourd'hui"
                                     FontWeight: =FontWeight.Semibold
                                     Color: =RGBA(16, 26, 46, 1)
-                                    Size: =15
+                                    Size: =14
                                     Font: =Font.'Segoe UI'
                               - galAuj:
                                   Control: Gallery@2.15.0
@@ -1441,8 +1444,9 @@ Screens:
                                           Y: =4
                                           Width: =Parent.TemplateWidth - 12
                                           Height: =24
-                                          Text: =ThisItem.Title
-                                          Size: =13
+                                          Text: |-
+                                            =With({t: ThisItem.Title}, Left(t, RoundDown((Parent.TemplateWidth - 12) / 6, 0)) & If(Len(t) > RoundDown((Parent.TemplateWidth - 12) / 6, 0), "…", ""))
+                                          Size: =12
                                           Color: =RGBA(16, 26, 46, 1)
                                           Font: =Font.'Segoe UI'
                                     - lblAujMeta:
@@ -1453,7 +1457,7 @@ Screens:
                                           Width: =Parent.TemplateWidth - 12
                                           Height: =20
                                           Text: =ThisItem.TypeTache.Value & " · " & Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) & " %"
-                                          Size: =11
+                                          Size: =10
                                           Color: =RGBA(100, 114, 138, 1)
                                           Font: =Font.'Segoe UI'
                         - cntCalAvenir:
@@ -1476,7 +1480,7 @@ Screens:
                                     Text: ="À venir"
                                     FontWeight: =FontWeight.Semibold
                                     Color: =RGBA(16, 26, 46, 1)
-                                    Size: =15
+                                    Size: =14
                                     Font: =Font.'Segoe UI'
                               - galAvenir:
                                   Control: Gallery@2.15.0
@@ -1498,8 +1502,9 @@ Screens:
                                           Y: =4
                                           Width: =Parent.TemplateWidth - 76
                                           Height: =24
-                                          Text: =ThisItem.Title
-                                          Size: =13
+                                          Text: |-
+                                            =With({t: ThisItem.Title}, Left(t, RoundDown((Parent.TemplateWidth - 76) / 6, 0)) & If(Len(t) > RoundDown((Parent.TemplateWidth - 76) / 6, 0), "…", ""))
+                                          Size: =12
                                           Color: =RGBA(16, 26, 46, 1)
                                           Font: =Font.'Segoe UI'
                                     - lblAvMeta:
@@ -1510,7 +1515,7 @@ Screens:
                                           Width: =Parent.TemplateWidth - 76
                                           Height: =20
                                           Text: =ThisItem.TypeTache.Value
-                                          Size: =11
+                                          Size: =10
                                           Color: =Coalesce(LookUp(colTC, T = ThisItem.TypeTache.Value, C), RGBA(107, 119, 140, 1))
                                           Font: =Font.'Segoe UI'
                                     - lblAvDate:
@@ -1522,7 +1527,7 @@ Screens:
                                           Height: =24
                                           Text: =Text(ThisItem.Echeance, "dd/mm")
                                           Align: =Align.Right
-                                          Size: =12
+                                          Size: =11
                                           Color: =RGBA(16, 26, 46, 1)
                                           Font: =Font.'Segoe UI'
             - cntStats:
@@ -1543,7 +1548,7 @@ Screens:
                         Width: =Parent.Width
                         Height: =40
                         Text: ="Analyse"
-                        Size: =26
+                        Size: =22
                         FontWeight: =FontWeight.Bold
                         Color: =RGBA(16, 26, 46, 1)
                         Font: =Font.'Segoe UI'
@@ -1570,7 +1575,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     Text: =CountRows(Filter('[LME] Workload', Statut.Value = "Terminé"))
-                                    Size: =32
+                                    Size: =26
                                     Color: =RGBA(31, 79, 216, 1)
                                     X: =16
                                     Y: =10
@@ -1582,7 +1587,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     Text: ="Tâches terminées"
-                                    Size: =13
+                                    Size: =12
                                     Color: =RGBA(100, 114, 138, 1)
                                     X: =16
                                     Y: =58
@@ -1603,7 +1608,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     Text: =CountRows(Filter(colEtapes, Fait))
-                                    Size: =32
+                                    Size: =26
                                     Color: =RGBA(14, 138, 125, 1)
                                     X: =16
                                     Y: =10
@@ -1615,7 +1620,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     Text: ="Étapes cochées"
-                                    Size: =13
+                                    Size: =12
                                     Color: =RGBA(100, 114, 138, 1)
                                     X: =16
                                     Y: =58
@@ -1639,7 +1644,7 @@ Screens:
                                       =With({fin: Filter('[LME] Workload', Statut.Value = "Terminé")},
                                         If(CountRows(fin) = 0, "0", Round(100 * CountRows(Filter(fin, Date(Year(TermineLe), Month(TermineLe), Day(TermineLe)) <= Echeance)) / CountRows(fin), 0)) & " %"
                                       )
-                                    Size: =32
+                                    Size: =26
                                     Color: =RGBA(19, 122, 74, 1)
                                     X: =16
                                     Y: =10
@@ -1651,7 +1656,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     Text: ="Clôturées dans les temps"
-                                    Size: =13
+                                    Size: =12
                                     Color: =RGBA(100, 114, 138, 1)
                                     X: =16
                                     Y: =58
@@ -1672,7 +1677,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     Text: =CountRows(Filter('[LME] Workload', Statut.Value <> "Terminé", Echeance < Today()))
-                                    Size: =32
+                                    Size: =26
                                     Color: =RGBA(192, 51, 43, 1)
                                     X: =16
                                     Y: =10
@@ -1684,7 +1689,7 @@ Screens:
                                   Control: Label@2.5.1
                                   Properties:
                                     Text: ="En retard"
-                                    Size: =13
+                                    Size: =12
                                     Color: =RGBA(100, 114, 138, 1)
                                     X: =16
                                     Y: =58
@@ -1720,7 +1725,7 @@ Screens:
                                     Text: ="Tâches terminées par semaine (8 dernières semaines)"
                                     FontWeight: =FontWeight.Semibold
                                     Color: =RGBA(16, 26, 46, 1)
-                                    Size: =15
+                                    Size: =14
                                     Font: =Font.'Segoe UI'
                               - imgCourbe:
                                   Control: Image@2.2.3
@@ -1750,7 +1755,7 @@ Screens:
                                     Text: ="Tâches ouvertes par projet"
                                     FontWeight: =FontWeight.Semibold
                                     Color: =RGBA(16, 26, 46, 1)
-                                    Size: =15
+                                    Size: =14
                                     Font: =Font.'Segoe UI'
                               - imgDonut:
                                   Control: Image@2.2.3
@@ -1759,7 +1764,7 @@ Screens:
                                     Y: =48
                                     Width: =Min(Parent.Width - 32, Parent.Height * 0.5)
                                     Height: =Min(Parent.Width - 32, Parent.Height * 0.5)
-                                    Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'>" & Concat(colDonut, "<circle r='40' cx='60' cy='60' fill='none' pathLength='100' stroke='" & Switch(k, 1, "#1f4fd8", 2, "#0e8a7d", 3, "#b86a00", "#6b778c") & "' stroke-width='16' stroke-dasharray='" & share & " " & (100 - share) & "' stroke-dashoffset='" & -start & "' transform='rotate(-90 60 60)'/>") & "<text x='60' y='58' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='20' font-weight='700' fill='#101a2e'>" & varTotalOuv & "</text><text x='60' y='73' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='9' fill='#64728a'>ouvertes</text></svg>")
+                                    Image: ="data:image/svg+xml;utf8," & EncodeUrl("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'>" & Concat(colDonut, "<circle r='40' cx='60' cy='60' fill='none' pathLength='100' stroke='" & Switch(k, 1, "#1f4fd8", 2, "#0e8a7d", 3, "#b86a00", "#6b778c") & "' stroke-width='16' stroke-dasharray='" & share & " " & (100 - share) & "' stroke-dashoffset='" & -start & "' transform='rotate(-90 60 60)'/>") & "<text x='60' y='58' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='16' font-weight='700' fill='#101a2e'>" & varTotalOuv & "</text><text x='60' y='73' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='9' fill='#64728a'>ouvertes</text></svg>")
                               - lblLegende:
                                   Control: Label@2.5.1
                                   Properties:
@@ -1769,7 +1774,7 @@ Screens:
                                     Height: =Parent.Height - 56 - Parent.Height * 0.5 - 8
                                     Text: |-
                                       =Concat(colDonut, name & " : " & n, Char(10))
-                                    Size: =13
+                                    Size: =12
                                     Color: =RGBA(16, 26, 46, 1)
                                     Font: =Font.'Segoe UI'
             - cntTrier:
@@ -1790,7 +1795,7 @@ Screens:
                         Width: =Parent.Width
                         Height: =40
                         Text: ="À trier"
-                        Size: =26
+                        Size: =22
                         FontWeight: =FontWeight.Bold
                         Color: =RGBA(16, 26, 46, 1)
                         Font: =Font.'Segoe UI'
@@ -1802,7 +1807,7 @@ Screens:
                         Width: =Parent.Width
                         Height: =26
                         Text: ="Mails sans catégorie reconnue et tâches manuelles. Choisis le type et le projet, les étapes du modèle se créent ensuite."
-                        Size: =13
+                        Size: =12
                         Color: =RGBA(100, 114, 138, 1)
                         Font: =Font.'Segoe UI'
                   - lblVideTrier:
@@ -1816,7 +1821,7 @@ Screens:
                         Align: =Align.Center
                         Color: =RGBA(100, 114, 138, 1)
                         Visible: =CountRows(galTrier.AllItems) = 0
-                        Size: =14
+                        Size: =13
                         Font: =Font.'Segoe UI'
                   - galTrier:
                       Control: Gallery@2.15.0
@@ -1848,7 +1853,7 @@ Screens:
                               Text: =ThisItem.Title
                               FontWeight: =FontWeight.Semibold
                               Color: =RGBA(16, 26, 46, 1)
-                              Size: =14
+                              Size: =13
                               Font: =Font.'Segoe UI'
                         - lblTrierMeta:
                             Control: Label@2.5.1
@@ -1858,7 +1863,7 @@ Screens:
                               Width: =Parent.TemplateWidth - 32
                               Height: =20
                               Text: =ThisItem.Source.Value & " · échéance " & Text(ThisItem.Echeance, "dd/mm")
-                              Size: =12
+                              Size: =11
                               Color: =RGBA(100, 114, 138, 1)
                               Font: =Font.'Segoe UI'
                         - ddTrierType:
@@ -1869,7 +1874,7 @@ Screens:
                               Width: =Parent.TemplateWidth * 0.25
                               Height: =32
                               Items: =["Support", "Amélioration", "Monthly eng", "Projet"]
-                              Size: =13
+                              Size: =12
                               Font: =Font.'Segoe UI'
                         - ddTrierProjet:
                             Control: Classic/DropDown@2.3.1
@@ -1880,7 +1885,7 @@ Screens:
                               Height: =32
                               Items: |-
                                 =ForAll(Filter('[LME] Projets', StatutProjet.Value = "Actif"), {Value: Title, ID: ID})
-                              Size: =13
+                              Size: =12
                               Font: =Font.'Segoe UI'
                         - btnClasser:
                             Control: Classic/Button@2.2.0
@@ -1900,7 +1905,7 @@ Screens:
                                   });
                                 Select(btnRefresh);
                                 Notify("Classée : les étapes du modèle vont être créées par le flux.", NotificationType.Success)
-                              Size: =13
+                              Size: =12
                               Font: =Font.'Segoe UI'
       - cntDrawer:
           Control: GroupContainer@1.5.0
@@ -1924,7 +1929,7 @@ Screens:
                   Fill: =RGBA(255, 255, 255, 1)
                   Color: =RGBA(16, 26, 46, 1)
                   OnSelect: =Set(varSel, Blank())
-                  Size: =13
+                  Size: =12
                   Font: =Font.'Segoe UI'
             - lblDType:
                 Control: Label@2.5.1
@@ -1934,7 +1939,7 @@ Screens:
                   Width: =320
                   Height: =22
                   Text: =varSel.TypeTache.Value
-                  Size: =12
+                  Size: =11
                   FontWeight: =FontWeight.Semibold
                   Color: =Coalesce(LookUp(colTC, T = varSel.TypeTache.Value, C), RGBA(107, 119, 140, 1))
                   Font: =Font.'Segoe UI'
@@ -1946,7 +1951,7 @@ Screens:
                   Width: =372
                   Height: =66
                   Text: =varSel.Title
-                  Size: =18
+                  Size: =16
                   FontWeight: =FontWeight.Semibold
                   Color: =RGBA(16, 26, 46, 1)
                   Font: =Font.'Segoe UI'
@@ -1958,7 +1963,7 @@ Screens:
                   Width: =380
                   Height: =44
                   Text: =varSel.Statut.Value & " · " & varSel.Source.Value & " · " & Coalesce(varSel.Projet.Value, "sans projet") & Char(10) & "Échéance " & Text(varSel.Echeance, "dd/mm/yyyy")
-                  Size: =13
+                  Size: =12
                   Color: =RGBA(100, 114, 138, 1)
                   Font: =Font.'Segoe UI'
             - lblDPct:
@@ -1971,7 +1976,7 @@ Screens:
                   Text: =Coalesce(LookUp(colPct, ID = varSel.ID, pct), 0) & " %  ·  " & CountRows(Filter(colEtapes, Tache.Id = varSel.ID, Fait)) & " étape(s) sur " & CountRows(Filter(colEtapes, Tache.Id = varSel.ID))
                   FontWeight: =FontWeight.Semibold
                   Color: =RGBA(31, 79, 216, 1)
-                  Size: =14
+                  Size: =13
                   Font: =Font.'Segoe UI'
             - recDBack:
                 Control: Rectangle@2.3.0
@@ -2018,7 +2023,7 @@ Screens:
                         OnUncheck: |-
                           =Patch('[LME] Etapes', LookUp('[LME] Etapes', ID = ThisItem.ID), {Fait: false});
                           Select(btnRefresh)
-                        Size: =13
+                        Size: =12
                         Font: =Font.'Segoe UI'
             - txtEtape:
                 Control: Classic/TextInput@2.3.2
@@ -2029,7 +2034,7 @@ Screens:
                   Height: =36
                   HintText: ="Ajouter une étape"
                   Visible: =varSel.Statut.Value <> "Terminé"
-                  Size: =13
+                  Size: =12
                   Font: =Font.'Segoe UI'
                   Default: =""
             - btnAjouterEtape:
@@ -2052,7 +2057,7 @@ Screens:
                       });
                     Reset(txtEtape);
                     Select(btnRefresh)
-                  Size: =13
+                  Size: =12
                   Font: =Font.'Segoe UI'
             - btnStAFaire:
                 Control: Classic/Button@2.2.0
@@ -2068,7 +2073,7 @@ Screens:
                   OnSelect: |-
                     =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "À faire"}});
                     Select(btnRefresh)
-                  Size: =13
+                  Size: =12
                   Font: =Font.'Segoe UI'
             - btnStEnCours:
                 Control: Classic/Button@2.2.0
@@ -2084,7 +2089,7 @@ Screens:
                   OnSelect: |-
                     =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "En cours"}});
                     Select(btnRefresh)
-                  Size: =13
+                  Size: =12
                   Font: =Font.'Segoe UI'
             - btnStBloque:
                 Control: Classic/Button@2.2.0
@@ -2100,7 +2105,7 @@ Screens:
                   OnSelect: |-
                     =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Statut: {Value: "Bloqué"}});
                     Select(btnRefresh)
-                  Size: =13
+                  Size: =12
                   Font: =Font.'Segoe UI'
             - lblSync:
                 Control: Label@2.5.1
@@ -2116,7 +2121,7 @@ Screens:
                         "Teams", "Terminer clôt la liste et la tâche To Do.",
                         "Loop", "Terminer clôt la liste. À cocher aussi dans Loop si non synchronisé.",
                         "Terminer clôt la liste."))
-                  Size: =12
+                  Size: =11
                   Color: =RGBA(100, 114, 138, 1)
                   Font: =Font.'Segoe UI'
             - btnTerminer:
@@ -2135,7 +2140,7 @@ Screens:
                       {Statut: {Value: "Terminé"}, TermineLe: Now()});
                     Select(btnRefresh);
                     Notify("Clôture envoyée à Outlook, To Do et Loop par le flux.", NotificationType.Success)
-                  Size: =13
+                  Size: =12
                   Font: =Font.'Segoe UI'
             - btnRouvrir:
                 Control: Classic/Button@2.2.0
@@ -2152,7 +2157,7 @@ Screens:
                     =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID),
                       {Statut: {Value: "En cours"}, TermineLe: Blank(), Propage: false});
                     Select(btnRefresh)
-                  Size: =13
+                  Size: =12
                   Font: =Font.'Segoe UI'
 ```
 
