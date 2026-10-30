@@ -192,8 +192,8 @@ Screens:
                 Control: Classic/Button@2.2.0
                 Properties:
                   Text: ="Tableau de bord"
-                  Fill: =If(varVue = "dash", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
-                  Color: =If(varVue = "dash", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
+                  Fill: =If(Coalesce(varVue, "dash") = "dash", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
+                  Color: =If(Coalesce(varVue, "dash") = "dash", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
                   X: =12
                   Y: =84
@@ -415,7 +415,7 @@ Screens:
           Variant: ManualLayout
           Properties:
             Height: =Parent.Height - 64
-            Visible: =varVue = "dash"
+            Visible: =Coalesce(varVue, "dash") = "dash"
             Width: =1088
             X: =254
             Y: =64
@@ -1099,7 +1099,7 @@ Screens:
             - lblTitreCal:
                 Control: Label@2.5.1
                 Properties:
-                  Text: =Text(Date(varAn, varMois, 1), "mmmm yyyy")
+                  Text: =Text(Date(Coalesce(varAn, Year(Today())), Coalesce(varMois, Month(Today())), 1), "mmmm yyyy")
                   Size: =24
                   FontWeight: =FontWeight.Bold
                   Color: =RGBA(16, 26, 46, 1)
@@ -1118,7 +1118,9 @@ Screens:
                   Width: =40
                   Height: =34
                   OnSelect: |-
-                    =If(varMois = 1,
+                    =Set(varAn, Coalesce(varAn, Year(Today())));
+                    Set(varMois, Coalesce(varMois, Month(Today())));
+                    If(varMois = 1,
                       Set(varAn, varAn - 1); Set(varMois, 12),
                       Set(varMois, varMois - 1))
             - btnMoisSuiv:
@@ -1132,7 +1134,9 @@ Screens:
                   Width: =40
                   Height: =34
                   OnSelect: |-
-                    =If(varMois = 12,
+                    =Set(varAn, Coalesce(varAn, Year(Today())));
+                    Set(varMois, Coalesce(varMois, Month(Today())));
+                    If(varMois = 12,
                       Set(varAn, varAn + 1); Set(varMois, 1),
                       Set(varMois, varMois + 1))
             - cntCalGrille:
@@ -1173,7 +1177,7 @@ Screens:
                       Variant: Vertical
                       Properties:
                         Items: |-
-                          =With({debut: DateAdd(Date(varAn, varMois, 1), -(Weekday(Date(varAn, varMois, 1), StartOfWeek.Monday) - 1), TimeUnit.Days)},
+                          =With({debut: DateAdd(Date(Coalesce(varAn, Year(Today())), Coalesce(varMois, Month(Today())), 1), -(Weekday(Date(Coalesce(varAn, Year(Today())), Coalesce(varMois, Month(Today())), 1), StartOfWeek.Monday) - 1), TimeUnit.Days)},
                             ForAll(Sequence(42, 0), {d: DateAdd(debut, Value, TimeUnit.Days)})
                           )
                         WrapCount: =7
@@ -1199,7 +1203,7 @@ Screens:
                             Properties:
                               Text: =Day(ThisItem.d)
                               Size: =11
-                              Color: =If(Month(ThisItem.d) = varMois, RGBA(16, 26, 46, 1), RGBA(170, 180, 196, 1))
+                              Color: =If(Month(ThisItem.d) = Coalesce(varMois, Month(Today())), RGBA(16, 26, 46, 1), RGBA(170, 180, 196, 1))
                               X: =4
                               Y: =2
                               Width: =40
@@ -1862,6 +1866,12 @@ Screens:
                       {Statut: {Value: "En cours"}, TermineLe: Blank(), Propage: false});
                     Select(btnRefresh)
 ```
+
+## Après chaque collage : exécuter `OnVisible`
+
+Coller le code ne relance pas l'`OnVisible` de l'écran : les variables (`varVue`, `varAn`, `varMois`) et les collections restent vides dans la session de Studio en cours. Dans l'arborescence, clic droit sur `scrMain` → **Exécuter OnVisible**, ou relance l'application avec F5 depuis l'écran. Sans cela, le calendrier affichait l'erreur « The year argument to the Date function must be between 0 and 9999 ». Il est maintenant protégé par des `Coalesce`, mais les chiffres ne se chargent qu'après l'`OnVisible` ou un clic sur « Actualiser ».
+
+Pour vérifier que les données sont chargées : menu **Affichage → Collections**, puis ouvre `colPct` (une ligne par tâche).
 
 ## Si les chiffres restent à zéro
 
