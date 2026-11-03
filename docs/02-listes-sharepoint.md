@@ -58,8 +58,11 @@ Vues à créer :
 | Tache | Recherche vers `Workload` (colonne Title) | Suppression en cascade : *Appliquer le comportement relationnel* → *Supprimer en cascade* |
 | Fait | Oui/Non, défaut Non | |
 | Ordre | Nombre | Tri dans l'app |
+| Cle | Texte, **indexée**, **valeurs uniques** | `<ID de la tâche>-<Ordre>`, remplie par le flux d'étapes ([04](04-flux-etapes.md)). Empêche les doublons. Vide pour les étapes ajoutées à la main. |
 
 ## Liste `ModelesEtapes`
+
+> Une seule ligne par type et par numéro d'ordre. Des lignes collées deux fois produisent des étapes en double dans chaque tâche.
 
 | Colonne | Type | Remarques |
 |---|---|---|
