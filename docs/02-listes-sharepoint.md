@@ -31,6 +31,8 @@ Ajoute une ligne `Hors projet` (Actif). Elle sert de projet par défaut aux type
 | TermineLe | Date et heure | Posée à la clôture |
 | Propage | Oui/Non, défaut Non | La clôture a-t-elle été propagée ? Sert d'anti-boucle |
 | EtapesCreees | Oui/Non, défaut Non | Les étapes du modèle ont-elles été créées ? |
+| Commentaire | **Plusieurs lignes de texte** (texte brut, sans mise en forme) | Commentaire libre sur la tâche, saisi dans le volet de détail de l'application |
+| ConversationId | Texte, **indexée** | Identifiant de la conversation Outlook : sert à ne pas ajouter une réponse à un mail déjà suivi |
 
 `SourceId` :
 - mail : `Internet Message Id` du mail (identifiant stable) ;
@@ -38,6 +40,8 @@ Ajoute une ligne `Hors projet` (Actif). Elle sert de projet par défaut aux type
 - Loop : identifiant de la tâche si exposé, sinon vide.
 
 Pour l'unicité : paramètres de la colonne → *Plus d'options* → *Appliquer des valeurs uniques* = Oui (SharePoint demande d'indexer la colonne). Un second flux qui tenterait de créer le même item échoue au lieu de créer un doublon.
+
+**Important.** Les colonnes `Commentaire` et `ConversationId` doivent exister **avant** de coller la version de l'application qui les utilise ([09](09-power-app-code-a-coller.md)). Après les avoir créées, actualise la source de données dans Power Apps Studio (menu Données, `…` à côté de la source, Actualiser).
 
 Vues à créer :
 - **Ouvertes** : filtre Statut différent de Terminé, tri Échéance croissant.

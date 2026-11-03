@@ -13,6 +13,35 @@ Type de flux : **Flux cloud automatisé**. Nom : `Workload - Mail flaggé`.
 
 ## Actions
 
+### 0. Ignorer les mails de réunion
+
+Les invitations et les réponses à invitation ne doivent pas devenir des tâches.
+
+**Condition**, en mode avancé :
+
+```
+@or(
+  contains(outputs('Categories'),'Réunion'),
+  startsWith(toLower(coalesce(triggerOutputs()?['body/subject'],'')),'accepté'),
+  startsWith(toLower(coalesce(triggerOutputs()?['body/subject'],'')),'refusé'),
+  startsWith(toLower(coalesce(triggerOutputs()?['body/subject'],'')),'provisoire'),
+  startsWith(toLower(coalesce(triggerOutputs()?['body/subject'],'')),'invitation'),
+  startsWith(toLower(coalesce(triggerOutputs()?['body/subject'],'')),'annulé'),
+  startsWith(toLower(coalesce(triggerOutputs()?['body/subject'],'')),'accepted'),
+  startsWith(toLower(coalesce(triggerOutputs()?['body/subject'],'')),'declined'),
+  startsWith(toLower(coalesce(triggerOutputs()?['body/subject'],'')),'tentative'),
+  startsWith(toLower(coalesce(triggerOutputs()?['body/subject'],'')),'canceled'),
+  startsWith(toLower(coalesce(triggerOutputs()?['body/subject'],'')),'updated invitation')
+)
+```
+
+- Oui : **Terminer** avec le statut *Réussi*. Aucun item n'est créé.
+- Non : continuer.
+
+Place cette condition avant l'étape 1, mais après l'action `Categories` (étape 2 ci-dessous) : déplace simplement l'action `Composer` des catégories en premier. Le nom de ta catégorie de réunion est à adapter : remplace `'Réunion'` par le nom exact utilisé dans ton flux de catégorisation, ou retire cette ligne si tu n'en as pas. Les préfixes d'objet couvrent les langues française et anglaise ; ajoute les tiens si besoin.
+
+**À vérifier** : si ton Outlook préfixe les réponses d'invitation autrement, ouvre un exemple dans l'historique d'exécution du flux et regarde la valeur de `subject`.
+
 ### 1. Éviter les doublons
 
 **SharePoint : Obtenir les éléments** — renomme l'action `Doublon`
@@ -25,6 +54,23 @@ Type de flux : **Flux cloud automatisé**. Nom : `Workload - Mail flaggé`.
 - Non : continuer.
 
 Si tu reflagges un mail déjà terminé, rien ne se passe. La réouverture n'est pas gérée en v1.
+
+### 1 bis. Ignorer une réponse à un mail déjà suivi
+
+Une réponse à un mail déjà flaggé ne doit pas créer une seconde tâche.
+
+**SharePoint : Obtenir les éléments** — renomme l'action `MemeConversation`
+- Liste : Workload
+- Requête de filtre : `ConversationId eq '@{triggerOutputs()?['body/conversationId']}' and Statut ne 'Terminé'`
+- Nombre maximal : 1
+
+**Condition** : `length(body('MemeConversation')?['value'])` est supérieur à `0`
+- Oui : **Terminer** avec le statut *Réussi*.
+- Non : continuer.
+
+Règle retenue : seule une tâche **encore ouverte** de la même conversation bloque la création. Si l'ancienne tâche est terminée et que tu flagges une nouvelle réponse, une nouvelle tâche est créée. Pour bloquer dans tous les cas, retire la partie `and Statut ne 'Terminé'`.
+
+**À vérifier** : le contenu dynamique du trigger doit proposer *ID de conversation* (`conversationId`). Sinon, ajoute *Obtenir un e-mail (V2)* avec l'ID du message et prends la valeur dans sa sortie.
 
 ### 2. Lire les projets
 
@@ -77,6 +123,7 @@ La comparaison de `contains` sur un tableau est sensible à la casse : la catég
 - Projet Id : `@{outputs('ProjetId')}`
 - LienSource : lien web du mail. **À vérifier** : si *Lien web* n'est pas dans le contenu dynamique, utilise `https://outlook.office.com/mail/deeplink/read/@{encodeUriComponent(triggerOutputs()?['body/id'])}`
 - MessageId : `@{triggerOutputs()?['body/id']}`
+- ConversationId : `@{triggerOutputs()?['body/conversationId']}`
 - SourceId : `@{triggerOutputs()?['body/internetMessageId']}`
 
 Le flux d'étapes ([04](04-flux-etapes.md)) se déclenche sur cette création.

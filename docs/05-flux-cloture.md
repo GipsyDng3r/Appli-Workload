@@ -57,13 +57,37 @@ Flux **« Workload - Clôture To Do »**
 - Action : *Obtenir les éléments* dans Workload, filtre `ToDoTaskId eq '<id de la tâche>'`, puis *Mettre à jour un élément* → `Statut = Terminé`.
 - Le flux sortant fait le reste (étapes, Propage).
 
-### Depuis Outlook (flag terminé) — à tester
+### Depuis Outlook (flag terminé ou retiré) — à tester
 
-Il n'existe pas de trigger « flag terminé » dans le connecteur Outlook. Trois options, à choisir selon les tests T3 de [08](08-loop-et-tests.md) :
+Règle voulue : quand un mail est **terminé** dans Outlook, la tâche passe à Terminé dans la liste. Quand le **flag est retiré**, la tâche est supprimée de la liste (comme une suppression faite dans l'application).
+
+Il n'existe pas de trigger « flag terminé » ou « flag retiré » dans le connecteur Outlook. Trois options, à choisir selon les tests T3 de [08](08-loop-et-tests.md) :
 
 - **Option A.** Si le connecteur To Do expose la liste « E-mails signalés », un trigger *tâche terminée* sur cette liste. Le rapprochement se fait sur le titre de la tâche (objet du mail), donc il est fragile si deux mails ont le même objet.
-- **Option B.** Un flux planifié toutes les 30 minutes : pour chaque item ouvert de Source Mail, lire l'e-mail (*Obtenir un e-mail (V2)*) et tester l'état de son indicateur si le connecteur l'expose. **À vérifier.**
-- **Option C.** Ne pas synchroniser ce sens. Tu termines depuis l'app Workload (qui termine le flag), et si tu termines d'abord dans Outlook, tu coches aussi dans l'app. C'est le repli sans risque.
+- **Option B (recommandée si le filtre fonctionne).** Un flux planifié, voir ci-dessous.
+- **Option C.** Ne pas synchroniser ce sens. Tu termines ou tu supprimes depuis l'application Workload, et si tu agis d'abord dans Outlook, tu fais la même chose dans l'application. C'est le repli sans risque.
+
+#### Option B : flux planifié « Workload - Rapprochement Outlook »
+
+Type : **Flux cloud planifié**, toutes les 30 minutes.
+
+1. **SharePoint : Obtenir les éléments** sur Workload, renomme `OuvertesMail` : filtre `Source eq 'Mail' and Statut ne 'Terminé' and MessageId ne null`.
+2. **Office 365 Outlook : Obtenir les e-mails (V3)**, renomme `Signales` : dossier Boîte de réception, nombre maximal 250, **Requête de filtre** `flag/flagStatus eq 'flagged'`.
+3. **Office 365 Outlook : Obtenir les e-mails (V3)**, renomme `Termines` : mêmes paramètres, **Requête de filtre** `flag/flagStatus eq 'complete'`.
+4. **Sélectionner** `IdsSignales` : de `body('Signales')?['value']`, mappage `item()?['internetMessageId']` ; même chose pour `IdsTermines` à partir de `Termines`.
+5. **Appliquer à chacun** sur `body('OuvertesMail')?['value']`, avec ces conditions :
+   - si `contains(body('IdsTermines'), items('Appliquer_à_chacun')?['SourceId'])` : **SharePoint : Mettre à jour un élément** → `Statut = Terminé`, `TermineLe = utcNow()`. Le flux de clôture sortant fait le reste.
+   - sinon, si `contains(body('IdsSignales'), items('Appliquer_à_chacun')?['SourceId'])` est faux : le mail n'est plus signalé. **SharePoint : Supprimer un élément** (étapes comprises, voir plus bas).
+
+Pour supprimer les étapes avant l'item : **Obtenir les éléments** sur Etapes (filtre `TacheId eq <ID de l'item>`), puis **Appliquer à chacun** → **Supprimer un élément**. Si la suppression en cascade est activée sur la colonne `Tache` (voir [02](02-listes-sharepoint.md)), cette étape est inutile.
+
+**À vérifier**, avant de construire le reste :
+- que *Obtenir les e-mails (V3)* accepte la **requête de filtre** `flag/flagStatus eq '...'` sur ton tenant (sinon essaie *Requête de recherche* ou renonce à cette option) ;
+- que la réponse contient bien `internetMessageId` (le champ `SourceId` de la liste en reprend la valeur) ;
+- que les mails sont toujours dans le dossier interrogé : un mail déplacé dans un autre dossier n'est plus vu comme « signalé ». **Risque** : la tâche serait alors supprimée à tort. Interroge les dossiers où tu déplaces tes mails, ou renonce à la suppression automatique et ne fais que `Terminé`.
+- **Plafond** : 250 mails. Au-delà, un mail ancien encore signalé peut ne pas apparaître. Prudence si tu as beaucoup de mails signalés.
+
+Une suppression automatique est une action destructive. Pendant la première semaine, remplace l'action de suppression par un `Statut = Bloqué` et un message Teams du bot Flow, pour vérifier que le flux ne supprime que ce qu'il faut.
 
 ### Depuis Loop
 

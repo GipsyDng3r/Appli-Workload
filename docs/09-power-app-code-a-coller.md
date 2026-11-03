@@ -28,6 +28,8 @@ La structure du YAML a été vérifiée avec un analyseur YAML : indentation cor
 
 ## Avant de coller
 
+**Deux colonnes à créer d'abord.** Cette version lit et écrit `Commentaire` dans `[LME] Workload` (plusieurs lignes de texte, texte brut). Ajoute aussi `ConversationId` (texte), utilisée par le flux de mail. Crée-les **avant** de coller, puis actualise la source dans Studio (menu Données, `…` à côté de la source, Actualiser). Sans `Commentaire`, les formules du volet de détail sont en erreur et déclenchent des erreurs en cascade.
+
 1. Les quatre listes SharePoint existent avec les noms internes de colonnes de [02](02-listes-sharepoint.md) : `Workload` (`TypeTache`, `Source`, `Statut`, `Echeance`, `Projet`, `TermineLe`, `Propage`, `EtapesCreees`), `Projets` (`StatutProjet`), `Etapes` (`Tache`, `Fait`, `Ordre`).
 2. Crée une application canvas vide au format **Tablette**.
 3. Menu **Données** → ajoute tes listes SharePoint (connecteur SharePoint). **Le nom d'une source de données dans l'app est le nom de la liste.** Le code utilise `'[LME] Workload'`, `'[LME] Projets'` et `'[LME] Etapes'` (les apostrophes sont obligatoires à cause des crochets et de l'espace). Si tes listes portent un autre nom, remplace partout `[LME] ` par ton préfixe, ou retire-le avec un rechercher-remplacer sur `'[LME] ` puis sur `'` après `Workload`, `Projets` et `Etapes`. Un nom de source incorrect provoque des centaines d'erreurs en cascade dans l'App checker.
@@ -53,6 +55,8 @@ Screens:
         Set(varType, Blank());
         Set(varSel, Blank());
         Set(varEdit, false);
+        Set(varConfirm, false);
+        Set(varJour, Today());
         Set(varAn, Year(Today()));
         Set(varMois, Month(Today()));
         ClearCollect(colTC,
@@ -204,7 +208,7 @@ Screens:
                   Fill: =If(Coalesce(varVue, "dash") = "dash", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(Coalesce(varVue, "dash") = "dash", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
-                  OnSelect: =Set(varVue, "dash"); Set(varSel, Blank()); Set(varEdit, false)
+                  OnSelect: =Set(varVue, "dash"); Set(varSel, Blank()); Set(varEdit, false); Set(varConfirm, false)
                   Size: =11
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
@@ -223,7 +227,7 @@ Screens:
                   Fill: =If(varVue = "tasks", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varVue = "tasks", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
-                  OnSelect: =Set(varVue, "tasks"); Set(varSel, Blank()); Set(varEdit, false)
+                  OnSelect: =Set(varVue, "tasks"); Set(varSel, Blank()); Set(varEdit, false); Set(varConfirm, false)
                   Size: =11
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
@@ -242,7 +246,7 @@ Screens:
                   Fill: =If(varVue = "cal", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varVue = "cal", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
-                  OnSelect: =Set(varVue, "cal"); Set(varSel, Blank()); Set(varEdit, false)
+                  OnSelect: =Set(varVue, "cal"); Set(varSel, Blank()); Set(varEdit, false); Set(varConfirm, false)
                   Size: =11
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
@@ -261,7 +265,7 @@ Screens:
                   Fill: =If(varVue = "stats", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varVue = "stats", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
-                  OnSelect: =Set(varVue, "stats"); Set(varSel, Blank()); Set(varEdit, false)
+                  OnSelect: =Set(varVue, "stats"); Set(varSel, Blank()); Set(varEdit, false); Set(varConfirm, false)
                   Size: =11
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
@@ -280,7 +284,7 @@ Screens:
                   Fill: =If(varVue = "trier", RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
                   Color: =If(varVue = "trier", RGBA(31, 79, 216, 1), RGBA(100, 114, 138, 1))
                   BorderColor: =Self.Fill
-                  OnSelect: =Set(varVue, "trier"); Set(varSel, Blank()); Set(varEdit, false)
+                  OnSelect: =Set(varVue, "trier"); Set(varSel, Blank()); Set(varEdit, false); Set(varConfirm, false)
                   Size: =11
                   Align: =Align.Left
                   Font: =Font.'Segoe UI'
@@ -311,7 +315,7 @@ Screens:
                       Properties:
                         X: =0
                         Y: =2
-                        Width: =Parent.Width * 0.30
+                        Width: =Parent.Width * 0.40
                         Height: =34
                         HintText: ="Rechercher une tâche"
                         Size: =10
@@ -323,57 +327,6 @@ Screens:
                         FocusedBorderColor: =RGBA(31, 79, 216, 1)
                         FocusedBorderThickness: =1
                         Color: =RGBA(16, 26, 46, 1)
-                  - txtNouvelle:
-                      Control: Classic/TextInput@2.3.2
-                      Properties:
-                        X: =Parent.Width * 0.30 + 12
-                        Y: =2
-                        Width: =Parent.Width * 0.26
-                        Height: =34
-                        HintText: ="Nouvelle tâche manuelle"
-                        Size: =10
-                        Font: =Font.'Segoe UI'
-                        Default: =""
-                        Fill: =RGBA(244, 246, 250, 1)
-                        BorderColor: =RGBA(221, 226, 232, 1)
-                        BorderThickness: =1
-                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
-                        FocusedBorderThickness: =1
-                        Color: =RGBA(16, 26, 46, 1)
-                  - btnAjouter:
-                      Control: Classic/Button@2.2.0
-                      Properties:
-                        X: =Parent.Width * 0.56 + 24
-                        Y: =2
-                        Width: =96
-                        Height: =34
-                        Text: ="Ajouter"
-                        Fill: =RGBA(31, 79, 216, 1)
-                        Color: =RGBA(255, 255, 255, 1)
-                        DisplayMode: =If(IsBlank(txtNouvelle.Text), DisplayMode.Disabled, DisplayMode.Edit)
-                        OnSelect: |-
-                          =Patch('[LME] Workload', Defaults('[LME] Workload'),
-                            {
-                              Title: txtNouvelle.Text,
-                              TypeTache: {Value: "À trier"},
-                              Source: {Value: "Manuel"},
-                              Statut: {Value: "À faire"},
-                              Echeance: DateAdd(Today(), 7, TimeUnit.Days),
-                              Propage: false,
-                              EtapesCreees: false
-                            });
-                          Reset(txtNouvelle);
-                          Select(btnRefresh);
-                          Set(varVue, "trier");
-                          Notify("Tâche créée dans À trier : choisis son type et son projet.", NotificationType.Success)
-                        Size: =10
-                        Font: =Font.'Segoe UI'
-                        BorderColor: =Self.Fill
-                        BorderThickness: =1
-                        HoverFill: =RGBA(21, 62, 170, 1)
-                        PressedFill: =RGBA(14, 45, 125, 1)
-                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
-                        FocusedBorderThickness: =1
                   - btnRefresh:
                       Control: Classic/Button@2.2.0
                       Properties:
@@ -671,7 +624,7 @@ Screens:
                         X: =0
                         Y: =152
                         Width: =Parent.Width
-                        Height: =(Parent.Height - 164) * 0.5
+                        Height: =(Parent.Height - 232) * 0.5
                       Children:
                         - cntDashProjets:
                             Control: GroupContainer@1.5.0
@@ -828,7 +781,7 @@ Screens:
                                     Fill: =RGBA(255, 255, 255, 1)
                                     Color: =RGBA(16, 26, 46, 1)
                                     Visible: =!IsBlank(varNext)
-                                    OnSelect: =Set(varSel, varNext); Set(varEdit, false)
+                                    OnSelect: =Set(varSel, varNext); Set(varEdit, false); Set(varConfirm, false)
                                     Size: =10
                                     Font: =Font.'Segoe UI'
                                     BorderColor: =RGBA(221, 226, 232, 1)
@@ -870,7 +823,7 @@ Screens:
                                     Items: =FirstN(SortByColumns(Filter('[LME] Workload', Statut.Value <> "Terminé"), "Echeance", SortOrder.Ascending), 5)
                                     TemplateSize: =54
                                     TemplatePadding: =0
-                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false); Set(varConfirm, false)
                                   Children:
                                     - lblATTitre:
                                         Control: Label@2.5.1
@@ -912,9 +865,9 @@ Screens:
                       Variant: ManualLayout
                       Properties:
                         X: =0
-                        Y: =152 + (Parent.Height - 164) * 0.5 + 12
+                        Y: =152 + (Parent.Height - 232) * 0.5 + 12
                         Width: =Parent.Width
-                        Height: =(Parent.Height - 164) * 0.5
+                        Height: =(Parent.Height - 232) * 0.5
                       Children:
                         - cntDashType:
                             Control: GroupContainer@1.5.0
@@ -1042,6 +995,106 @@ Screens:
                                     FontWeight: =FontWeight.Bold
                                     Color: =RGBA(255, 255, 255, 1)
                                     Font: =Font.'Segoe UI'
+                  - cntDashNouveau:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        X: =0
+                        Y: =Parent.Height - 56
+                        Width: =Parent.Width
+                        Height: =56
+                        Fill: =RGBA(255, 255, 255, 1)
+                      Children:
+                        - lblNouveauTitre:
+                            Control: Label@2.5.1
+                            Properties:
+                              Text: ="Nouvelle tâche"
+                              X: =16
+                              Y: =16
+                              Width: =120
+                              Height: =24
+                              Size: =12
+                              FontWeight: =FontWeight.Semibold
+                              Color: =RGBA(16, 26, 46, 1)
+                              Font: =Font.'Segoe UI'
+                        - txtNouvelle:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              X: =150
+                              Y: =11
+                              Width: =Parent.Width * 0.36
+                              Height: =34
+                              HintText: ="Nouvelle tâche manuelle"
+                              Size: =10
+                              Font: =Font.'Segoe UI'
+                              Default: =""
+                              Fill: =RGBA(244, 246, 250, 1)
+                              BorderColor: =RGBA(221, 226, 232, 1)
+                              BorderThickness: =1
+                              FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                              FocusedBorderThickness: =1
+                              Color: =RGBA(16, 26, 46, 1)
+                        - ddNouveauProjet:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              X: =Parent.Width * 0.36 + 164
+                              Y: =11
+                              Width: =Parent.Width * 0.26
+                              Height: =34
+                              Items: =colProjChoix
+                              Size: =11
+                              Font: =Font.'Segoe UI'
+                              Fill: =RGBA(244, 246, 250, 1)
+                              BorderColor: =RGBA(221, 226, 232, 1)
+                              BorderThickness: =1
+                              FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                              FocusedBorderThickness: =1
+                              Color: =RGBA(16, 26, 46, 1)
+                              ChevronBackground: =RGBA(238, 241, 247, 1)
+                              ChevronFill: =RGBA(100, 114, 138, 1)
+                              ChevronHoverBackground: =RGBA(227, 235, 255, 1)
+                              ChevronHoverFill: =RGBA(31, 79, 216, 1)
+                              HoverFill: =RGBA(238, 241, 247, 1)
+                              SelectionFill: =RGBA(227, 235, 255, 1)
+                              SelectionColor: =RGBA(16, 26, 46, 1)
+                              PressedFill: =RGBA(227, 235, 255, 1)
+                              PressedColor: =RGBA(16, 26, 46, 1)
+                        - btnAjouter:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              X: =Parent.Width - 126
+                              Y: =11
+                              Width: =110
+                              Height: =34
+                              Text: ="Ajouter"
+                              Fill: =RGBA(31, 79, 216, 1)
+                              Color: =RGBA(255, 255, 255, 1)
+                              DisplayMode: =If(IsBlank(txtNouvelle.Text), DisplayMode.Disabled, DisplayMode.Edit)
+                              OnSelect: |-
+                                =Set(varProj, If(ddNouveauProjet.Selected.Value = "(sans projet)", Blank(), LookUp('[LME] Projets', Title = ddNouveauProjet.Selected.Value)));
+                                Patch('[LME] Workload', Defaults('[LME] Workload'),
+                                  {
+                                    Title: txtNouvelle.Text,
+                                    TypeTache: {Value: If(IsBlank(varProj), "À trier", "Projet")},
+                                    Projet: If(IsBlank(varProj), Blank(), {Id: varProj.ID, Value: varProj.Title}),
+                                    Source: {Value: "Manuel"},
+                                    Statut: {Value: "À faire"},
+                                    Echeance: DateAdd(Today(), 7, TimeUnit.Days),
+                                    Propage: false,
+                                    EtapesCreees: false
+                                  });
+                                Reset(txtNouvelle);
+                                Select(btnRefresh);
+                                Set(varVue, If(IsBlank(varProj), "trier", "tasks"));
+                                Notify(If(IsBlank(varProj), "Tâche créée dans À trier : choisis son type et son projet.", "Tâche créée dans le projet " & varProj.Title & "."), NotificationType.Success)
+                              Size: =10
+                              Font: =Font.'Segoe UI'
+                              BorderColor: =Self.Fill
+                              BorderThickness: =1
+                              HoverFill: =RGBA(21, 62, 170, 1)
+                              PressedFill: =RGBA(14, 45, 125, 1)
+                              FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                              FocusedBorderThickness: =1
             - cntTasks:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
@@ -1169,7 +1222,7 @@ Screens:
                               Y: =10
                               Width: =Parent.TemplateWidth - 28
                               Height: =28
-                              Text: =ThisItem.S & " (" & CountRows(Filter('[LME] Workload', Statut.Value = ThisItem.S, TypeTache.Value <> "À trier")) & ")"
+                              Text: =ThisItem.S & " (" & CountRows(Filter('[LME] Workload', Statut.Value = ThisItem.S, TypeTache.Value <> "À trier", (ThisItem.S <> "Terminé" || IsBlank(TermineLe) || TermineLe >= DateAdd(Today(), -14, TimeUnit.Days)))) & ")"
                               FontWeight: =FontWeight.Semibold
                               Color: =Switch(ThisItem.S, "En cours", RGBA(31, 79, 216, 1), "Bloqué", RGBA(192, 51, 43, 1), "Terminé", RGBA(19, 122, 74, 1), RGBA(100, 114, 138, 1))
                               Size: =12
@@ -1187,6 +1240,7 @@ Screens:
                                   Filter('[LME] Workload',
                                     Statut.Value = ThisItem.S,
                                     TypeTache.Value <> "À trier",
+                                    (ThisItem.S <> "Terminé" || IsBlank(TermineLe) || TermineLe >= DateAdd(Today(), -14, TimeUnit.Days)),
                                     IsBlank(varType) || TypeTache.Value = varType,
                                     IsBlank(txtRecherche.Text) || txtRecherche.Text in Title
                                   ),
@@ -1194,7 +1248,7 @@ Screens:
                                 )
                               TemplateSize: =128
                               TemplatePadding: =0
-                              OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
+                              OnSelect: =Set(varSel, ThisItem); Set(varEdit, false); Set(varConfirm, false)
                             Children:
                               - recCarte:
                                   Control: Rectangle@2.3.0
@@ -1204,7 +1258,7 @@ Screens:
                                     Width: =Parent.TemplateWidth
                                     Height: =Parent.TemplateHeight - 8
                                     Fill: =RGBA(244, 246, 250, 1)
-                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false); Set(varConfirm, false)
                               - lblCType:
                                   Control: Label@2.5.1
                                   Properties:
@@ -1217,7 +1271,7 @@ Screens:
                                     FontWeight: =FontWeight.Semibold
                                     Color: =Coalesce(LookUp(colTC, T = ThisItem.TypeTache.Value, C), RGBA(107, 119, 140, 1))
                                     Font: =Font.'Segoe UI'
-                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false); Set(varConfirm, false)
                               - lblCTitre:
                                   Control: Label@2.5.1
                                   Properties:
@@ -1230,7 +1284,7 @@ Screens:
                                     FontWeight: =FontWeight.Semibold
                                     Color: =If(ThisItem.Statut.Value = "Terminé", RGBA(100, 114, 138, 1), RGBA(16, 26, 46, 1))
                                     Font: =Font.'Segoe UI'
-                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false); Set(varConfirm, false)
                               - lblCProjet:
                                   Control: Label@2.5.1
                                   Properties:
@@ -1243,7 +1297,7 @@ Screens:
                                     Color: =RGBA(14, 138, 125, 1)
                                     FontWeight: =FontWeight.Semibold
                                     Font: =Font.'Segoe UI'
-                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false); Set(varConfirm, false)
                               - recCBack:
                                   Control: Rectangle@2.3.0
                                   Properties:
@@ -1252,7 +1306,7 @@ Screens:
                                     Width: =Parent.TemplateWidth - 20
                                     Height: =6
                                     Fill: =RGBA(227, 232, 240, 1)
-                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false); Set(varConfirm, false)
                               - recCFill:
                                   Control: Rectangle@2.3.0
                                   Properties:
@@ -1261,7 +1315,7 @@ Screens:
                                     Width: =(Parent.TemplateWidth - 20) * Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) / 100
                                     Height: =6
                                     Fill: =RGBA(31, 79, 216, 1)
-                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false); Set(varConfirm, false)
                               - lblCDue:
                                   Control: Label@2.5.1
                                   Properties:
@@ -1273,7 +1327,7 @@ Screens:
                                     Size: =9
                                     Color: =If(ThisItem.Statut.Value <> "Terminé" && ThisItem.Echeance < Today(), RGBA(192, 51, 43, 1), RGBA(100, 114, 138, 1))
                                     Font: =Font.'Segoe UI'
-                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false); Set(varConfirm, false)
                               - btnDetail:
                                   Control: Classic/Button@2.2.0
                                   Properties:
@@ -1472,9 +1526,10 @@ Screens:
                                     Y: =0
                                     Width: =Parent.TemplateWidth
                                     Height: =Parent.TemplateHeight
-                                    Fill: =If(ThisItem.d = Today(), RGBA(227, 235, 255, 1), RGBA(255, 255, 255, 1))
-                                    BorderColor: =If(ThisItem.d = Today(), RGBA(31, 79, 216, 1), RGBA(227, 232, 240, 1))
-                                    BorderThickness: =1
+                                    Fill: =If(ThisItem.d = varJour, RGBA(227, 235, 255, 1), If(ThisItem.d = Today(), RGBA(238, 244, 255, 1), RGBA(255, 255, 255, 1)))
+                                    BorderColor: =If(ThisItem.d = varJour, RGBA(31, 79, 216, 1), If(ThisItem.d = Today(), RGBA(147, 175, 240, 1), RGBA(227, 232, 240, 1)))
+                                    BorderThickness: =If(ThisItem.d = varJour, 2, 1)
+                                    OnSelect: =Set(varJour, ThisItem.d)
                               - lblNumJour:
                                   Control: Label@2.5.1
                                   Properties:
@@ -1486,6 +1541,7 @@ Screens:
                                     Size: =9
                                     Color: =If(Month(ThisItem.d) = Coalesce(varMois, Month(Today())), RGBA(16, 26, 46, 1), RGBA(170, 180, 196, 1))
                                     Font: =Font.'Segoe UI'
+                                    OnSelect: =Set(varJour, ThisItem.d)
                               - lblEv1:
                                   Control: Label@2.5.1
                                   Properties:
@@ -1499,6 +1555,7 @@ Screens:
                                     Fill: =If(IsBlank(Self.Text), RGBA(0, 0, 0, 0), RGBA(227, 235, 255, 1))
                                     Color: =RGBA(31, 79, 216, 1)
                                     Font: =Font.'Segoe UI'
+                                    OnSelect: =Set(varSel, First(Filter(colWL, Echeance = ThisItem.d))); Set(varEdit, false); Set(varConfirm, false)
                               - lblEv2:
                                   Control: Label@2.5.1
                                   Properties:
@@ -1512,6 +1569,7 @@ Screens:
                                     Fill: =If(IsBlank(Self.Text), RGBA(0, 0, 0, 0), RGBA(227, 235, 255, 1))
                                     Color: =RGBA(31, 79, 216, 1)
                                     Font: =Font.'Segoe UI'
+                                    OnSelect: =Set(varSel, Last(FirstN(Filter(colWL, Echeance = ThisItem.d), 2))); Set(varEdit, false); Set(varConfirm, false)
                               - lblEvPlus:
                                   Control: Label@2.5.1
                                   Properties:
@@ -1523,6 +1581,7 @@ Screens:
                                     Size: =8
                                     Color: =RGBA(100, 114, 138, 1)
                                     Font: =Font.'Segoe UI'
+                                    OnSelect: =Set(varJour, ThisItem.d)
                   - cntCalCote:
                       Control: GroupContainer@1.5.0
                       Variant: ManualLayout
@@ -1549,7 +1608,7 @@ Screens:
                                     Y: =12
                                     Width: =Parent.Width - 32
                                     Height: =26
-                                    Text: ="Aujourd'hui"
+                                    Text: =If(varJour = Today(), "Aujourd'hui", Text(varJour, "dddd dd mmmm"))
                                     FontWeight: =FontWeight.Semibold
                                     Color: =RGBA(16, 26, 46, 1)
                                     Size: =12
@@ -1562,10 +1621,10 @@ Screens:
                                     Y: =44
                                     Width: =Parent.Width - 16
                                     Height: =Parent.Height - 52
-                                    Items: =Filter('[LME] Workload', Echeance = Today(), Statut.Value <> "Terminé")
+                                    Items: =SortByColumns(Filter(colWL, Echeance = varJour), "Title")
                                     TemplateSize: =52
                                     TemplatePadding: =0
-                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false); Set(varConfirm, false)
                                   Children:
                                     - lblAujTitre:
                                         Control: Label@2.5.1
@@ -1586,7 +1645,7 @@ Screens:
                                           Y: =29
                                           Width: =Parent.TemplateWidth - 12
                                           Height: =20
-                                          Text: =ThisItem.TypeTache.Value & " · " & Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) & " %"
+                                          Text: =ThisItem.TypeTache.Value & " · " & ThisItem.Statut.Value & " · " & Coalesce(LookUp(colPct, ID = ThisItem.ID, pct), 0) & " %"
                                           Size: =8
                                           Color: =RGBA(100, 114, 138, 1)
                                           Font: =Font.'Segoe UI'
@@ -1623,7 +1682,7 @@ Screens:
                                     Items: =FirstN(SortByColumns(Filter('[LME] Workload', Echeance > Today(), Statut.Value <> "Terminé"), "Echeance", SortOrder.Ascending), 8)
                                     TemplateSize: =54
                                     TemplatePadding: =0
-                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false)
+                                    OnSelect: =Set(varSel, ThisItem); Set(varEdit, false); Set(varConfirm, false)
                                   Children:
                                     - lblAvTitre:
                                         Control: Label@2.5.1
@@ -2152,7 +2211,7 @@ Screens:
                         X: =20
                         Y: =212
                         Width: =380
-                        Height: =Parent.Height - 212 - 250
+                        Height: =Parent.Height - 212 - 346
                         Items: =SortByColumns(Filter(colEtapes, Tache.Id = varSel.ID), "Ordre")
                         TemplateSize: =38
                         TemplatePadding: =0
@@ -2162,7 +2221,7 @@ Screens:
                             Properties:
                               X: =0
                               Y: =0
-                              Width: =Parent.TemplateWidth
+                              Width: =Parent.TemplateWidth - 40
                               Height: =Parent.TemplateHeight
                               Text: =ThisItem.Title
                               Default: =ThisItem.Fait
@@ -2176,6 +2235,67 @@ Screens:
                                 Select(btnRefresh)
                               Size: =10
                               Font: =Font.'Segoe UI'
+                        - btnSupprEtape:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              X: =Parent.TemplateWidth - 34
+                              Y: =6
+                              Width: =28
+                              Height: =24
+                              Text: ="✕"
+                              Fill: =RGBA(255, 255, 255, 1)
+                              Color: =RGBA(192, 51, 43, 1)
+                              Size: =10
+                              Font: =Font.'Segoe UI'
+                              OnSelect: =Remove('[LME] Etapes', LookUp('[LME] Etapes', ID = ThisItem.ID)); Select(btnRefresh)
+                              BorderColor: =RGBA(221, 226, 232, 1)
+                              BorderThickness: =1
+                              HoverFill: =RGBA(238, 241, 247, 1)
+                              PressedFill: =RGBA(227, 235, 255, 1)
+                              FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                              FocusedBorderThickness: =1
+                  - txtComment:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        X: =20
+                        Y: =Parent.Height - 336
+                        Width: =Parent.Width - 40
+                        Height: =64
+                        Mode: =TextMode.MultiLine
+                        Default: =Coalesce(varSel.Commentaire, "")
+                        HintText: ="Ajouter un commentaire…"
+                        Size: =11
+                        Font: =Font.'Segoe UI'
+                        Fill: =RGBA(244, 246, 250, 1)
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
+                        Color: =RGBA(16, 26, 46, 1)
+                  - btnSaveComment:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        X: =Parent.Width - 210
+                        Y: =Parent.Height - 266
+                        Width: =190
+                        Height: =26
+                        Text: ="Enregistrer le commentaire"
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Color: =RGBA(31, 79, 216, 1)
+                        Size: =9
+                        Font: =Font.'Segoe UI'
+                        Visible: =txtComment.Text <> Coalesce(varSel.Commentaire, "")
+                        OnSelect: |-
+                          =Patch('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID), {Commentaire: txtComment.Text});
+                          Set(varSel, LookUp('[LME] Workload', ID = varSel.ID));
+                          Select(btnRefresh);
+                          Notify("Commentaire enregistré.", NotificationType.Success)
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        HoverFill: =RGBA(238, 241, 247, 1)
+                        PressedFill: =RGBA(227, 235, 255, 1)
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
                   - txtEtape:
                       Control: Classic/TextInput@2.3.2
                       Properties:
@@ -2347,6 +2467,64 @@ Screens:
                           Select(btnRefresh)
                         Size: =10
                         Font: =Font.'Segoe UI'
+                        BorderColor: =RGBA(221, 226, 232, 1)
+                        BorderThickness: =1
+                        HoverFill: =RGBA(238, 241, 247, 1)
+                        PressedFill: =RGBA(227, 235, 255, 1)
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
+                  - lblConfirm:
+                      Control: Label@2.5.1
+                      Properties:
+                        X: =20
+                        Y: =Parent.Height - 136
+                        Width: =Parent.Width - 40
+                        Height: =44
+                        Text: ="Supprimer définitivement cette tâche et ses étapes ?"
+                        Size: =11
+                        Color: =RGBA(192, 51, 43, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Font: =Font.'Segoe UI'
+                        Visible: =varConfirm
+                  - btnSupprOui:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        X: =20
+                        Y: =Parent.Height - 84
+                        Width: =(Parent.Width - 52) / 2
+                        Height: =40
+                        Text: ="Supprimer"
+                        Fill: =RGBA(192, 51, 43, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Size: =11
+                        Font: =Font.'Segoe UI'
+                        Visible: =varConfirm
+                        OnSelect: |-
+                          =RemoveIf('[LME] Etapes', Tache.Id = varSel.ID);
+                          Remove('[LME] Workload', LookUp('[LME] Workload', ID = varSel.ID));
+                          Set(varSel, Blank()); Set(varEdit, false); Set(varConfirm, false);
+                          Select(btnRefresh);
+                          Notify("Tâche supprimée.", NotificationType.Success)
+                        BorderColor: =Self.Fill
+                        BorderThickness: =1
+                        HoverFill: =RGBA(160, 40, 34, 1)
+                        PressedFill: =RGBA(130, 30, 26, 1)
+                        FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                        FocusedBorderThickness: =1
+                  - btnSupprNon:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        X: =(Parent.Width - 52) / 2 + 32
+                        Y: =Parent.Height - 84
+                        Width: =(Parent.Width - 52) / 2
+                        Height: =40
+                        Text: ="Garder"
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Color: =RGBA(16, 26, 46, 1)
+                        Size: =11
+                        Font: =Font.'Segoe UI'
+                        Visible: =varConfirm
+                        OnSelect: =Set(varConfirm, false)
                         BorderColor: =RGBA(221, 226, 232, 1)
                         BorderThickness: =1
                         HoverFill: =RGBA(238, 241, 247, 1)
@@ -2583,7 +2761,7 @@ Screens:
                               })
                           );
                           Set(varSel, LookUp('[LME] Workload', ID = varSel.ID));
-                          Set(varEdit, false);
+                          Set(varEdit, false); Set(varConfirm, false);
                           Select(btnRefresh);
                           Notify("Tâche enregistrée.", NotificationType.Success)
                         BorderColor: =Self.Fill
@@ -2604,7 +2782,7 @@ Screens:
                         Color: =RGBA(16, 26, 46, 1)
                         Size: =11
                         Font: =Font.'Segoe UI'
-                        OnSelect: =Set(varEdit, false)
+                        OnSelect: =Set(varEdit, false); Set(varConfirm, false)
                         BorderColor: =RGBA(221, 226, 232, 1)
                         BorderThickness: =1
                         HoverFill: =RGBA(238, 241, 247, 1)
@@ -2616,13 +2794,33 @@ Screens:
                 Properties:
                   X: =20
                   Y: =18
-                  Width: =240
+                  Width: =140
                   Height: =22
                   Text: =varSel.TypeTache.Value
                   Size: =9
                   FontWeight: =FontWeight.Semibold
                   Color: =Coalesce(LookUp(colTC, T = varSel.TypeTache.Value, C), RGBA(107, 119, 140, 1))
                   Font: =Font.'Segoe UI'
+            - btnSupprimer:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  X: =Parent.Width - 250
+                  Y: =12
+                  Width: =92
+                  Height: =30
+                  Text: ="Supprimer"
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Color: =RGBA(192, 51, 43, 1)
+                  Size: =10
+                  Font: =Font.'Segoe UI'
+                  Visible: =!varEdit && !varConfirm
+                  OnSelect: =Set(varConfirm, true)
+                  BorderColor: =RGBA(221, 226, 232, 1)
+                  BorderThickness: =1
+                  HoverFill: =RGBA(238, 241, 247, 1)
+                  PressedFill: =RGBA(227, 235, 255, 1)
+                  FocusedBorderColor: =RGBA(31, 79, 216, 1)
+                  FocusedBorderThickness: =1
             - btnModifier:
                 Control: Classic/Button@2.2.0
                 Properties:
@@ -2653,7 +2851,7 @@ Screens:
                   Text: ="✕"
                   Fill: =RGBA(255, 255, 255, 1)
                   Color: =RGBA(16, 26, 46, 1)
-                  OnSelect: =Set(varEdit, false); Set(varSel, Blank())
+                  OnSelect: =Set(varEdit, false); Set(varConfirm, false); Set(varSel, Blank())
                   Size: =10
                   Font: =Font.'Segoe UI'
                   BorderColor: =RGBA(221, 226, 232, 1)
@@ -2680,6 +2878,15 @@ L'application affiche uniquement ce qui est dans tes listes. Si `[LME] Workload`
 2. Dans Studio, sélectionne `btnRefresh`, propriété `OnSelect` : les erreurs de formule sont soulignées en rouge, et le **Vérificateur d'application** (icône en haut à droite) les liste toutes.
 3. Si le clic sur « Actualiser » ne produit ni bandeau ni donnée, c'est qu'une erreur de syntaxe empêche toute la formule de s'exécuter : cherche le soulignement rouge.
 4. Envoie-moi le texte des bandeaux ou des erreurs, ou une nouvelle trace faite après le clic.
+
+## Fonctions ajoutées d'après tes notes
+
+- **Supprimer une tâche** : bouton **Supprimer** en haut du volet de détail. Une confirmation demande « Supprimer définitivement cette tâche et ses étapes ? » avant d'agir. La suppression retire les étapes puis la tâche. Elle ne touche pas au flag du mail dans Outlook : retire-le toi-même, ou laisse le flux de rapprochement le faire ([05](05-flux-cloture.md)).
+- **Supprimer une étape** : un « ✕ » rouge à droite de chaque étape.
+- **Commentaire** : une zone de texte dans le volet de détail, au-dessus de « Ajouter une étape ». Le bouton « Enregistrer le commentaire » n'apparaît que si le texte a changé.
+- **Calendrier** : un clic sur un événement d'une case ouvre le volet de détail de la tâche. Un clic sur une case (ou sur « +n ») affiche toutes les tâches de ce jour dans le panneau de droite, qui devient « Aujourd'hui » ou le jour choisi.
+- **Création d'une tâche** : le champ et le bouton ont quitté la barre du haut. Ils sont dans une bande « Nouvelle tâche » en bas du tableau de bord, avec une liste déroulante des projets de `[LME] Projets`. Sans projet choisi, la tâche arrive dans « À trier ».
+- **Colonne Terminé du Kanban** : elle ne garde que les tâches terminées depuis moins de 14 jours, pour rester lisible. Les anciennes restent dans la liste et dans la vue Analyse.
 
 ## Modifier une tâche depuis le Kanban
 
